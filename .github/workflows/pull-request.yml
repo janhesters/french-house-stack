@@ -1,0 +1,125 @@
+name: Pull Request
+
+on: [pull_request]
+
+jobs:
+  lint:
+    name: ⬣ ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: 🔬 Lint
+        run: npm run lint
+
+  type-check:
+    name: ʦ TypeScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: 🔎 Type check
+        run: npm run type-check --if-present
+
+  commitlint:
+    name: ⚙️ commitlint
+    runs-on: ubuntu-latest
+
+    if: github.actor != 'dependabot[bot]'
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: ⚙️ commitlint
+        uses: wagoid/commitlint-github-action@v4
+
+  vitest:
+    name: ⚡ Vitest
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: ⚡ Run vitest
+        run: npm run test -- --coverage
+
+  cypress:
+    name: 🌳 Cypress
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v3
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: 📥 Download deps
+        uses: bahmutov/npm-install@v1
+
+      - name: 🌳 Cypress run
+        uses: cypress-io/github-action@v4
+        with:
+          build: npm run build
+          start: npm start
+          wait-on: 'http://localhost:3000'
+        env:
+          MAGIC_PUBLISHABLE_KEY: ${{ secrets.MAGIC_PUBLISHABLE_KEY }}
+          MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          VALID_COOKIE_TOKEN: ${{ secrets.VALID_COOKIE_TOKEN }}
+
+      - name: 📸 Cypress Screenshots
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: 📸 Cypress Screenshots
+          path: cypress/screenshots
+
+      - name: 📹 Cypress Videos
+        uses: actions/upload-artifact@v2
+        if: failure()
+        with:
+          name: 📹 Cypress Videos
+          path: cypress/videos
+
+  dependabot:
+    name: 🤖 Dependabot
+    runs-on: ubuntu-latest
+    steps:
+      - name: 🤖 Dependabot
+        uses: ahmadnassri/action-dependabot-auto-merge@v2
+        with:
+          target: major
+          github-token: ${{ secrets.GITHUB_TOKEN }}

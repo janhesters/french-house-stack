@@ -1,0 +1,10 @@
+node_modules
+
+coverage
+
+/.cache
+/build
+/public/build
+.env
+
+/app/tailwind.css
