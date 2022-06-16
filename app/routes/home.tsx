@@ -4,27 +4,12 @@ import type { LoaderFunction, MetaFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { Link, useLoaderData } from '@remix-run/react';
 import { Fragment } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import i18next from '~/features/localization/i18next.server';
 import { requireUserIsAuthenticated } from '~/features/user-authentication/user-authentication-session.server';
 
-export const meta: MetaFunction = () => ({
-  title: 'Home | French House Stack',
-  viewport: 'width=device-width,initial-scale=1',
-});
-
-const navigation = [
-  { name: 'Dashboard', href: '#', current: true },
-  { name: 'Team', href: '#', current: false },
-  { name: 'Projects', href: '#', current: false },
-  { name: 'Calendar', href: '#', current: false },
-  { name: 'Reports', href: '#', current: false },
-];
-const userNavigation = [
-  { name: 'Your Profile', href: '#' },
-  { name: 'Settings', href: '#' },
-];
-
-const classNames = (...classes: string[]) => classes.filter(Boolean).join(' ');
+export const handle = { i18n: 'home' };
 
 /**
  * NOTE: A user might have more attributes, such as an id, an address etc.
@@ -32,23 +17,50 @@ const classNames = (...classes: string[]) => classes.filter(Boolean).join(' ');
  * respective page needs.
  * @see https://remix.run/docs/en/v1/tutorials/jokes#data-overfetching
  */
-type LoaderData = { user: { avatar: string; email: string; name: string } };
+type LoaderData = {
+  user: { avatar: string; email: string; name: string };
+  title: string;
+  navigation: Array<{ name: string; href: string; current: boolean }>;
+  userNavigation: Array<{ name: string; href: string }>;
+};
 
 export const loader: LoaderFunction = async ({ request }) => {
+  const t = await i18next.getFixedT(request);
   const userId = await requireUserIsAuthenticated(request);
   // TODO: Store your users profile and grab it based on the `usedId`.
   return json<LoaderData>({
+    title: `${t('home:home')} | ${t('app-name')}`,
     user: {
       name: 'Bob House',
       email: userId && 'bob@french-house-stack.com',
       avatar:
         'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
     },
+    navigation: [
+      { name: t('home:dashboard'), href: '#', current: true },
+      { name: t('home:team'), href: '#', current: false },
+      { name: t('home:projects'), href: '#', current: false },
+      { name: t('home:calendar'), href: '#', current: false },
+      { name: t('home:reports'), href: '#', current: false },
+    ],
+    userNavigation: [
+      { name: t('home:your-profile'), href: '#' },
+      { name: t('home:settings'), href: '#' },
+    ],
   });
 };
 
+export const meta: MetaFunction = ({ data }) => {
+  const { title } = data as LoaderData;
+
+  return { title };
+};
+
+const classNames = (...classes: string[]) => classes.filter(Boolean).join(' ');
+
 export default function HomePageComponent() {
-  const { user } = useLoaderData<LoaderData>();
+  const { user, navigation, userNavigation } = useLoaderData<LoaderData>();
+  const { t } = useTranslation();
 
   return (
     <div className="min-h-full">
@@ -62,7 +74,7 @@ export default function HomePageComponent() {
                     <img
                       className="h-8 w-8"
                       src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg"
-                      alt="Workflow"
+                      alt={t('app-name')}
                     />
                   </div>
                   <div className="hidden md:block">
@@ -91,7 +103,7 @@ export default function HomePageComponent() {
                       type="button"
                       className="bg-gray-800 p-1 rounded-full text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
                     >
-                      <span className="sr-only">View notifications</span>
+                      <span className="sr-only">{t('view-notifications')}</span>
                       <BellIcon className="h-6 w-6" aria-hidden="true" />
                     </button>
 
@@ -99,7 +111,7 @@ export default function HomePageComponent() {
                     <Menu as="div" className="ml-3 relative">
                       <div>
                         <Menu.Button className="max-w-xs bg-gray-800 rounded-full flex items-center text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
-                          <span className="sr-only">Open user menu</span>
+                          <span className="sr-only">{t('open-user-menu')}</span>
                           <img
                             className="h-8 w-8 rounded-full"
                             src={user.avatar}
@@ -142,7 +154,7 @@ export default function HomePageComponent() {
                                     'block px-4 py-2 text-sm text-gray-700 w-full text-left',
                                   )}
                                 >
-                                  Logout
+                                  {t('logout')}
                                 </button>
                               </form>
                             )}
@@ -155,7 +167,7 @@ export default function HomePageComponent() {
                 <div className="-mr-2 flex md:hidden">
                   {/* Mobile menu button */}
                   <Disclosure.Button className="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white">
-                    <span className="sr-only">Open main menu</span>
+                    <span className="sr-only">{t('open-main-menu')}</span>
                     {open ? (
                       <XIcon className="block h-6 w-6" aria-hidden="true" />
                     ) : (
@@ -227,7 +239,7 @@ export default function HomePageComponent() {
                     method="post"
                     className="block px-3 py-2 rounded-md text-base font-medium text-gray-400 hover:text-white hover:bg-gray-700"
                   >
-                    <button type="submit">Logout</button>
+                    <button type="submit">{t('logout')}</button>
                   </Disclosure.Button>
                 </div>
               </div>
@@ -238,7 +250,7 @@ export default function HomePageComponent() {
 
       <header className="bg-white shadow">
         <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">Home</h1>
+          <h1 className="text-3xl font-bold text-gray-900">{t('home:home')}</h1>
         </div>
       </header>
 

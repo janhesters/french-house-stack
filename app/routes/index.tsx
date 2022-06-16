@@ -1,11 +1,14 @@
 import type { LoaderFunction } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { Link } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
 
 import { getUserId } from '~/features/user-authentication/user-authentication-session.server';
 import getSafeRedirectDestination from '~/utils/get-safe-redirect-destination';
 
 import magicLogo from '../../public/magic-icon.png';
+
+export const handle = { i18n: ['common', 'landing'] };
 
 export const loader: LoaderFunction = async ({ request }) => {
   const userId = await getUserId(request);
@@ -18,7 +21,9 @@ export const loader: LoaderFunction = async ({ request }) => {
   return json({});
 };
 
-export default function Index() {
+export default function LandingPage() {
+  const { t } = useTranslation();
+
   return (
     <main className="relative min-h-screen bg-white sm:flex sm:items-center sm:justify-center">
       <div className="relative sm:pb-16 sm:pt-8">
@@ -35,25 +40,24 @@ export default function Index() {
             <div className="lg:pb-18 relative px-4 pt-16 pb-8 sm:px-6 sm:pt-24 sm:pb-14 lg:px-8 lg:pt-32">
               <h1 className="text-center text-6xl font-extrabold tracking-tight sm:text-8xl lg:text-9xl">
                 <span className="block uppercase text-indigo-600 drop-shadow-md">
-                  French House Stack
+                  {t('app-name')}
                 </span>
               </h1>
               <p className="mx-auto mt-6 max-w-lg text-center text-xl text-white sm:max-w-3xl">
-                Check the README.md file for instructions on how to get this
-                project deployed.
+                {t('landing:stack-instructions')}
               </p>
               <div className="mx-auto mt-10 max-w-sm sm:flex sm:max-w-none sm:justify-center">
                 <Link
                   to="/login"
                   className="flex items-center justify-center rounded-md bg-indigo-600 px-4 py-3 font-medium text-white hover:bg-indigo-600  "
                 >
-                  Log In
+                  {t('landing:sign-in')}
                 </Link>
               </div>
               <a href="https://remix.run">
                 <img
                   src="https://user-images.githubusercontent.com/1500684/158298926-e45dafff-3544-4b69-96d6-d3bcc33fc76a.svg"
-                  alt="Remix"
+                  alt={t('landing:remix')}
                   className="mx-auto mt-16 w-full max-w-[12rem] md:max-w-[16rem]"
                 />
               </a>

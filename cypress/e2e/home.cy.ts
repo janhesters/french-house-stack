@@ -28,7 +28,7 @@ describe('home page', () => {
 
       // Logging the user out should redirect you to the landing page.
       cy.findByRole('button', { name: /open user menu/i }).click();
-      cy.findByRole('menuitem', { name: /logout/i }).click();
+      cy.findByRole('menuitem', { name: /log out/i }).click();
       cy.url().should('equal', Cypress.config().baseUrl + '/');
 
       // Verify that the user is really logged out by trying to visit the home

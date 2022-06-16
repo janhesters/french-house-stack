@@ -22,6 +22,16 @@ The French House Stack is a starter template for [developing DApps by using Magi
 - Static Types with [TypeScript](https://typescriptlang.org)
 - Commit hooks with [Husky](https://github.com/typicode/husky) and [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) with [Commitizen](https://github.com/commitizen/cz-cli)
 
+### Versioning
+
+This stack pinned all version of its dependencies in order to ensure that it always works. You can use
+
+```
+npx npm-check-updates -u
+```
+
+to check for updates and install the latest versions.
+
 ## Development
 
 - Install dependencies:
@@ -49,6 +59,12 @@ The French House Stack is a starter template for [developing DApps by using Magi
   ```
 
 This starts your app in development mode, rebuilding assets on file changes.
+
+### i18n
+
+The French House Stack comes with localization support through [remix-i18next](https://github.com/sergiodxa/remix-i18next).
+
+The namespaces live in `public/locales/`.
 
 ## GitHub Actions
 
@@ -116,7 +132,6 @@ There are a bunch of TODOs in the code, for example for error reporting. This st
 
 Here is a list of things this app could use:
 
-- i18n
 - error reporting
 - feature flags
 - use feedback capturing and tracking
