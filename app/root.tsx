@@ -16,42 +16,61 @@ import {
   useLoaderData,
   useLocation,
 } from '@remix-run/react';
+import { useTranslation } from 'react-i18next';
+import { useChangeLanguage } from 'remix-i18next';
 import invariant from 'tiny-invariant';
 
-import type { EnvironmentVariables } from './entry.server';
+import type { EnvironmentVariables } from './entry.client';
+import i18next from './features/localization/i18next.server';
 import styles from './tailwind.css';
+
+export const handle = { i18n: 'common' };
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: styles },
   { rel: 'stylesheet', href: 'https://rsms.me/inter/inter.css' },
 ];
 
-export const meta: MetaFunction = () => ({
-  // eslint-disable-next-line unicorn/text-encoding-identifier-case
-  charset: 'utf-8',
-  title: 'French House Stack',
-  viewport: 'width=device-width,initial-scale=1',
-});
-
 type LoaderData = {
   ENV: EnvironmentVariables;
+  locale: string;
+  title: string;
 };
 
-export const loader: LoaderFunction = () => {
+export const loader: LoaderFunction = async ({ request }) => {
   const { MAGIC_PUBLISHABLE_KEY } = process.env;
-
   invariant(MAGIC_PUBLISHABLE_KEY, 'MAGIC_PUBLISHABLE_KEY must be set');
+
+  const locale = await i18next.getLocale(request);
+
+  const t = await i18next.getFixedT(request);
+  const title = t('app-name');
 
   return json<LoaderData>({
     ENV: { MAGIC_PUBLISHABLE_KEY: MAGIC_PUBLISHABLE_KEY },
+    locale,
+    title,
   });
 };
 
+export const meta: MetaFunction = ({ data }) => {
+  const { title } = data as LoaderData;
+
+  return {
+    // eslint-disable-next-line unicorn/text-encoding-identifier-case
+    charset: 'utf-8',
+    title: title || 'French House Stack',
+    viewport: 'width=device-width,initial-scale=1',
+  };
+};
+
 export default function App() {
-  const data = useLoaderData<LoaderData>();
+  const { locale, ENV } = useLoaderData<LoaderData>();
+  const { i18n } = useTranslation();
+  useChangeLanguage(locale);
 
   return (
-    <html lang="en" className="h-full bg-gray-100">
+    <html lang={locale} className="h-full bg-gray-100" dir={i18n.dir()}>
       <head>
         <Meta />
         <Links />
@@ -61,7 +80,7 @@ export default function App() {
         <ScrollRestoration />
         <script
           dangerouslySetInnerHTML={{
-            __html: `window.ENV = ${JSON.stringify(data.ENV)}`,
+            __html: `window.ENV = ${JSON.stringify(ENV)}`,
           }}
         />
         <Scripts />

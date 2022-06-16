@@ -16,8 +16,10 @@ import {
 } from 'formik';
 import { Magic } from 'magic-sdk';
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as yup from 'yup';
 
+import i18next from '~/features/localization/i18next.server';
 import magicAdmin from '~/features/user-authentication/magic-admin.server';
 import {
   createUserSession,
@@ -28,9 +30,9 @@ import useIsOffline from '~/hooks/use-is-offline';
 import usePromise from '~/hooks/use-promise';
 import getSafeRedirectDestination from '~/utils/get-safe-redirect-destination';
 
-export const meta: MetaFunction = () => ({
-  title: 'Sign In / Sign Up | French House Stack',
-});
+export const handle = { i18n: 'login' };
+
+type LoaderData = { title: string };
 
 export const loader: LoaderFunction = async ({ request }) => {
   const userId = await getUserId(request);
@@ -40,21 +42,31 @@ export const loader: LoaderFunction = async ({ request }) => {
     return redirect(redirectTo);
   }
 
-  return json({});
+  const t = await i18next.getFixedT(request);
+
+  return json<LoaderData>({
+    title: `${t('login:sign-in-sign-up')} | ${t('app-name')}`,
+  });
 };
 
-type ActionData = {
-  errorMessage?: string;
+export const meta: MetaFunction = ({ data }) => {
+  const { title } = data as LoaderData;
+
+  return { title };
 };
+
+type ActionData = { errorMessage?: string };
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
   const didToken = formData.get('didToken');
 
+  const t = await i18next.getFixedT(request);
+
   if (typeof didToken !== 'string') {
     // TODO: report error.
     return json<ActionData>(
-      { errorMessage: 'A DID token must be a string.' },
+      { errorMessage: t('login:did-token-malformed-error') },
       { status: 400 },
     );
   }
@@ -64,7 +76,7 @@ export const action: ActionFunction = async ({ request }) => {
   if (typeof issuer !== 'string') {
     // TODO: report error.
     return json<ActionData>(
-      { errorMessage: 'Missing issuer from Magic metadata.' },
+      { errorMessage: t('login:missing-issuer-metadata') },
       { status: 400 },
     );
   }
@@ -148,8 +160,8 @@ export default function LoginPage() {
     });
   });
 
+  const { t } = useTranslation();
   const submit = useSubmit();
-
   const isOffline = useIsOffline();
 
   return (
@@ -159,13 +171,13 @@ export default function LoginPage() {
           <img
             className="mx-auto h-12 w-auto"
             src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-            alt="Workflow"
+            alt={t('app-name')}
           />
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Sign in to your account
+            {t('login:sign-in-to-your-account')}
           </h2>
           <p className="mt-2 mx-auto max-w-xs text-center text-sm text-gray-600">
-            Or create an account. Both works through this email field here 👇
+            {t('login:or-create-account')}
           </p>
         </div>
 
@@ -178,21 +190,21 @@ export default function LoginPage() {
 
               if (!didToken) {
                 // TODO: report error
-                throw new Error('Login failed - no DID token.');
+                throw new Error(t('login:did-token-missing'));
               } else {
                 submit({ didToken }, { method: 'post', replace: true });
               }
             } catch {
               // TODO: report error
-              setErrors({ email: 'Login failed. Please try again.' });
+              setErrors({ email: t('login:login-failed') });
             }
           }}
           initialErrors={{ email: '' }}
           validationSchema={yup.object().shape({
             email: yup
               .string()
-              .email("A valid email consists of characters, '@' and '.'.")
-              .required('Please enter a valid email (required).'),
+              .email(t('login:email-invalid'))
+              .required(t('login:email-required')),
           })}
         >
           {({ errors, isSubmitting, isValid, touched }) => (
@@ -200,7 +212,7 @@ export default function LoginPage() {
               <div className="rounded-md shadow-sm -space-y-px">
                 <div>
                   <label htmlFor="email" className="sr-only">
-                    Email address
+                    {t('login:email-address')}
                   </label>
                   <Field
                     aria-describedby={
@@ -209,13 +221,13 @@ export default function LoginPage() {
                     aria-invalid={
                       errors.email && touched.email ? 'true' : undefined
                     }
-                    aria-label="Email"
+                    aria-label={t('login:email-address')}
                     aria-required="true"
                     autoComplete="email"
                     className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                     id="email"
                     name="email"
-                    placeholder="Your email address ..."
+                    placeholder={t('login:email-placeholder')}
                     required
                     type="email"
                   />
@@ -242,7 +254,9 @@ export default function LoginPage() {
                       aria-hidden="true"
                     />
                   </span>
-                  {isSubmitting ? 'Authenticating ...' : 'Sign in / Sign up'}
+                  {isSubmitting
+                    ? t('login:authenticating')
+                    : t('login:sign-in-sign-up')}
                 </button>
               </div>
             </Form>
@@ -250,11 +264,11 @@ export default function LoginPage() {
         </Formik>
 
         {isOffline && (
-          <ErrorMessage errorMessage="You're offline. Please connect to the internet again." />
+          <ErrorMessage errorMessage={t('login:offline-warning')} />
         )}
 
         {failedToLoadMagic && (
-          <ErrorMessage errorMessage="Failed to load authentication provider https://magic.link. Please reload the page to try again." />
+          <ErrorMessage errorMessage={t('login:failed-to-load-magic')} />
         )}
       </div>
     </main>
