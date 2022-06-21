@@ -30,7 +30,7 @@
   "devDependencies": {
     "@commitlint/cli": "17.0.2",
     "@commitlint/config-conventional": "17.0.2",
-    "@faker-js/faker": "7.2.0",
+    "@faker-js/faker": "7.3.0",
     "@remix-run/dev": "1.6.0",
     "@remix-run/eslint-config": "1.6.0",
     "@tailwindcss/forms": "0.5.2",
