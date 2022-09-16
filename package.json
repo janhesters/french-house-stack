@@ -5,7 +5,7 @@
     }
   },
   "dependencies": {
-    "@headlessui/react": "1.6.4",
+    "@headlessui/react": "1.7.2",
     "@heroicons/react": "1.0.6",
     "@magic-sdk/admin": "1.4.1",
     "@remix-run/node": "1.6.0",
