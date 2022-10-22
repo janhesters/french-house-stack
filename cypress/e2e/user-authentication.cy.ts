@@ -45,7 +45,7 @@ const goOnline = () => {
 };
 
 describe('login page', () => {
-  it('redirects to the route specified in the search parameter if the user is logged in', () => {
+  it.only('redirects to the route specified in the search parameter if the user is logged in', () => {
     cy.loginByCookie();
     // TODO: `/home` is the default. We should change this assertion to another
     // route.

@@ -1,6 +1,6 @@
 import 'dotenv/config';
 
-import { installGlobals } from '@remix-run/node/globals';
+import { installGlobals } from '@remix-run/node';
 import { parse } from 'cookie';
 import { defineConfig } from 'cypress';
 

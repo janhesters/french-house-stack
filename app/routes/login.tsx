@@ -1,5 +1,5 @@
-import { LockClosedIcon } from '@heroicons/react/solid';
-import { XCircleIcon } from '@heroicons/react/solid';
+import { LockClosedIcon } from '@heroicons/react/24/solid';
+import { XCircleIcon } from '@heroicons/react/24/solid';
 import type {
   ActionFunction,
   LoaderFunction,
