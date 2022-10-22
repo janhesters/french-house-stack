@@ -29,6 +29,7 @@ i18next
     backend: { loadPath: '/locales/{{lng}}/{{ns}}.json' },
     detection: { order: ['htmlTag'], caches: [] },
   })
+  // eslint-disable-next-line unicorn/prefer-top-level-await
   .then(() => {
     if (window.Cypress) {
       // eslint-disable-next-line unicorn/prefer-module
