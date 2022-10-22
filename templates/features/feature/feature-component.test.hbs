@@ -1,0 +1,23 @@
+import { describe, expect, it } from 'vitest';
+
+import { render, screen } from '~/test/test-utils';
+import type { Factory } from '~/utils/types';
+
+import type { {{pascalCase name}}ComponentProps } from './{{kebabCase name}}-component';
+import {{pascalCase name}} from './{{kebabCase name}}-component';
+
+const createProps: Factory<{{pascalCase name}}ComponentProps> = ({ ...props } = {}) => ({
+  ...props,
+});
+
+describe('{{pascalCase name}} component', () => {
+  it('renders correctly', () => {
+    const props = createProps();
+
+    render(<{{pascalCase name}} {...props} />);
+
+    expect(
+      screen.getByRole('heading', { name: /{{name}}/i, level: 1 }),
+    ).toBeInTheDocument();
+  });
+});
