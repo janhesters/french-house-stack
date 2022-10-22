@@ -1,0 +1,68 @@
+import type { {{pascalCase name}} } from '@prisma/client';
+
+import { prisma } from '~/database.server';
+
+export type Partial{{pascalCase name}}Parameters = Pick<
+  Parameters<typeof prisma.{{camelCase name}}.create>[0]['data'],
+  'id'
+>;
+
+// CREATE
+
+/**
+ * Saves a new {{name}} to the database.
+ *
+ * @param {{name}} - Parameters of the {{name}} that should be created.
+ * @returns The newly created {{name}}.
+ */
+export async function save{{pascalCase name}}ToDatabase({{camelCase name}}: Partial{{pascalCase name}}Parameters) {
+  return prisma.{{camelCase name}}.create({ data: {{camelCase name}} });
+}
+
+// READ
+
+/**
+ * Retrieves a {{name}} record from the database based on its id.
+ *
+ * @param id - The id of the {{name}} to get.
+ * @returns The {{name}} with a given id or null if it wasn't found.
+ */
+export async function retrieve{{pascalCase name}}FromDatabaseById(id: {{pascalCase name}}['id']) {
+  return prisma.{{camelCase name}}.findUnique({ where: { id } });
+}
+
+// UPDATE
+
+/**
+ *  Updates a {{name}} in the database.
+ *
+ * @param options - A an object with the {{name}}'s id and the new values.
+ * @returns The updated {{name}}.
+ */
+export async function update{{pascalCase name}}InDatabaseById({
+  id,
+  {{camelCase name}},
+}: {
+  /**
+   * The id of the {{name}} you want to update.
+   */
+  id: {{pascalCase name}}['id'];
+  /**
+   * The values of the {{name}} you want to change.
+   */
+  {{name}}: Partial<Omit<Partial{{pascalCase name}}Parameters, 'id'>>;
+}) {
+  return prisma.{{camelCase name}}.update({ where: { id }, data: {{camelCase name}} });
+}
+
+// DELETE
+
+/**
+ * Removes a {{name}} from the database.
+ *
+ * @param id - The id of the {{name}} you want to delete.
+ * @returns The {{name}} that was deleted.
+ */
+export async function delete{{pascalCase name}}FromDatabaseById(id: {{pascalCase name}}['id']) {
+  return prisma.{{camelCase name}}.delete({ where: { id } });
+}

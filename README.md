@@ -60,6 +60,26 @@ to check for updates and install the latest versions.
 
 This starts your app in development mode, rebuilding assets on file changes.
 
+#### Generating boilerplate
+
+This repository uses [Plop](https://plopjs.com/documentation/#getting-started)
+to automate the generation of common boilerplate.
+
+Run `npm run gen` and then choose what you want to create, e.g.:
+
+```
+$ npm run gen
+
+> gen
+> plop
+
+? What do you want to generate? React component
+? For what feature do you want to generate the React component? user-profile
+? What is the name of the React component? user name
+✔  ++ /app/features/user-profile/user-name-component.tsx
+✔  ++ /app/features/user-profile/user-name-component.test.tsx
+```
+
 ### i18n
 
 The French House Stack comes with localization support through [remix-i18next](https://github.com/sergiodxa/remix-i18next).
