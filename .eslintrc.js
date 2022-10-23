@@ -8,20 +8,33 @@ module.exports = {
     '@remix-run/eslint-config/node',
     'plugin:unicorn/recommended',
     'plugin:prettier/recommended',
+    '@remix-run/eslint-config/jest-testing-library',
   ],
   plugins: ['simple-import-sort'],
   rules: {
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
-    'unicorn/prefer-node-protocol': 'off',
+    // Allow file namings like `$slug.tsx`.
+    'unicorn/filename-case': [
+      'error',
+      {
+        case: 'kebabCase',
+        ignore: [/\$[A-Za-z]+\.tsx/],
+      },
+    ],
+    'unicorn/no-array-callback-reference': 'off',
+    'unicorn/no-array-for-each': 'off',
     'unicorn/no-array-reduce': 'off',
+    'unicorn/prefer-node-protocol': 'off',
     'unicorn/prevent-abbreviations': [
       'error',
       {
         allowList: {
           e2e: true,
-          props: true,
           'remix.env.d': true,
+        },
+        replacements: {
+          props: false,
         },
       },
     ],
@@ -34,6 +47,11 @@ module.exports = {
     {
       files: ['*.test.ts', '*.test.tsx'],
       extends: ['@remix-run/eslint-config/jest-testing-library'],
+      settings: {
+        jest: {
+          version: 27,
+        },
+      },
     },
   ],
 };
