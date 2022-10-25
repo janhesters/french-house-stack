@@ -148,7 +148,7 @@ export default function LoginPage() {
         /**
          * @see https://magic.link/docs/introduction/test-mode
          */
-        testMode: Boolean(window.Cypress),
+        testMode: window.runMagicInTestMode,
       });
       await magic.preload();
       setMagicReady({ magic });

@@ -8,7 +8,6 @@ module.exports = {
     '@remix-run/eslint-config/node',
     'plugin:unicorn/recommended',
     'plugin:prettier/recommended',
-    '@remix-run/eslint-config/jest-testing-library',
   ],
   plugins: ['simple-import-sort'],
   rules: {
@@ -41,8 +40,11 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['*.cy.ts'],
-      extends: ['plugin:cypress/recommended'],
+      files: ['*.spec.ts'],
+      extends: ['plugin:playwright/playwright-test'],
+      rules: {
+        'playwright/require-top-level-describe': 'error',
+      },
     },
     {
       files: ['*.test.ts', '*.test.tsx'],
