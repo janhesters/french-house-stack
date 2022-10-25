@@ -39,7 +39,7 @@
     "@testing-library/react": "13.4.0",
     "@types/i18next-fs-backend": "1.1.2",
     "@types/ramda": "0.28.18",
-    "@types/react": "18.0.21",
+    "@types/react": "18.0.22",
     "@types/react-dom": "18.0.6",
     "@vitejs/plugin-react": "2.1.0",
     "@vitest/coverage-c8": "0.24.3",
