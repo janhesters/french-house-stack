@@ -80,8 +80,8 @@ export default function LandingPage() {
               },
               {
                 src: 'https://user-images.githubusercontent.com/1500684/157764454-48ac8c71-a2a9-4b5e-b19c-edef8b8953d6.svg',
-                alt: 'Cypress',
-                href: 'https://www.cypress.io',
+                alt: 'Playwright',
+                href: 'https://www.playwright.dev',
               },
               {
                 src: 'https://user-images.githubusercontent.com/1500684/157772386-75444196-0604-4340-af28-53b236faa182.svg',

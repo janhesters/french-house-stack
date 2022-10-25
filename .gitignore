@@ -8,3 +8,6 @@ coverage
 .env
 
 /app/tailwind.css
+/test-results/
+/playwright-report/
+/playwright/.cache/

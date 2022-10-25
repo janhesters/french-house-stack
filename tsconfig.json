@@ -17,8 +17,6 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2019",
-    "types": ["cypress"]
   },
-  "exclude": ["./cypress"],
   "include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx"]
 }

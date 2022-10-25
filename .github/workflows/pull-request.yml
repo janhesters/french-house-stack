@@ -73,8 +73,8 @@ jobs:
       - name: ⚡ Run vitest
         run: npm run test -- --coverage
 
-  cypress:
-    name: 🌳 Cypress
+  playwright:
+    name: 🎭 Playwright
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout repo
@@ -88,31 +88,24 @@ jobs:
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
 
-      - name: 🌳 Cypress run
-        uses: cypress-io/github-action@v4
-        with:
-          build: npm run build
-          start: npm start
-          wait-on: 'http://localhost:3000'
+      - name: 🌐 Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: 🎭 Playwright Run
+        run: npm run test:e2e:ci
         env:
           MAGIC_PUBLISHABLE_KEY: ${{ secrets.MAGIC_PUBLISHABLE_KEY }}
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           VALID_COOKIE_TOKEN: ${{ secrets.VALID_COOKIE_TOKEN }}
 
-      - name: 📸 Cypress Screenshots
-        uses: actions/upload-artifact@v2
+      - name: 📸 Playwright Screenshots
+        uses: actions/upload-artifact@v3
         if: failure()
         with:
-          name: 📸 Cypress Screenshots
-          path: cypress/screenshots
-
-      - name: 📹 Cypress Videos
-        uses: actions/upload-artifact@v2
-        if: failure()
-        with:
-          name: 📹 Cypress Videos
-          path: cypress/videos
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
 
   dependabot:
     name: 🤖 Dependabot

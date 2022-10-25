@@ -22,7 +22,7 @@ However, Magic is perfectly suited for a regular Web2 app, too.
 - Styling with [Tailwind](https://tailwindcss.com/) and the routes in this app
   have been build using the
   [free components from Tailwind UI](https://tailwindui.com/preview)
-- End-to-end testing with [Cypress](https://cypress.io)
+- End-to-end testing with [Playwright](https://playwright.dev)
 - Unit testing with [Vitest](https://vitest.dev) and
   [Testing Library](https://testing-library.com)
 - Code formatting with [Prettier](https://prettier.io)
@@ -115,25 +115,35 @@ learn how to use GitHub Actions for continuous integration and deployment.
 
 ## Testing
 
-### Cypress
+### Playwright
 
-We use Cypress for our End-to-End tests in this project. You'll find those in
-the `cypress` directory. As you make changes, add to an existing file or create
-a new file in the `cypress/e2e` directory to test your changes.
+We use Playwright for our End-to-End tests in this project. You'll find those in
+the `playwright` directory. As you make changes, add to an existing file or
+create a new file in the `playwright/e2e` directory to test your changes.
 
-We use [`@testing-library/cypress`](https://testing-library.com/cypress) for
-selecting elements on the page semantically.
+[Playwright natively features testing library selectors](https://playwright.dev/docs/release-notes#locators)
+for selecting elements on the page semantically.
 
-To run these tests in development, run `npm run test:e2e:dev` which will start
-the dev server for the app as well as the Cypress client. Make sure the database
-is running in docker as described above.
+To run these tests in development, run `npm run test:e2e` which will start the
+dev server for the app as well as the Playwright client.
+
+#### VSCode Extension
+
+If you're using VSCode, you can install the [Playwright extension](https://github.com/microsoft/playwright-vscode) for a better developer experience.
+
+#### Utilities
 
 We have a utility for testing authenticated features without having to go
 through the login flow:
 
 ```ts
-cy.loginByCookie();
+test('something that requires an authenticated user', async ({ page }) => {
+  await loginByCookie({ page });
+  // ... your tests ...
+});
 ```
+
+Check out the `playwright/utils.ts` file for other utility functions.
 
 ### Vitest
 

@@ -3,9 +3,10 @@ import { createCookieSessionStorage, redirect } from '@remix-run/node';
 import invariant from 'tiny-invariant';
 
 import magicAdmin from './magic-admin.server';
-import { USER_AUTHENTICATION_SESSION_NAME } from './user-authentication-constants.server';
 
 invariant(process.env.SESSION_SECRET, 'SESSION_SECRET must be set');
+
+export const USER_AUTHENTICATION_SESSION_NAME = '__user-authentication-session';
 
 export const sessionStorage = createCookieSessionStorage({
   cookie: {

@@ -15,7 +15,7 @@ declare global {
   var ENV: EnvironmentVariables;
 
   interface Window {
-    Cypress?: Cypress.Cypress;
+    runMagicInTestMode?: boolean;
   }
 }
 
@@ -26,25 +26,18 @@ i18next
   .init({
     ...i18n,
     ns: getInitialNamespaces(),
-    backend: { loadPath: '/locales/{{lng}}/{{ns}}.json' },
+    backend: {
+      loadPath: '/locales/{{lng}}/{{ns}}.json',
+      // requestOptions: { cache: 'no-cache' },
+    },
     detection: { order: ['htmlTag'], caches: [] },
   })
   // eslint-disable-next-line unicorn/prefer-top-level-await
   .then(() => {
-    if (window.Cypress) {
-      // eslint-disable-next-line unicorn/prefer-module
-      require('react-dom').hydrate(
-        <I18nextProvider i18n={i18next}>
-          <RemixBrowser />
-        </I18nextProvider>,
-        document,
-      );
-    } else {
-      hydrateRoot(
-        document,
-        <I18nextProvider i18n={i18next}>
-          <RemixBrowser />
-        </I18nextProvider>,
-      );
-    }
+    hydrateRoot(
+      document,
+      <I18nextProvider i18n={i18next}>
+        <RemixBrowser />
+      </I18nextProvider>,
+    );
   });

@@ -3,7 +3,7 @@
  */
 // eslint-disable-next-line unicorn/prefer-module
 module.exports = {
-  ignoredRouteFiles: ['**/.*', '**/*.css', '**/*.test.{js,jsx,ts,tsx}'],
+  ignoredRouteFiles: ['**/.*', '**/*.css', '**/*.{test,spec}.{js,jsx,ts,tsx}'],
   // appDirectory: "app",
   // assetsBuildDirectory: "public/build",
   // serverBuildPath: "build/index.js",
