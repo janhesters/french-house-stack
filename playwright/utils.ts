@@ -1,6 +1,5 @@
 import 'dotenv/config';
 
-import { faker } from '@faker-js/faker';
 import type { Page } from '@playwright/test';
 import { installGlobals } from '@remix-run/node';
 import { parse } from 'cookie';
@@ -9,20 +8,9 @@ import {
   createUserSession,
   USER_AUTHENTICATION_SESSION_NAME,
 } from '~/features/user-authentication/user-authentication-session.server';
+import generateRandomDid from '~/test/generate-random-did';
 
 installGlobals();
-
-/**
- * Generates a random decentralized identity token (DID). This function is to
- * _**generate fake test data only**_. We use DIDs for user ids.
- *
- * @see https://magic.link/docs/introduction/decentralized-id
- *
- * @returns did - Decentralized identity token.
- */
-function generateRandomDid() {
-  return 'did:ethr:' + faker.finance.ethereumAddress();
-}
 
 /**
  * Adds a cookie to the page's browser context to log the user with the given id

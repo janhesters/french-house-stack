@@ -13,7 +13,7 @@ const i18next = new RemixI18Next({
   i18next: {
     ...i18n,
     // Namespaces that need to be accessed in LoaderFunctions go here.
-    ns: ['common', 'home', 'login'],
+    ns: ['common', 'home', 'user-authentication'],
     backend: {
       loadPath: resolve('./public/locales/{{lng}}/{{ns}}.json'),
     },

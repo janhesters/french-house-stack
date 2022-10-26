@@ -10,9 +10,10 @@ import {
   startsWith,
 } from 'ramda';
 
-export const requestToUrl = (request: Request) => new URL(request.url);
-export const getRedirectToSearchParameter = (url: URL) =>
-  url.searchParams.get('redirectTo');
+import { getSearchParameterFromRequest } from './get-search-parameter-from-request';
+
+const getRedirectToSearchParameter =
+  getSearchParameterFromRequest('redirectTo');
 const isNotEmpty = complement(isEmpty);
 export const isValidRedirectDestination = (
   to: FormDataEntryValue | string | null | undefined,
@@ -24,6 +25,7 @@ export const isValidRedirectDestination = (
  * This should be used any time the redirect path is user-provided
  * (like the query string on our login pages). This avoids
  * open-redirect vulnerabilities.
+ *
  * @param request The to grab the redirectTo search parameter from.
  * @param defaultRedirect The redirect to use if the redirectTo is unsafe.
  * @returns A url that can be safely redirected to.
@@ -33,7 +35,6 @@ const getSafeRedirectDestination = (
   defaultRedirect = '/',
 ): string =>
   pipe(
-    requestToUrl,
     getRedirectToSearchParameter,
     ifElse(isValidRedirectDestination, identity, always(defaultRedirect)),
   )(request);

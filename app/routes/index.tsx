@@ -1,16 +1,16 @@
-import type { LoaderFunction } from '@remix-run/node';
+import type { LoaderArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
 import { Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
 import { getUserId } from '~/features/user-authentication/user-authentication-session.server';
-import getSafeRedirectDestination from '~/utils/get-safe-redirect-destination';
+import getSafeRedirectDestination from '~/utils/get-safe-redirect-destination.server';
 
 import magicLogo from '../../public/magic-icon.png';
 
 export const handle = { i18n: ['common', 'landing'] };
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader = async ({ request }: LoaderArgs) => {
   const userId = await getUserId(request);
 
   if (userId) {
