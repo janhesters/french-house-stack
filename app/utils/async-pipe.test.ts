@@ -1,4 +1,4 @@
-import { test } from 'vitest';
+import { describe } from 'vitest';
 
 import { assert } from '~/test/assert';
 
@@ -7,7 +7,7 @@ import { asyncPipe } from './async-pipe';
 const asyncDouble = (n: number) => Promise.resolve(n * 2);
 const asyncInc = (n: number) => Promise.resolve(n + 1);
 
-test('asyncPipe()', async () => {
+describe('asyncPipe()', async () => {
   const asyncIncDouble = asyncPipe(asyncInc, asyncDouble);
 
   assert({

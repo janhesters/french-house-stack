@@ -129,7 +129,9 @@ dev server for the app as well as the Playwright client.
 
 #### VSCode Extension
 
-If you're using VSCode, you can install the [Playwright extension](https://github.com/microsoft/playwright-vscode) for a better developer experience.
+If you're using VSCode, you can install the
+[Playwright extension](https://github.com/microsoft/playwright-vscode) for a
+better developer experience.
 
 #### Utilities
 
