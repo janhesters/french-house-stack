@@ -1,9 +1,5 @@
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import type {
-  LinksFunction,
-  LoaderFunction,
-  MetaFunction,
-} from '@remix-run/node';
+import type { LinksFunction, LoaderArgs, MetaFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import {
   Link,
@@ -22,6 +18,7 @@ import invariant from 'tiny-invariant';
 
 import type { EnvironmentVariables } from './entry.client';
 import i18next from './features/localization/i18next.server';
+import NotFoundComponent from './features/not-found/not-found-component';
 import styles from './tailwind.css';
 
 export const handle = { i18n: 'common' };
@@ -37,7 +34,7 @@ type LoaderData = {
   title: string;
 };
 
-export const loader: LoaderFunction = async ({ request }) => {
+export const loader = async ({ request }: LoaderArgs) => {
   const { MAGIC_PUBLISHABLE_KEY } = process.env;
   invariant(MAGIC_PUBLISHABLE_KEY, 'MAGIC_PUBLISHABLE_KEY must be set');
 
@@ -53,19 +50,21 @@ export const loader: LoaderFunction = async ({ request }) => {
   });
 };
 
-export const meta: MetaFunction = ({ data }) => {
+export const meta: MetaFunction<typeof loader> = ({
+  data = { title: 'French House Stack' },
+}) => {
   const { title } = data as LoaderData;
 
   return {
     // eslint-disable-next-line unicorn/text-encoding-identifier-case
     charset: 'utf-8',
-    title: title || 'French House Stack',
+    title,
     viewport: 'width=device-width,initial-scale=1',
   };
 };
 
 export default function App() {
-  const { locale, ENV } = useLoaderData<LoaderData>();
+  const { locale, ENV } = useLoaderData<typeof loader>();
   const { i18n } = useTranslation();
   useChangeLanguage(locale);
 
@@ -148,6 +147,23 @@ export function ErrorBoundary() {
           </div>
         </main>
 
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
+export function CatchBoundary() {
+  return (
+    <html className="h-full bg-gray-100">
+      <head>
+        <title>404 Not Found | French House Stack</title>
+        <Meta />
+        <Links />
+      </head>
+
+      <body className="h-full">
+        <NotFoundComponent />;
         <Scripts />
       </body>
     </html>
