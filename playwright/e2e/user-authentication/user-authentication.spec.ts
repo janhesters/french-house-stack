@@ -30,15 +30,21 @@ test.describe('login page', () => {
     await page.addInitScript(() => {
       window.runMagicInTestMode = true;
     });
-    await page.route(loginLoaderRoute, route => {
-      return route.fulfill({
-        headers: {
-          'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${process.env.VALID_COOKIE_TOKEN}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
-          'X-Remix-Redirect': '/home',
-          'X-Remix-Revalidate': 'yes',
-        },
-        status: 204,
-      });
+    await page.route(loginLoaderRoute, (route, request) => {
+      const postData = request.postDataJSON();
+
+      if (postData && postData.didToken) {
+        return route.fulfill({
+          headers: {
+            'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${process.env.VALID_COOKIE_TOKEN}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
+            'X-Remix-Redirect': '/home',
+            'X-Remix-Revalidate': 'yes',
+          },
+          status: 204,
+        });
+      }
+
+      return route.continue();
     });
 
     // Navigate to the login page.
@@ -70,15 +76,21 @@ test.describe('login page', () => {
     await page.addInitScript(() => {
       window.runMagicInTestMode = true;
     });
-    await page.route(loginLoaderRoute, route => {
-      return route.fulfill({
-        headers: {
-          'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${process.env.VALID_COOKIE_TOKEN}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
-          'X-Remix-Redirect': '/home',
-          'X-Remix-Revalidate': 'yes',
-        },
-        status: 204,
-      });
+    await page.route(loginLoaderRoute, (route, request) => {
+      const postData = request.postDataJSON();
+
+      if (postData && postData.didToken) {
+        return route.fulfill({
+          headers: {
+            'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${process.env.VALID_COOKIE_TOKEN}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
+            'X-Remix-Redirect': '/home',
+            'X-Remix-Revalidate': 'yes',
+          },
+          status: 204,
+        });
+      }
+
+      return route.continue();
     });
 
     // Navigate to the login page.

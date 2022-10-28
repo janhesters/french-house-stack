@@ -1,24 +1,47 @@
 import { LockClosedIcon } from '@heroicons/react/24/solid';
 import { XCircleIcon } from '@heroicons/react/24/solid';
-import type { FormikHelpers } from 'formik';
-import {
-  ErrorMessage as FormikErrorMessage,
-  Field,
-  Form,
-  Formik,
-} from 'formik';
-import type { ReactNode } from 'react';
+import { Form } from '@remix-run/react';
+import type { RefObject } from 'react';
 import { useTranslation } from 'react-i18next';
-import * as yup from 'yup';
 
-const ErrorMessage = ({ errorMessage }: { errorMessage: string }) => (
-  <div className="rounded-md bg-red-50 p-4">
+const Spinner = () => (
+  <svg
+    aria-hidden="true"
+    className="-ml-1 mr-3 h-5 w-5 animate-spin text-white"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    />
+    <path
+      className="opacity-75"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
+const ErrorMessage = ({
+  errorMessage,
+  id,
+}: {
+  errorMessage: string;
+  id: string;
+}) => (
+  <div className="rounded-md bg-red-50 p-2">
     <div className="flex">
       <div className="flex-shrink-0">
         <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
       </div>
       <div className="ml-3">
-        <p id="email-error" className="text-sm text-red-700">
+        <p className="text-sm text-red-700" id={id} role="alert">
           {errorMessage}
         </p>
       </div>
@@ -26,28 +49,23 @@ const ErrorMessage = ({ errorMessage }: { errorMessage: string }) => (
   </div>
 );
 
-const initialValues = { email: '' };
-export type UserAuthenticationInitialValues = typeof initialValues;
-
-export type HandleSubmit = (
-  values: {
-    email: string;
-  },
-  formikHelpers: FormikHelpers<UserAuthenticationInitialValues>,
-) => void | Promise<any>;
+export const actionName = '_action';
+export const loginAction = 'login';
 
 export type UserAuthenticationComponentProps = {
-  children: ReactNode;
-  failedToLoadMagic: boolean;
-  handleSubmit: HandleSubmit;
-  isOffline: boolean;
+  email?: string;
+  emailError?: string;
+  formError?: string;
+  inputRef?: RefObject<HTMLInputElement>;
+  state: 'idle' | 'submitting' | 'error';
 };
 
 export default function UserAuthenticationComponent({
-  children,
-  failedToLoadMagic,
-  handleSubmit,
-  isOffline,
+  email,
+  emailError,
+  formError,
+  inputRef,
+  state,
 }: UserAuthenticationComponentProps) {
   const { t } = useTranslation();
 
@@ -73,88 +91,69 @@ export default function UserAuthenticationComponent({
             </p>
           </div>
 
-          <Formik
-            initialValues={initialValues}
-            onSubmit={handleSubmit}
-            initialErrors={{ email: '' }}
-            validationSchema={yup.object().shape({
-              email: yup
-                .string()
-                .email(t('user-authentication:email-invalid'))
-                .required(t('user-authentication:email-required')),
-            })}
+          <Form
+            aria-describedby={formError && 'form-error'}
+            className="mt-8 space-y-6"
+            method="post"
+            replace={true}
           >
-            {({ errors, isSubmitting, isValid, touched }) => (
-              <Form className="mt-8 space-y-6">
-                <div className="-space-y-px rounded-md shadow-sm">
-                  <div>
-                    <label htmlFor="email" className="sr-only">
-                      {t('user-authentication:email-address')}
-                    </label>
-                    <Field
-                      aria-describedby={
-                        (errors.email && touched.email) ||
-                        isOffline ||
-                        failedToLoadMagic
-                          ? 'email-error'
-                          : undefined
-                      }
-                      aria-invalid={
-                        errors.email && touched.email ? 'true' : undefined
-                      }
-                      aria-label={t('user-authentication:email-address')}
-                      aria-required="true"
-                      autoComplete="email"
-                      className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                      id="email"
-                      name="email"
-                      placeholder={t('user-authentication:email-placeholder')}
-                      required
-                      type="email"
-                    />
-                  </div>
-                </div>
+            <div className="-space-y-px rounded-md shadow-sm">
+              <div>
+                <label className="sr-only" htmlFor="email">
+                  {t('user-authentication:email-address')}
+                </label>
 
-                {children}
+                <input
+                  aria-describedby={emailError && 'email-error'}
+                  aria-invalid={Boolean(emailError)}
+                  autoComplete="email"
+                  className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:pointer-events-none disabled:opacity-50 sm:text-sm"
+                  defaultValue={email}
+                  disabled={state === 'submitting'}
+                  id="email"
+                  name="email"
+                  placeholder={t('user-authentication:email-placeholder')}
+                  ref={inputRef}
+                  required
+                  type="email"
+                />
 
-                <FormikErrorMessage name="email">
-                  {errorMessage => <ErrorMessage errorMessage={errorMessage} />}
-                </FormikErrorMessage>
+                {emailError && (
+                  <ErrorMessage errorMessage={emailError} id="email-error" />
+                )}
+              </div>
+            </div>
 
-                <div>
-                  <button
-                    className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-                    disabled={
-                      isSubmitting || !isValid || isOffline || failedToLoadMagic
-                    }
-                    type="submit"
-                  >
-                    <span className="absolute inset-y-0 left-0 flex items-center pl-3">
-                      <LockClosedIcon
-                        className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
-                        aria-hidden="true"
-                      />
-                    </span>
-                    {isSubmitting
-                      ? t('user-authentication:authenticating')
-                      : t('user-authentication:sign-in-sign-up')}
-                  </button>
-                </div>
-              </Form>
+            {formError && (
+              <ErrorMessage errorMessage={formError} id="form-error" />
             )}
-          </Formik>
 
-          {isOffline && (
-            <ErrorMessage
-              errorMessage={t('user-authentication:offline-warning')}
-            />
-          )}
-
-          {failedToLoadMagic && (
-            <ErrorMessage
-              errorMessage={t('user-authentication:failed-to-load-magic')}
-            />
-          )}
+            <div>
+              <button
+                className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+                disabled={state === 'submitting'}
+                name={actionName}
+                type="submit"
+                value={loginAction}
+              >
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                  {state === 'submitting' ? (
+                    <div className="ml-2">
+                      <Spinner />
+                    </div>
+                  ) : (
+                    <LockClosedIcon
+                      aria-hidden="true"
+                      className="h-5 w-5 text-indigo-500 group-hover:text-indigo-400"
+                    />
+                  )}
+                </span>
+                {state === 'submitting'
+                  ? t('user-authentication:authenticating')
+                  : t('user-authentication:sign-in-sign-up')}
+              </button>
+            </div>
+          </Form>
         </div>
       </main>
     </>
