@@ -35,13 +35,20 @@ const ErrorMessage = ({
   errorMessage: string;
   id: string;
 }) => (
-  <div className="rounded-md bg-red-50 p-2">
+  <div className="rounded-md bg-red-50 p-2 dark:bg-red-300">
     <div className="flex">
       <div className="flex-shrink-0">
-        <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+        <XCircleIcon
+          aria-hidden="true"
+          className="h-5 w-5 text-red-400 dark:text-red-600"
+        />
       </div>
       <div className="ml-3">
-        <p className="text-sm text-red-700" id={id} role="alert">
+        <p
+          className="text-sm text-red-700 dark:text-red-900"
+          id={id}
+          role="alert"
+        >
           {errorMessage}
         </p>
       </div>
@@ -83,10 +90,10 @@ export default function UserAuthenticationComponent({
               src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
               alt={t('app-name')}
             />
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
               {t('user-authentication:sign-in-to-your-account')}
             </h2>
-            <p className="mx-auto mt-2 max-w-xs text-center text-sm text-gray-600">
+            <p className="mx-auto mt-2 max-w-xs text-center text-sm text-gray-600 dark:text-slate-400">
               {t('user-authentication:or-create-account')}
             </p>
           </div>
@@ -107,7 +114,7 @@ export default function UserAuthenticationComponent({
                   aria-describedby={emailError && 'email-error'}
                   aria-invalid={Boolean(emailError)}
                   autoComplete="email"
-                  className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:pointer-events-none disabled:opacity-50 sm:text-sm"
+                  className="relative block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-500 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400 sm:text-sm"
                   defaultValue={email}
                   disabled={state === 'submitting'}
                   id="email"
