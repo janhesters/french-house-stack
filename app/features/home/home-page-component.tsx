@@ -209,9 +209,11 @@ export default function HomePageComponent({
         )}
       </Disclosure>
 
-      <header className="bg-white shadow">
+      <header className="bg-white shadow dark:bg-slate-800">
         <div className="mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-gray-900">{t('home:home')}</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            {t('home:home')}
+          </h1>
         </div>
       </header>
 
@@ -219,7 +221,7 @@ export default function HomePageComponent({
         <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
           {/* Replace with your content */}
           <div className="px-4 py-6 sm:px-0">
-            <div className="h-96 rounded-lg border-4 border-dashed border-gray-200">
+            <div className="h-96 rounded-lg border-4 border-dashed border-gray-200 dark:border-slate-500 dark:text-white">
               {user.email}
             </div>
           </div>

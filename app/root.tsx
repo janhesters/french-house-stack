@@ -69,12 +69,16 @@ export default function App() {
   useChangeLanguage(locale);
 
   return (
-    <html lang={locale} className="h-full bg-gray-100" dir={i18n.dir()}>
+    <html
+      lang={locale}
+      className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800"
+      dir={i18n.dir()}
+    >
       <head>
         <Meta />
         <Links />
       </head>
-      <body className="h-full">
+      <body className="h-full overflow-auto">
         <Outlet />
         <ScrollRestoration />
         <script
@@ -94,13 +98,13 @@ export function ErrorBoundary() {
   const location = useLocation();
 
   return (
-    <html className="h-full bg-gray-100">
+    <html className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800">
       <head>
         <title>Oh no!</title>
         <Meta />
         <Links />
       </head>
-      <body className="h-full">
+      <body className="h-full overflow-auto">
         <main className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
@@ -155,14 +159,14 @@ export function ErrorBoundary() {
 
 export function CatchBoundary() {
   return (
-    <html className="h-full bg-gray-100">
+    <html className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800">
       <head>
         <title>404 Not Found | French House Stack</title>
         <Meta />
         <Links />
       </head>
 
-      <body className="h-full">
+      <body className="h-full overflow-auto">
         <NotFoundComponent />;
         <Scripts />
       </body>
