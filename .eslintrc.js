@@ -34,6 +34,7 @@ module.exports = {
         },
         replacements: {
           props: false,
+          ref: false,
         },
       },
     ],

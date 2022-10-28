@@ -1,114 +1,115 @@
-/**
- * .blur() is broken right now, so we need to use jsdom instead of happy-dom.
- * @vitest-environment jsdom
- */
-
+import { faker } from '@faker-js/faker';
+import type { FormProps } from '@remix-run/react';
 import userEvent from '@testing-library/user-event';
+import type { RefAttributes } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
-import { act, render, screen } from '~/test/test-utils';
+import { render, screen } from '~/test/test-utils';
 import type { Factory } from '~/utils/types';
 
 import type { UserAuthenticationComponentProps } from './user-authentication-component';
 import UserAuthentication from './user-authentication-component';
 
+vi.mock('@remix-run/react', () => ({
+  Form: ({
+    replace: _,
+    ...props
+  }: FormProps & RefAttributes<HTMLFormElement>) => <form {...props} />,
+}));
+
 const createProps: Factory<UserAuthenticationComponentProps> = ({
-  failedToLoadMagic = false,
-  handleSubmit = () => {},
-  isOffline = false,
-} = {}) => ({
-  children: <p data-testid="children">Child</p>,
-  failedToLoadMagic,
-  handleSubmit,
-  isOffline,
-});
+  email,
+  emailError,
+  formError,
+  inputRef,
+  state = 'idle',
+} = {}) => ({ email, emailError, formError, inputRef, state });
 
 describe('UserAuthentication component', () => {
-  it('given no errors, a handleSubmit function and some children: it renders the children, renders a heading, handles malformed email errors and calls the submit function when the user clicked "log in"', async () => {
+  it('given an idle state and nothing else: renders the user authentication form', async () => {
     const user = userEvent.setup();
-    const handleSubmit = vi.fn();
-    const props = createProps({ handleSubmit });
+    const props = createProps();
 
     render(<UserAuthentication {...props} />);
 
-    // It renders a heading.
+    // It renders the correct headings and a sub heading.
     expect(
       screen.getByRole('heading', { name: /sign in or sign up/i, level: 1 }),
     ).toBeInTheDocument();
-
-    // It renders the children
-    expect(screen.getByTestId('children')).toBeInTheDocument();
-
-    const loginButton = screen.getByRole('button', { name: /sign in/i });
-
-    // The submit button is disabled by default
-    expect(loginButton).toBeDisabled();
-
-    // Typing nothing into the input notifies the user that an email is required
-    const input = screen.getByLabelText(/email/i);
-    input.focus();
-    act(() => {
-      input.blur();
-    });
     expect(
-      await screen.findByRole('textbox', {
-        description: /email \(required\)/i,
+      screen.getByRole('heading', {
+        name: /sign in to your account/i,
+        level: 2,
       }),
     ).toBeInTheDocument();
-
-    // Typing in an invalid email keeps the login button disabled and ...
-    await user.type(input, 'some@email');
-    act(() => {
-      input.blur();
-    });
-    expect(loginButton).toBeDisabled();
-    // ... shows an error message about what went wrong
     expect(
-      screen.getByRole('textbox', {
-        description: /a valid email consists of/i,
-      }),
+      screen.getByText(/or create an account/i, { selector: 'p' }),
     ).toBeInTheDocument();
 
-    // Typing in a valid email enables the button
-    const email = 'some@email.com';
-    await user.clear(input);
-    await user.type(input, email);
-    expect(loginButton).toBeEnabled();
+    // It renders an empty email input.
+    const emailInput = screen.getByLabelText(/email address/i);
+    expect(emailInput).toHaveValue('');
 
-    // Clicking the button should cal the handleSubmit function.
-    await user.click(loginButton);
-    expect(handleSubmit).toHaveBeenCalledWith({ email }, expect.any(Object));
+    // The user can type into it to change the value of the email.
+    const email = faker.internet.email();
+    await user.type(emailInput, email);
+    expect(emailInput).toHaveValue(email);
+
+    // It renders a submit button to log the user in.
+    expect(
+      screen.getByRole('button', { name: /sign in/i }),
+    ).toBeInTheDocument();
   });
 
-  it('given Magic provider failed to load: it renders an error and disables the UI', async () => {
-    const props = createProps({ failedToLoadMagic: true });
+  it('given an email: sets the email as the default value for the email input', () => {
+    const email = faker.internet.email();
+    const props = createProps({ email });
 
     render(<UserAuthentication {...props} />);
 
-    // It renders the appropriate error to the user.
-    expect(
-      screen.getByRole('textbox', {
-        description: /failed to load authentication provider/i,
-      }),
-    ).toBeInTheDocument();
-
-    // It disables the sign in button.
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeDisabled();
+    // It passes the email to the email address input.
+    expect(screen.getByLabelText(/email address/i)).toHaveValue(email);
   });
 
-  it('given the user is offline: it renders an error and disables the UI', () => {
-    const props = createProps({ isOffline: true });
+  it('given an email and an email error: displays the error for the email field', () => {
+    const email = faker.internet.email();
+    const emailError = faker.lorem.sentence();
+    const props = createProps({ email, emailError });
 
     render(<UserAuthentication {...props} />);
 
-    // It renders the appropriate error to the user.
+    // It displays the email error.
     expect(
-      screen.getByRole('textbox', {
-        description: /please connect to the internet/i,
-      }),
-    ).toBeInTheDocument();
+      screen.getByRole('textbox', { description: emailError }),
+    ).toHaveValue(email);
+    expect(screen.getByRole('alert')).toHaveTextContent(emailError);
+    expect(
+      screen.getByRole('textbox', { name: /email address/i }),
+    ).not.toBeValid();
+  });
 
-    // It disables the sign in button.
-    expect(screen.getByRole('button', { name: /sign in/i })).toBeDisabled();
+  it('given a form error: displays the error for the form', () => {
+    const formError = faker.lorem.sentence();
+    const props = createProps({ formError });
+
+    render(<UserAuthentication {...props} />);
+
+    // It displays the form error.
+    expect(screen.getByRole('alert')).toHaveTextContent(formError);
+  });
+
+  it('given a state of submitting: disables the email input and submit button', () => {
+    const props = createProps({ state: 'submitting' });
+
+    render(<UserAuthentication {...props} />);
+
+    // It disables the email input and submit button.
+    expect(screen.getByLabelText(/email address/i)).toBeDisabled();
+    expect(
+      screen.queryByRole('button', { name: /sign in/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /authenticating/i }),
+    ).toBeDisabled();
   });
 });
