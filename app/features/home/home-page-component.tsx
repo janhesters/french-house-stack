@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import classNames from '~/utils/class-names';
 
 export type HomePageComponentProps = {
-  user: {
+  userProfile: {
     name: string;
     email: string;
     avatar: string;
@@ -18,7 +18,7 @@ export type HomePageComponentProps = {
 
 export default function HomePageComponent({
   navigation,
-  user,
+  userProfile,
   userNavigation,
 }: HomePageComponentProps) {
   const { t } = useTranslation();
@@ -75,7 +75,7 @@ export default function HomePageComponent({
                           <span className="sr-only">{t('open-user-menu')}</span>
                           <img
                             className="h-8 w-8 rounded-full"
-                            src={user.avatar}
+                            src={userProfile.avatar}
                             alt={t('your-avatar')}
                           />
                         </Menu.Button>
@@ -163,16 +163,16 @@ export default function HomePageComponent({
                   <div className="flex-shrink-0">
                     <img
                       className="h-10 w-10 rounded-full"
-                      src={user.avatar}
+                      src={userProfile.avatar}
                       alt={t('your-avatar')}
                     />
                   </div>
                   <div className="ml-3">
                     <div className="text-base font-medium leading-none text-white">
-                      {user.name}
+                      {userProfile.name}
                     </div>
                     <div className="text-sm font-medium leading-none text-gray-400">
-                      {user.email}
+                      {userProfile.email}
                     </div>
                   </div>
                   <button
@@ -222,7 +222,7 @@ export default function HomePageComponent({
           {/* Replace with your content */}
           <div className="px-4 py-6 sm:px-0">
             <div className="h-96 rounded-lg border-4 border-dashed border-gray-200 dark:border-slate-500 dark:text-white">
-              {user.email}
+              {userProfile.email}
             </div>
           </div>
           {/* /End replace */}

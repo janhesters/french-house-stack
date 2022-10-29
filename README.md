@@ -45,6 +45,8 @@ to check for updates and install the latest versions.
 
 ## Development
 
+### Getting Started
+
 - Install dependencies:
 
   ```sh
@@ -68,6 +70,20 @@ to check for updates and install the latest versions.
   - `VALID_COOKIE_TOKEN` - You'll need to generate a valid cookie token for your
     E2E by running the app, logging in, and grabbing it from your network tab.
     It should be the value saved as `'__user-authentication-session'`.
+  - `DATABASE_URL` - The url under which the SQLite database will operate.
+  - `SEED_USER_ID` - The user id of the user that will be seeded in the database. You can grab it by logging in with Magic and looking at the `userId` that gets returned from `requireUserIsAuthenticated()`.
+
+- Set up the database:
+
+  ```sh
+  npm run prisma:setup
+  ```
+
+- **(Optional)** If you used the user authentication route to log in with Magic, a user profile has been automatically created for you. If not, seed the database with a user profile:
+
+  ```sh
+  npm run prisma:seed
+  ```
 
 - Start dev server:
 
@@ -76,6 +92,13 @@ to check for updates and install the latest versions.
   ```
 
 This starts your app in development mode, rebuilding assets on file changes.
+
+### Prisma helper scripts
+
+- `"prisma:apply-changes"` - Applies changes to the database schema to the database.
+- `"prisma:seed"` - Seeds the database with a user profile.
+- `"prisma:setup"` - Sets up the database.
+- `"prisma:wipe"` - Wipes the database (irrevocably delete all data, but keep the schema).
 
 #### Generating boilerplate
 
@@ -147,6 +170,27 @@ test('something that requires an authenticated user', async ({ page }) => {
 
 Check out the `playwright/utils.ts` file for other utility functions.
 
+#### Miscellaneous
+
+To mark a test as todo in Playwright, [you have to use `.fixme()`](https://github.com/microsoft/playwright/issues/10918).
+
+```ts
+test('something that should be done later', ({}, testInfo) => {
+  testInfo.fixme();
+});
+
+test.fixme('something that should be done later', async ({ page }) => {
+  // ...
+});
+
+test('something that should be done later', ({ page }) => {
+  test.fixme();
+  // ...
+});
+```
+
+The version using `testInfo.fixme()` is the "preferred" way and can be picked up by the VSCode extension.
+
 ### Vitest
 
 For lower level tests of utilities and individual components, we use `vitest`.
@@ -176,15 +220,13 @@ run to format all files in the project.
 
 ### Pick a Database
 
-The French House stack intentionally leaves out a database setup for you because
-if you build a DApp you might want to use the [IPFS](https://ipfs.io/) or
-something like [3Box](https://3boxlabs.com/). And if you build a Web2 app, you
-might want to go with a traditional database.
+The French House Stack comes with a SQLite database out of the box. It uses [Prisma](https://www.prisma.io/) to abstract away the database layer, so you can easily switch it out for another database.
 
-If you're looking for inspiration for a centralized database, check out the
-[Indie Stack](https://github.com/remix-run/indie-stack) for a simple SQLite
-setup or the [Blues Stack](https://github.com/remix-run/blues-stack) for a
+If you're looking for inspiration for a centralized database, check out the [Blues Stack](https://github.com/remix-run/blues-stack) for a
 enterprise grade PostgeSQL setup.
+
+If you build a DApp, you might want to use the [IPFS](https://ipfs.io/) or
+something like [3Box](https://3boxlabs.com/).
 
 ### Pick a Blockchain
 

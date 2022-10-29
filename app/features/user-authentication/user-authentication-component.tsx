@@ -56,8 +56,8 @@ const ErrorMessage = ({
   </div>
 );
 
-export const actionName = '_action';
-export const loginAction = 'login';
+export const intentName = 'intent';
+export const loginIntent = 'login';
 
 export type UserAuthenticationComponentProps = {
   email?: string;
@@ -139,9 +139,9 @@ export default function UserAuthenticationComponent({
               <button
                 className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                 disabled={state === 'submitting'}
-                name={actionName}
+                name={intentName}
                 type="submit"
-                value={loginAction}
+                value={loginIntent}
               >
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                   {state === 'submitting' ? (

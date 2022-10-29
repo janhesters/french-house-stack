@@ -1,7 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-import { loginByCookie } from '../../utils';
+import { deleteUserProfileFromDatabaseById } from '~/features/user-profile/user-profile-model.server';
+
+import { loginAndSaveUserProfileToDatabase } from '../../utils';
 
 test.describe('home page', () => {
   test("page redirects you to the login page when you're logged out and remembers the page as the redirectTo query parameter", async ({
@@ -20,6 +22,8 @@ test.describe('home page', () => {
     baseURL,
     browserName,
   }) => {
+    // TODO: Refactor out the logout test, so that only logout things are NOT
+    // asserted for Webkit.
     // See: https://github.com/microsoft/playwright/issues/18318
     // eslint-disable-next-line playwright/no-skipped-test
     test.skip(
@@ -38,14 +42,14 @@ test.describe('home page', () => {
       });
     });
 
-    await loginByCookie({ page });
+    const { id, email } = await loginAndSaveUserProfileToDatabase({ page });
     await page.goto('./home');
 
     // The page has the correct tile.
     expect(await page.title()).toEqual('Home | French House Stack');
 
     // It retrieves the users data.
-    await page.getByText('bob@french-house-stack.com').isVisible();
+    await page.getByText(email).isVisible();
 
     // Logging the user out should redirect you to the landing page.
     await page.getByRole('button', { name: /open user menu/i }).click();
@@ -56,16 +60,24 @@ test.describe('home page', () => {
     // page and getting redirected to login.
     await page.goto('./home');
     expect(page.url()).toContain('/login');
+
+    await deleteUserProfileFromDatabaseById(id);
   });
 
   test('page should not have any automatically detectable accessibility issues', async ({
     page,
   }) => {
-    await loginByCookie({ page });
+    const { id } = await loginAndSaveUserProfileToDatabase({ page });
     await page.goto('./home');
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
 
     expect(accessibilityScanResults.violations).toEqual([]);
+
+    await deleteUserProfileFromDatabaseById(id);
+  });
+
+  test('given there is no user profile for the given user: renders a message to the user', ({}, testInfo) => {
+    testInfo.fixme();
   });
 });

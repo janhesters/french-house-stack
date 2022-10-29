@@ -1,25 +1,23 @@
 import type { LoaderArgs, MetaFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
+import { pick } from 'ramda';
 
 import HomePageComponent from '~/features/home/home-page-component';
 import i18next from '~/features/localization/i18next.server';
 import { requireUserIsAuthenticated } from '~/features/user-authentication/user-authentication-session.server';
+import { requireUserProfileExists } from '~/features/user-profile/user-profile-helpers.server';
 
 export const handle = { i18n: 'home' };
 
 export const loader = async ({ request }: LoaderArgs) => {
   const t = await i18next.getFixedT(request);
   const userId = await requireUserIsAuthenticated(request);
+  const userProfile = await requireUserProfileExists(userId);
   // TODO: Store your users profile and grab it based on the `userId`.
   return json({
     title: `${t('home:home')} | ${t('app-name')}`,
-    user: {
-      name: 'Bob House',
-      email: userId && 'bob@french-house-stack.com',
-      avatar:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    },
+    userProfile: pick(['avatar', 'email', 'name'], userProfile),
     navigation: [
       { name: t('home:dashboard'), href: '#', current: true },
       { name: t('home:team'), href: '#', current: false },
@@ -39,12 +37,13 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => ({
 });
 
 export default function HomePage() {
-  const { navigation, user, userNavigation } = useLoaderData<typeof loader>();
+  const { navigation, userProfile, userNavigation } =
+    useLoaderData<typeof loader>();
 
   return (
     <HomePageComponent
       navigation={navigation}
-      user={user}
+      userProfile={userProfile}
       userNavigation={userNavigation}
     />
   );

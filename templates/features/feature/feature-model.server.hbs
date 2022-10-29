@@ -50,7 +50,7 @@ export async function update{{pascalCase name}}InDatabaseById({
   /**
    * The values of the {{name}} you want to change.
    */
-  {{name}}: Partial<Omit<Partial{{pascalCase name}}Parameters, 'id'>>;
+  {{camelCase name}}: Partial<Omit<Partial{{pascalCase name}}Parameters, 'id'>>;
 }) {
   return prisma.{{camelCase name}}.update({ where: { id }, data: {{camelCase name}} });
 }
