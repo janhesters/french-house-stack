@@ -76,7 +76,7 @@ export default function HomePageComponent({
                           <img
                             className="h-8 w-8 rounded-full"
                             src={user.avatar}
-                            alt=""
+                            alt={t('your-avatar')}
                           />
                         </Menu.Button>
                       </div>
@@ -164,7 +164,7 @@ export default function HomePageComponent({
                     <img
                       className="h-10 w-10 rounded-full"
                       src={user.avatar}
-                      alt=""
+                      alt={t('your-avatar')}
                     />
                   </div>
                   <div className="ml-3">

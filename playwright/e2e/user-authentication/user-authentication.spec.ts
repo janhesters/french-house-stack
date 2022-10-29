@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 import { USER_AUTHENTICATION_SESSION_NAME } from '~/features/user-authentication/user-authentication-session.server';
@@ -122,7 +123,18 @@ test.describe('login page', () => {
     await page.getByRole('button', { name: /sign in/i }).isEnabled();
     await page.getByRole('button', { name: /sign in/i }).click();
     await page.waitForURL(baseURL + '/home');
+    await page.waitForLoadState('networkidle');
     await page.getByRole('heading', { level: 1, name: /home/i }).isVisible();
     expect(page.url()).toEqual(baseURL + '/home');
+  });
+
+  test('page should not have any automatically detectable accessibility issues', async ({
+    page,
+  }) => {
+    await page.goto('./home');
+
+    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
   });
 });

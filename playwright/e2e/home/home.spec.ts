@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 import { loginByCookie } from '../../utils';
@@ -13,7 +14,8 @@ test.describe('home page', () => {
     expect(page.url()).toEqual(expectedUrl.href);
   });
 
-  test('has the correct title and renders the user email when they are logged in and lets the user log out', async ({
+  // test('has the correct title and renders the user email when they are logged in and lets the user log out', async ({
+  test("given the user is logged in: has the correct title, renders the user's email and lets the user log out", async ({
     page,
     baseURL,
     browserName,
@@ -54,5 +56,16 @@ test.describe('home page', () => {
     // page and getting redirected to login.
     await page.goto('./home');
     expect(page.url()).toContain('/login');
+  });
+
+  test('page should not have any automatically detectable accessibility issues', async ({
+    page,
+  }) => {
+    await loginByCookie({ page });
+    await page.goto('./home');
+
+    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
   });
 });
