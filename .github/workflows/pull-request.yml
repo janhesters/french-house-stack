@@ -91,6 +91,11 @@ jobs:
       - name: 🌐 Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      - name: 🛠 Setup Database
+        run: npm run prisma:wipe
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: 🎭 Playwright Run
         run: npm run test:e2e:ci
         env:
@@ -98,6 +103,7 @@ jobs:
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           VALID_COOKIE_TOKEN: ${{ secrets.VALID_COOKIE_TOKEN }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: 📸 Playwright Screenshots
         uses: actions/upload-artifact@v3

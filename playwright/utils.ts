@@ -1,5 +1,6 @@
 import 'dotenv/config';
 
+import { faker } from '@faker-js/faker';
 import type { Page } from '@playwright/test';
 import { installGlobals } from '@remix-run/node';
 import { parse } from 'cookie';
@@ -8,6 +9,8 @@ import {
   createUserSession,
   USER_AUTHENTICATION_SESSION_NAME,
 } from '~/features/user-authentication/user-authentication-session.server';
+import type { PartialUserProfileParameters } from '~/features/user-profile/user-profile-model.server';
+import { saveUserProfileToDatabase } from '~/features/user-profile/user-profile-model.server';
 import generateRandomDid from '~/test/generate-random-did';
 
 installGlobals();
@@ -47,4 +50,15 @@ export async function loginByCookie({
       path: '/',
     },
   ]);
+}
+
+export async function loginAndSaveUserProfileToDatabase({
+  avatar = faker.image.avatar(),
+  email = faker.internet.email(),
+  id = generateRandomDid(),
+  name = faker.name.fullName(),
+  page,
+}: Partial<PartialUserProfileParameters> & { page: Page }) {
+  await loginByCookie({ id, page });
+  return await saveUserProfileToDatabase({ avatar, email, id, name });
 }

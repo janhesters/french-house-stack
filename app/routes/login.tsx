@@ -10,13 +10,17 @@ import { z } from 'zod';
 import i18next from '~/features/localization/i18next.server';
 import magicAdmin from '~/features/user-authentication/magic-admin.server';
 import UserAuthenticationComponent, {
-  actionName,
-  loginAction,
+  intentName,
+  loginIntent,
 } from '~/features/user-authentication/user-authentication-component';
 import {
   createUserSession,
   getUserId,
 } from '~/features/user-authentication/user-authentication-session.server';
+import {
+  retrieveUserProfileFromDatabaseById,
+  saveUserProfileToDatabase,
+} from '~/features/user-profile/user-profile-model.server';
 import useEffectOnce from '~/hooks/use-effect-once';
 import usePromise from '~/hooks/use-promise';
 import getSafeRedirectDestination from '~/utils/get-safe-redirect-destination.server';
@@ -50,15 +54,15 @@ type ActionData = {
 
 const badRequest = (data: ActionData) => json(data, { status: 400 });
 
-const magicAction = 'magic';
-const magicErrorAction = 'magicError';
+const magicIntent = 'magic';
+const magicErrorIntent = 'magicError';
 
 export const action = async ({ request }: ActionArgs) => {
   const t = await i18next.getFixedT(request);
   const formData = await request.formData();
-  const { _action, ...values } = Object.fromEntries(formData);
+  const { [intentName]: intent, ...values } = Object.fromEntries(formData);
 
-  if (_action === loginAction) {
+  if (intent === loginIntent) {
     const { email } = values;
     const emailSchema = z
       .string({
@@ -76,7 +80,7 @@ export const action = async ({ request }: ActionArgs) => {
     return json<ActionData>({ email: result.data });
   }
 
-  if (_action === magicAction) {
+  if (intent === magicIntent) {
     const { didToken } = values;
 
     if (typeof didToken !== 'string') {
@@ -86,26 +90,37 @@ export const action = async ({ request }: ActionArgs) => {
       });
     }
 
-    const { issuer } = await magicAdmin.users.getMetadataByToken(didToken);
+    const { email, issuer: userId } = await magicAdmin.users.getMetadataByToken(
+      didToken,
+    );
 
-    if (typeof issuer !== 'string') {
+    if (typeof userId !== 'string') {
       // TODO: report error.
       return badRequest({
         formError: t('user-authentication:missing-issuer-metadata'),
       });
     }
 
+    const existingUser = await retrieveUserProfileFromDatabaseById(userId);
+
+    if (!existingUser) {
+      if (typeof email !== 'string') {
+        // TODO: report error
+        return json(
+          { errorMessage: t('user-authentication:missing-email-metadata') },
+          { status: 400 },
+        );
+      }
+
+      await saveUserProfileToDatabase({ id: userId, email });
+    }
+
     const redirectTo = getSafeRedirectDestination(request, '/home');
 
-    return createUserSession({
-      request,
-      userId: issuer,
-      remember: true,
-      redirectTo,
-    });
+    return createUserSession({ redirectTo, remember: true, request, userId });
   }
 
-  if (_action === magicErrorAction) {
+  if (intent === magicErrorIntent) {
     const { formError } = values;
     // TODO: report errors here
 
@@ -117,7 +132,7 @@ export const action = async ({ request }: ActionArgs) => {
   }
 
   return badRequest({
-    formError: t('user-authentication:invalid-action', { action: _action }),
+    formError: t('user-authentication:invalid-intent', { intent }),
   });
 };
 
@@ -168,7 +183,7 @@ export default function LoginPage() {
       // TODO: force user to reload page
       submit(
         {
-          [actionName]: magicErrorAction,
+          [intentName]: magicErrorIntent,
           formError: t('user-authentication:failed-to-load-magic'),
         },
         { method: 'post', replace: true },
@@ -189,14 +204,14 @@ export default function LoginPage() {
             // TODO: report error
             submit(
               {
-                [actionName]: magicErrorAction,
+                [intentName]: magicErrorIntent,
                 formError: t('user-authentication:did-token-missing'),
               },
               { method: 'post', replace: true },
             );
           } else {
             submit(
-              { didToken, [actionName]: magicAction },
+              { didToken, [intentName]: magicIntent },
               { method: 'post', replace: true },
             );
           }
@@ -204,7 +219,7 @@ export default function LoginPage() {
           // TODO: reportError
           submit(
             {
-              [actionName]: magicErrorAction,
+              [intentName]: magicErrorIntent,
               formError: t('user-authentication:login-failed'),
             },
             { method: 'post', replace: true },
