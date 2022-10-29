@@ -159,7 +159,10 @@ export function ErrorBoundary() {
 
 export function CatchBoundary() {
   return (
-    <html className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800">
+    <html
+      className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800"
+      lang="en"
+    >
       <head>
         <title>404 Not Found | French House Stack</title>
         <Meta />

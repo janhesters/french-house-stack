@@ -13,7 +13,7 @@ export default function NotFoundComponent() {
             <img
               className="h-12 w-auto"
               src="https://tailwindui.com/img/logos/workflow-mark.svg?color=indigo&shade=600"
-              alt={t('app-name')}
+              alt=""
             />
           </Link>
         </div>

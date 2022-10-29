@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 import { loginByCookie } from '../../utils';
@@ -34,5 +35,15 @@ test.describe('not found page', () => {
     await page.waitForNavigation();
     await page.getByRole('heading', { name: /home/i, level: 1 }).isVisible();
     expect(page.url()).toEqual(baseURL + '/home');
+  });
+
+  test('page should not have any automatically detectable accessibility issues', async ({
+    page,
+  }) => {
+    await page.goto('./some-non-existing-url');
+
+    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
   });
 });
