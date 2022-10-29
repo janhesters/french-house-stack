@@ -23,6 +23,35 @@ function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
   }
 }
 
+/**
+ * Get the error message from an error or any other thing that has been thrown.
+ *
+ * @param error - Something that has been thrown and might be an error.
+ * @returns A string containing the error message.
+ *
+ * @example
+ *
+ * Used on an Error instance:
+ *
+ * ```ts
+ * getErrorMessage(new Error('Something went wrong'))
+ * // ↵ 'Something went wrong'
+ * ```
+ *
+ * Used on a non-error object:
+ *
+ * ```ts
+ * getErrorMessage({ message: 'Something went wrong' })
+ * // ↵ 'Something went wrong'
+ * ```
+ *
+ * Used on a non-error object with no message property (e.g. a primitive):
+ *
+ * ```ts
+ * getErrorMessage('Something went wrong')
+ * // ↵ '"some-string"'
+ * ```
+ */
 export default function getErrorMessage(error: unknown) {
   return toErrorWithMessage(error).message;
 }

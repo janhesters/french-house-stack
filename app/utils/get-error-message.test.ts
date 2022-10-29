@@ -1,23 +1,26 @@
 /* eslint-disable jest/no-conditional-expect */
 import { describe, expect, it } from 'vitest';
 
+import { assert } from '~/test/assert';
+
 import getErrorMessage from './get-error-message';
 
 describe('getErrorMessage()', () => {
-  it("given an error returns the error's message", () => {
-    const message = 'foo';
-    const error = new Error(message);
+  {
+    const message = 'This is an error message';
 
-    const actual = getErrorMessage(error);
-    const expected = message;
+    assert({
+      given: 'an error',
+      should: "return the error's message",
+      actual: getErrorMessage(new Error(message)),
+      expected: message,
+    });
+  }
 
-    expect(actual).toEqual(expected);
-  });
-
-  it("given a string is thrown return's the string", () => {
+  it('given a string is thrown: returns the string', () => {
     expect.assertions(1);
 
-    const someString = 'some-string';
+    const someString = 'foo';
 
     try {
       throw someString;
@@ -29,7 +32,7 @@ describe('getErrorMessage()', () => {
     }
   });
 
-  it("given a number is thrown return's the number", () => {
+  it('given a number is thrown: returns the number', () => {
     expect.assertions(1);
 
     const someNumber = 1;
@@ -44,7 +47,7 @@ describe('getErrorMessage()', () => {
     }
   });
 
-  it("given extending the custom error class should return the error's message", () => {
+  {
     class CustomError extends Error {
       public constructor(message: string) {
         super(message);
@@ -52,23 +55,25 @@ describe('getErrorMessage()', () => {
     }
 
     const message = 'bar';
-    const error = new CustomError(message);
 
-    const actual = getErrorMessage(error);
-    const expected = message;
+    assert({
+      given: 'an error that extended the custom error class',
+      should: "return the error's message",
+      actual: getErrorMessage(new CustomError(message)),
+      expected: message,
+    });
+  }
 
-    expect(actual).toEqual(expected);
-  });
-
-  it("given a custom error object should return the error's message", () => {
+  {
     const message = 'baz';
-    const error = { message };
 
-    const actual = getErrorMessage(error);
-    const expected = message;
-
-    expect(actual).toEqual(expected);
-  });
+    assert({
+      given: 'a custom error object with a message property',
+      should: "return the object's message property",
+      actual: getErrorMessage({ message }),
+      expected: message,
+    });
+  }
 
   it('handles circular references', () => {
     expect.assertions(1);
