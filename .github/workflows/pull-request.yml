@@ -102,7 +102,6 @@ jobs:
           MAGIC_PUBLISHABLE_KEY: ${{ secrets.MAGIC_PUBLISHABLE_KEY }}
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-          VALID_COOKIE_TOKEN: ${{ secrets.VALID_COOKIE_TOKEN }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: 📸 Playwright Screenshots

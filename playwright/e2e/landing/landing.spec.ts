@@ -1,7 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-import { loginByCookie } from '../../utils';
+import { deleteUserProfileFromDatabaseById } from '~/features/user-profile/user-profile-model.server';
+
+import { loginAndSaveUserProfileToDatabase } from '../../utils';
 
 test.describe('landing page', () => {
   test('has the correct title and renders a greeting', async ({ page }) => {
@@ -16,9 +18,13 @@ test.describe('landing page', () => {
     page,
     baseURL,
   }) => {
-    await loginByCookie({ page });
+    const { id } = await loginAndSaveUserProfileToDatabase({ page });
+
     await page.goto('./');
     expect(page.url()).toEqual(baseURL + '/home');
+
+    await page.close();
+    await deleteUserProfileFromDatabaseById(id);
   });
 
   test('page should not have any automatically detectable accessibility issues', async ({

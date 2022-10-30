@@ -4,8 +4,16 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 import { USER_AUTHENTICATION_SESSION_NAME } from '~/features/user-authentication/user-authentication-session.server';
+import { createPopulatedUserProfile } from '~/features/user-profile/user-profile-factories';
+import {
+  deleteUserProfileFromDatabaseById,
+  saveUserProfileToDatabase,
+} from '~/features/user-profile/user-profile-model.server';
 
-import { loginByCookie } from '../../utils';
+import {
+  createValidCookieToken,
+  loginAndSaveUserProfileToDatabase,
+} from '../../utils';
 
 const loginLoaderRoute = '/login?_data=routes%2Flogin';
 const invalidMagicEmail = 'test+fail@magic.link';
@@ -16,18 +24,26 @@ test.describe('login page', () => {
     page,
     baseURL,
   }) => {
-    await loginByCookie({ page });
-    // TODO: `/home` is the default. We should change this assertion to another
-    // route.
-    const searchParameters = new URLSearchParams({ redirectTo: '/home' });
+    const { id } = await loginAndSaveUserProfileToDatabase({ page });
+
+    const searchParameters = new URLSearchParams({
+      redirectTo: '/settings/profile',
+    });
     await page.goto('./login?' + searchParameters.toString());
-    expect(page.url()).toEqual(baseURL + '/home');
+    expect(page.url()).toEqual(baseURL + '/settings/profile');
+
+    await page.close();
+    await deleteUserProfileFromDatabaseById(id);
   });
 
   test('lets the user log in with valid credentials', async ({
     page,
     baseURL,
   }) => {
+    const user = createPopulatedUserProfile();
+    await saveUserProfileToDatabase(user);
+    const cookieToken = await createValidCookieToken(user.id);
+
     await page.addInitScript(() => {
       window.runMagicInTestMode = true;
     });
@@ -37,7 +53,7 @@ test.describe('login page', () => {
       if (postData && postData.didToken) {
         return route.fulfill({
           headers: {
-            'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${process.env.VALID_COOKIE_TOKEN}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
+            'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${cookieToken}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
             'X-Remix-Redirect': '/home',
             'X-Remix-Revalidate': 'yes',
           },
@@ -65,12 +81,19 @@ test.describe('login page', () => {
 
     // After logging in, the user should be redirected to the home page.
     expect(page.url()).toEqual(baseURL + '/home');
+
+    await page.context().close();
+    await deleteUserProfileFromDatabaseById(user.id);
   });
 
   test('fails gracefully with invalid credentials', async ({
     page,
     baseURL,
   }) => {
+    const user = createPopulatedUserProfile();
+    await saveUserProfileToDatabase(user);
+    const cookieToken = await createValidCookieToken(user.id);
+
     // NOTE: This test has two `waits` to make the test more reliable.
     // The first wait waits for the page to load. The second wait waits for the
     // page to correctly navigate to the next page after the successful sign in.
@@ -83,7 +106,7 @@ test.describe('login page', () => {
       if (postData && postData.didToken) {
         return route.fulfill({
           headers: {
-            'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${process.env.VALID_COOKIE_TOKEN}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
+            'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${cookieToken}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
             'X-Remix-Redirect': '/home',
             'X-Remix-Revalidate': 'yes',
           },
@@ -126,6 +149,9 @@ test.describe('login page', () => {
     await page.waitForLoadState('networkidle');
     await page.getByRole('heading', { level: 1, name: /home/i }).isVisible();
     expect(page.url()).toEqual(baseURL + '/home');
+
+    await page.context().close();
+    await deleteUserProfileFromDatabaseById(user.id);
   });
 
   test('page should not have any automatically detectable accessibility issues', async ({

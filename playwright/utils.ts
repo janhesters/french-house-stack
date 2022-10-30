@@ -16,6 +16,31 @@ import generateRandomDid from '~/test/generate-random-did';
 installGlobals();
 
 /**
+ * Generates a token that can be used within a cookie to authenticate a user.
+ *
+ * @param userId - The id (decentralized identity token) of the user to create
+ * the token for.
+ * @returns A signed token to add as a cookie to a request.
+ */
+export async function createValidCookieToken(userId: string) {
+  const response = await createUserSession({
+    redirectTo: '/',
+    remember: false,
+    request: new Request('http://localhost:3000/'),
+    userId,
+  });
+  const cookieValue = response.headers.get('Set-Cookie');
+
+  if (!cookieValue) {
+    throw new Error('Cookie missing from createUserSession response');
+  }
+
+  const parsedCookie = parse(cookieValue);
+  const token = parsedCookie[USER_AUTHENTICATION_SESSION_NAME];
+  return token;
+}
+
+/**
  * Adds a cookie to the page's browser context to log the user with the given id
  * in.
  *
@@ -28,20 +53,7 @@ export async function loginByCookie({
   id?: string;
   page: Page;
 }) {
-  const response = await createUserSession({
-    redirectTo: '/',
-    remember: false,
-    request: new Request('http://localhost:3000/'),
-    userId: id,
-  });
-  const cookieValue = response.headers.get('Set-Cookie');
-
-  if (!cookieValue) {
-    throw new Error('Cookie missing from createUserSession response');
-  }
-
-  const parsedCookie = parse(cookieValue);
-  const token = parsedCookie[USER_AUTHENTICATION_SESSION_NAME];
+  const token = await createValidCookieToken(id);
   await page.context().addCookies([
     {
       name: USER_AUTHENTICATION_SESSION_NAME,
