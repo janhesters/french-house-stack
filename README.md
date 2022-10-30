@@ -67,9 +67,6 @@ to check for updates and install the latest versions.
     public key and a secret key for your project from your Magic dashboard.
   - `SESSION_SECRET` - The session secret can be any string that is at least 32
     characters long.
-  - `VALID_COOKIE_TOKEN` - You'll need to generate a valid cookie token for your
-    E2E by running the app, logging in, and grabbing it from your network tab.
-    It should be the value saved as `'__user-authentication-session'`.
   - `DATABASE_URL` - The url under which the SQLite database will operate.
   - `SEED_USER_ID` - The user id of the user that will be seeded in the database. You can grab it by logging in with Magic and looking at the `userId` that gets returned from `requireUserIsAuthenticated()`.
 

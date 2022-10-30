@@ -23,6 +23,7 @@ import {
 } from '~/features/user-profile/user-profile-model.server';
 import useEffectOnce from '~/hooks/use-effect-once';
 import usePromise from '~/hooks/use-promise';
+import getPageTitle from '~/utils/get-page-title.server';
 import getSafeRedirectDestination from '~/utils/get-safe-redirect-destination.server';
 
 export const handle = { i18n: 'user-authentication' };
@@ -35,10 +36,8 @@ export const loader = async ({ request }: LoaderArgs) => {
     return redirect(redirectTo);
   }
 
-  const t = await i18next.getFixedT(request);
-
   return json({
-    title: `${t('user-authentication:sign-in-sign-up')} | ${t('app-name')}`,
+    title: await getPageTitle(request, 'user-authentication:sign-in-sign-up'),
   });
 };
 

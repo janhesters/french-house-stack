@@ -1,7 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-import { loginByCookie } from '../../utils';
+import { deleteUserProfileFromDatabaseById } from '~/features/user-profile/user-profile-model.server';
+
+import { loginAndSaveUserProfileToDatabase } from '../../utils';
 
 test.describe('not found page', () => {
   test('the page renders the correct title and a useful error message and a link that redirects logged out users to the landig page instead', async ({
@@ -27,7 +29,7 @@ test.describe('not found page', () => {
     page,
     baseURL,
   }) => {
-    await loginByCookie({ page });
+    const { id } = await loginAndSaveUserProfileToDatabase({ page });
     await page.goto('./some-non-existing-url');
 
     // Clicking the home button navigates the user to the home page.
@@ -35,6 +37,9 @@ test.describe('not found page', () => {
     await page.waitForNavigation();
     await page.getByRole('heading', { name: /home/i, level: 1 }).isVisible();
     expect(page.url()).toEqual(baseURL + '/home');
+
+    await page.close();
+    await deleteUserProfileFromDatabaseById(id);
   });
 
   test('page should not have any automatically detectable accessibility issues', async ({

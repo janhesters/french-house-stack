@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { randomBytes } from 'crypto';
 
 /**
  * Generates a random decentralized identity token (DID). This function is to
@@ -9,5 +9,5 @@ import { faker } from '@faker-js/faker';
  * @returns did - Decentralized identity token.
  */
 export default function generateRandomDid() {
-  return 'did:ethr:' + faker.finance.ethereumAddress();
+  return 'did:ethr:0x' + randomBytes(32).toString('hex').slice(0, 40);
 }

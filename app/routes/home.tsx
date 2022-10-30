@@ -7,16 +7,19 @@ import HomePageComponent from '~/features/home/home-page-component';
 import i18next from '~/features/localization/i18next.server';
 import { requireUserIsAuthenticated } from '~/features/user-authentication/user-authentication-session.server';
 import { requireUserProfileExists } from '~/features/user-profile/user-profile-helpers.server';
+import getPageTitle from '~/utils/get-page-title.server';
 
 export const handle = { i18n: 'home' };
 
 export const loader = async ({ request }: LoaderArgs) => {
-  const t = await i18next.getFixedT(request);
-  const userId = await requireUserIsAuthenticated(request);
+  const [t, userId] = await Promise.all([
+    i18next.getFixedT(request),
+    requireUserIsAuthenticated(request),
+  ]);
   const userProfile = await requireUserProfileExists(userId);
-  // TODO: Store your users profile and grab it based on the `userId`.
+
   return json({
-    title: `${t('home:home')} | ${t('app-name')}`,
+    title: await getPageTitle(request, t('home:home')),
     userProfile: pick(['avatar', 'email', 'name'], userProfile),
     navigation: [
       { name: t('home:dashboard'), href: '#', current: true },

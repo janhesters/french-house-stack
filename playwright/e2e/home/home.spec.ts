@@ -61,6 +61,7 @@ test.describe('home page', () => {
     await page.goto('./home');
     expect(page.url()).toContain('/login');
 
+    await page.close();
     await deleteUserProfileFromDatabaseById(id);
   });
 
@@ -74,6 +75,7 @@ test.describe('home page', () => {
 
     expect(accessibilityScanResults.violations).toEqual([]);
 
+    await page.close();
     await deleteUserProfileFromDatabaseById(id);
   });
 

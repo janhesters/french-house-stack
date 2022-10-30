@@ -1,0 +1,13 @@
+{
+  "cancel": "Abbrechen",
+  "dismiss-alert": "Benachrichtigung schließen",
+  "email": "Email",
+  "name": "Name",
+  "name-required-and-constraints": "Ein Name ist erforderlich und er muss mindestens 3 Buchstaben lang sein.",
+  "profile": "Profil",
+  "public-information": "Diese Informationen sind öffentlich, also pass auf was du teilst.",
+  "save": "Speichern",
+  "saving": "Speichert ...",
+  "settings": "Einstellungen",
+  "successful-save": "Profil erfolgreich gespeichert"
+}
