@@ -22,6 +22,11 @@ module.exports = function (
             value: 'reactComponent',
             short: 'React component',
           },
+          {
+            name: 'E2E tests for a feature',
+            value: 'e2eTests',
+            short: 'E2E tests',
+          },
         ],
       },
       {
@@ -31,7 +36,9 @@ module.exports = function (
           const ressourceToGenerate =
             fileType === 'dbHelper'
               ? 'those CRUD helpers'
-              : 'the React component';
+              : fileType === 'reactComponent'
+              ? 'the React component'
+              : 'the E2E tests';
           return `For what feature do you want to generate ${ressourceToGenerate}?`;
         },
       },
@@ -39,6 +46,10 @@ module.exports = function (
         type: 'input',
         name: 'name',
         message: function ({ fileType }) {
+          if (fileType === 'e2eTests') {
+            return "What is the url path of the page you want to test? (start with '/')";
+          }
+
           const ressourceToGenerate =
             fileType === 'dbHelper' ? 'the model' : 'the React component';
           return `What is the name of ${ressourceToGenerate}?`;
@@ -53,7 +64,7 @@ module.exports = function (
               type: 'add',
               path: 'app/features/{{kebabCase feature}}/{{kebabCase name}}-model.server.ts',
               templateFile:
-                'templates/features/feature/feature-model.server.hbs',
+                'templates/app/features/feature/feature-model.server.hbs',
             },
           ];
         }
@@ -62,13 +73,23 @@ module.exports = function (
             {
               type: 'add',
               path: 'app/features/{{kebabCase feature}}/{{kebabCase name}}-component.tsx',
-              templateFile: 'templates/features/feature/feature-component.hbs',
+              templateFile:
+                'templates/app/features/feature/feature-component.hbs',
             },
             {
               type: 'add',
               path: 'app/features/{{kebabCase feature}}/{{kebabCase name}}-component.test.tsx',
               templateFile:
-                'templates/features/feature/feature-component.test.hbs',
+                'templates/app/features/feature/feature-component.test.hbs',
+            },
+          ];
+        }
+        case 'e2eTests': {
+          return [
+            {
+              type: 'add',
+              path: 'playwright/e2e/{{kebabCase feature}}/{{kebabCase feature}}.spec.ts',
+              templateFile: 'templates/playwright/e2e/feature/feature.spec.hbs',
             },
           ];
         }

@@ -6,3 +6,5 @@ public
 coverage
 templates
 build
+playwright-report
+test-results
