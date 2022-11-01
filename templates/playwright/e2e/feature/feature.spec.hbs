@@ -1,0 +1,37 @@
+import AxeBuilder from '@axe-core/playwright';
+import { expect, test } from '@playwright/test';
+
+import { deleteUserProfileFromDatabaseById } from '~/features/user-profile/user-profile-model.server';
+
+import { loginAndSaveUserProfileToDatabase } from '../../utils';
+
+test.describe('{{feature}} page', () => {
+  test("page redirects you to the login page when you're logged out and remembers the page as the redirectTo query parameter", async ({
+    page,
+    baseURL,
+  }) => {
+    await page.goto('.{{name}}');
+    const expectedUrl = new URL(baseURL + '/login');
+    expectedUrl.searchParams.append('redirectTo', '{{name}}');
+    expect(page.url()).toEqual(expectedUrl.href);
+  });
+
+  test('page has the correct title', async ({ page }) => {
+    await page.goto('.{{name}}');
+    expect(await page.title()).toEqual('{{titleCase feature}}');
+    await page.getByRole('heading', { level: 1, name: '{{titleCase feature}}' }).isVisible();
+  });
+
+  test('page should not have any automatically detectable accessibility issues', async ({
+    page,
+  }) => {
+    const { id } = await loginAndSaveUserProfileToDatabase({ page });
+    await page.goto('.{{name}}');
+
+    const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+
+    expect(accessibilityScanResults.violations).toEqual([]);
+
+    await deleteUserProfileFromDatabaseById(id);
+  });
+});

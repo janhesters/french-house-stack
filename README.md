@@ -1,6 +1,8 @@
-# Remix French House Stack
+# Remix French House Stack 🪩
 
 ![The Remix French House Stack](./public/french-house-stack.png)
+
+The Remix Stack for Web2, Web3 and [Web5](https://developer.tbd.website/blog/what-is-web5/) 💃🕺
 
 Learn more about [Remix Stacks](https://remix.run/stacks).
 
@@ -8,7 +10,7 @@ Learn more about [Remix Stacks](https://remix.run/stacks).
 npx create-remix --template janhesters/french-house-stack
 ```
 
-## What's in the Stack?
+## What's in the Stack? 🤔
 
 The French House Stack is a starter template for
 [developing DApps by using Magic](https://magic.link/docs/home#blockchains).
@@ -19,12 +21,18 @@ However, Magic is perfectly suited for a regular Web2 app, too.
   which enables you to both build Web2 and Web3 apps
 - [GitHub Actions](https://github.com/features/actions) for deploy on merge to
   production and staging environments
-- Styling with [Tailwind](https://tailwindcss.com/) and the routes in this app
-  have been build using the
-  [free components from Tailwind UI](https://tailwindui.com/preview)
+- Styling with [Tailwind](https://tailwindcss.com/).
+  - Includes [dark mode](https://tailwindcss.com/docs/dark-mode).
+  - The routes in this app have been build using the
+    [free components from Tailwind UI](https://tailwindui.com/preview)
 - End-to-end testing with [Playwright](https://playwright.dev)
 - Unit testing with [Vitest](https://vitest.dev) and
   [Testing Library](https://testing-library.com)
+  - Comes with a
+    [RITEway-like `assert()`](https://github.com/paralleldrive/riteway#assert)
+    utility function.
+- [SQLite](https://www.sqlite.org/index.html) database with
+  [Prisma](https://www.prisma.io/) as the ORM
 - Code formatting with [Prettier](https://prettier.io)
 - Linting with [ESLint](https://eslint.org)
 - Static Types with [TypeScript](https://typescriptlang.org)
@@ -43,7 +51,7 @@ npx npm-check-updates -u
 
 to check for updates and install the latest versions.
 
-## Development
+## Development 🛠
 
 ### Getting Started
 
@@ -68,7 +76,9 @@ to check for updates and install the latest versions.
   - `SESSION_SECRET` - The session secret can be any string that is at least 32
     characters long.
   - `DATABASE_URL` - The url under which the SQLite database will operate.
-  - `SEED_USER_ID` - The user id of the user that will be seeded in the database. You can grab it by logging in with Magic and looking at the `userId` that gets returned from `requireUserIsAuthenticated()`.
+  - `SEED_USER_ID` - The user id of the user that will be seeded in the
+    database. You can grab it by logging in with Magic and looking at the
+    `userId` that gets returned from `requireUserIsAuthenticated()`.
 
 - Set up the database:
 
@@ -76,7 +86,9 @@ to check for updates and install the latest versions.
   npm run prisma:setup
   ```
 
-- **(Optional)** If you used the user authentication route to log in with Magic, a user profile has been automatically created for you. If not, seed the database with a user profile:
+- **(Optional)** If you used the user authentication route to log in with Magic,
+  a user profile has been automatically created for you. If not, seed the
+  database with a user profile:
 
   ```sh
   npm run prisma:seed
@@ -92,12 +104,14 @@ This starts your app in development mode, rebuilding assets on file changes.
 
 ### Prisma helper scripts
 
-- `"prisma:apply-changes"` - Applies changes to the database schema to the database.
+- `"prisma:apply-changes"` - Applies changes to the database schema to the
+  database.
 - `"prisma:seed"` - Seeds the database with a user profile.
 - `"prisma:setup"` - Sets up the database.
-- `"prisma:wipe"` - Wipes the database (irrevocably delete all data, but keep the schema).
+- `"prisma:wipe"` - Wipes the database (irrevocably delete all data, but keep
+  the schema).
 
-#### Generating boilerplate
+### Generating boilerplate
 
 This repository uses [Plop](https://plopjs.com/documentation/#getting-started)
 to automate the generation of common boilerplate.
@@ -111,7 +125,7 @@ $ npm run gen
 > plop
 
 ? What do you want to generate? React component
-? For what feature do you want to generate the React component? user-profile
+? For what feature do you want to generate the React component? user profile
 ? What is the name of the React component? user name
 ✔  ++ /app/features/user-profile/user-name-component.tsx
 ✔  ++ /app/features/user-profile/user-name-component.test.tsx
@@ -133,13 +147,14 @@ Check out the
 [Remix team's official stacks](https://remix.run/docs/en/v1/pages/stacks) to
 learn how to use GitHub Actions for continuous integration and deployment.
 
-## Testing
+## Testing 🧪
 
-### Playwright
+### Playwright 🎭
 
 We use Playwright for our End-to-End tests in this project. You'll find those in
-the `playwright` directory. As you make changes, add to an existing file or
-create a new file in the `playwright/e2e` directory to test your changes.
+the `playwright/` directory. As you make changes to your app, add to an existing
+file or create a new file in the `playwright/e2e` directory to test your
+changes.
 
 [Playwright natively features testing library selectors](https://playwright.dev/docs/release-notes#locators)
 for selecting elements on the page semantically.
@@ -169,7 +184,8 @@ Check out the `playwright/utils.ts` file for other utility functions.
 
 #### Miscellaneous
 
-To mark a test as todo in Playwright, [you have to use `.fixme()`](https://github.com/microsoft/playwright/issues/10918).
+To mark a test as todo in Playwright,
+[you have to use `.fixme()`](https://github.com/microsoft/playwright/issues/10918).
 
 ```ts
 test('something that should be done later', ({}, testInfo) => {
@@ -186,13 +202,44 @@ test('something that should be done later', ({ page }) => {
 });
 ```
 
-The version using `testInfo.fixme()` is the "preferred" way and can be picked up by the VSCode extension.
+The version using `testInfo.fixme()` is the "preferred" way and can be picked up
+by the VSCode extension.
 
-### Vitest
+### Vitest ⚡️
 
 For lower level tests of utilities and individual components, we use `vitest`.
 We have DOM-specific assertion helpers via
 [`@testing-library/jest-dom`](https://testing-library.com/jest-dom).
+
+#### `assert()`
+
+There are
+[5 questions every unit test must answer](https://medium.com/javascript-scene/what-every-unit-test-needs-f6cd34d9836d)
+and [Eric Elliott](https://mobile.twitter.com/_ericelliott) created a testing
+framework called [RITEway](https://github.com/paralleldrive/riteway) that forces
+you to write **R**eadable, **I**solated, and **E**xplicit tests. The framework
+only exposes a single `assert` test function, which performs a deep equality
+check.
+
+The French House Stack features this `assert` testing utility function, but it
+works with Vitest.
+
+```ts
+import { describe } from 'vitest';
+
+import { assert } from '~/test/assert';
+
+const sum = (a: number, b: number) => a + b;
+
+describe('sum()', () => {
+  assert({
+    given: 'two numbers',
+    should: 'returns the sum of the two numbers',
+    actual: sum(21, 21),
+    expected: 42,
+  });
+});
+```
 
 ### Type Checking
 
@@ -213,14 +260,17 @@ It's recommended to install an editor plugin (like the
 to get auto-formatting on save. There's also a `npm run format` script you can
 run to format all files in the project.
 
-## Next Steps
+## Next Steps 🚀
 
 ### Pick a Database
 
-The French House Stack comes with a SQLite database out of the box. It uses [Prisma](https://www.prisma.io/) to abstract away the database layer, so you can easily switch it out for another database.
+The French House Stack comes with a SQLite database out of the box. It uses
+[Prisma](https://www.prisma.io/) to abstract away the database layer, so you can
+easily switch it out for another database.
 
-If you're looking for inspiration for a centralized database, check out the [Blues Stack](https://github.com/remix-run/blues-stack) for a
-enterprise grade PostgeSQL setup.
+If you're looking for inspiration for a centralized database, check out the
+[Blues Stack](https://github.com/remix-run/blues-stack) for a enterprise grade
+PostgeSQL setup.
 
 If you build a DApp, you might want to use the [IPFS](https://ipfs.io/) or
 something like [3Box](https://3boxlabs.com/).
@@ -243,7 +293,7 @@ For examples of setups you can check out the
 
 ### Explore Magic
 
-The French House Stack comes with magic link setup via email preconfigured.
+The French House Stack comes with a magic link setup via email preconfigured.
 However, Magic also offers social auth (e.g. for
 [Google](https://magic.link/docs/login-methods/social-logins/integration/social-providers/google)),
 [multi-factor auth](https://magic.link/docs/login-methods/mfa) and
@@ -269,4 +319,6 @@ Here is a list of things this app could use:
 
 ### [Buidl!](https://www.urbandictionary.com/define.php?term=%23BUIDL)
 
-Now go out there make some magic, and ask better questions!
+Now go out there make some magic! 🧙‍♂️ 
+
+[Ask better questions! 📈](https://janhesters.com)
