@@ -64,7 +64,6 @@
     "prettier-plugin-tailwindcss": "0.1.13",
     "prisma": "4.5.0",
     "remix-flat-routes": "0.4.4",
-    "start-server-and-test": "1.14.0",
     "tailwindcss": "3.2.1",
     "ts-node": "10.9.1",
     "tsconfig-paths": "4.1.0",
@@ -80,7 +79,6 @@
   "private": true,
   "scripts": {
     "build": "run-s build:*",
-    "build-and-start": "run-s build start",
     "build:css": "npm run generate:css -- --minify",
     "build:remix": "remix build",
     "deploy": "fly deploy --remote-only",
@@ -99,8 +97,7 @@
     "start": "remix-serve build",
     "test": "vitest --segfault-retry=5",
     "test:coverage": "npm run test -- --coverage",
-    "test:e2e": "start-server-and-test dev http://localhost:3000 \"npx playwright test\"",
-    "test:e2e:ci": "start-server-and-test build-and-start http://localhost:3000 \"npx playwright test\"",
+    "test:e2e": "npx playwright test",
     "type-check": "tsc -b"
   },
   "sideEffects": false,

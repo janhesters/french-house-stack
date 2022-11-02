@@ -16,14 +16,12 @@ test.describe('home page', () => {
     expect(page.url()).toEqual(expectedUrl.href);
   });
 
-  // test('has the correct title and renders the user email when they are logged in and lets the user log out', async ({
-  test("given the user is logged in: has the correct title, renders the user's email and lets the user log out", async ({
+  test('given the user is logged in: lets the user log out', async ({
     page,
     baseURL,
+    isMobile,
     browserName,
   }) => {
-    // TODO: Refactor out the logout test, so that only logout things are NOT
-    // asserted for Webkit.
     // See: https://github.com/microsoft/playwright/issues/18318
     // eslint-disable-next-line playwright/no-skipped-test
     test.skip(
@@ -31,8 +29,6 @@ test.describe('home page', () => {
       'webkit does not support redirects in route.fulfill',
     );
 
-    // We stub the logout message to prevent Magic from logging out the test
-    // user.
     // TODO: Refactor when Magic supports server side test mode.
     await page.route('/logout', async route => {
       await page.context().clearCookies();
@@ -42,6 +38,35 @@ test.describe('home page', () => {
       });
     });
 
+    const { id } = await loginAndSaveUserProfileToDatabase({ page });
+    await page.goto('./home');
+
+    // eslint-disable-next-line playwright/no-conditional-in-test
+    await (isMobile
+      ? page.getByRole('button', { name: /open main menu/i }).click()
+      : page.getByRole('button', { name: /open user menu/i }).click());
+
+    // Logging the user out should redirect you to the landing page.
+    await page.waitForLoadState('networkidle');
+
+    // eslint-disable-next-line playwright/no-conditional-in-test
+    await (isMobile
+      ? page.getByRole('button', { name: /log out/i }).click()
+      : page.getByRole('menuitem', { name: /log out/i }).click());
+    expect(page.url()).toEqual(baseURL + '/');
+
+    // Verify that the user is really logged out by trying to visit the home
+    // page and getting redirected to login.
+    await page.goto('./home');
+    expect(page.url()).toContain('/login');
+
+    await page.close();
+    await deleteUserProfileFromDatabaseById(id);
+  });
+
+  test("given the user is logged in: has the correct title and renders the user's email", async ({
+    page,
+  }) => {
     const { id, email } = await loginAndSaveUserProfileToDatabase({ page });
     await page.goto('./home');
 
@@ -50,16 +75,6 @@ test.describe('home page', () => {
 
     // It retrieves the users data.
     await page.getByText(email).isVisible();
-
-    // Logging the user out should redirect you to the landing page.
-    await page.getByRole('button', { name: /open user menu/i }).click();
-    await page.getByRole('menuitem', { name: /log out/i }).click();
-    expect(page.url()).toEqual(baseURL + '/');
-
-    // Verify that the user is really logged out by trying to visit the home
-    // page and getting redirected to login.
-    await page.goto('./home');
-    expect(page.url()).toContain('/login');
 
     await page.close();
     await deleteUserProfileFromDatabaseById(id);

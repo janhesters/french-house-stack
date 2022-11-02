@@ -194,14 +194,14 @@ export default function HomePageComponent({
                       {item.name}
                     </Disclosure.Button>
                   ))}
-                  <Disclosure.Button
-                    as="form"
-                    action="/logout"
-                    method="post"
-                    className="block rounded-md px-3 py-2 text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
-                  >
-                    <button type="submit">{t('logout')}</button>
-                  </Disclosure.Button>
+                  <form action="/logout" className="w-full" method="post">
+                    <button
+                      className="block w-full rounded-md px-3 py-2 text-left text-base font-medium text-gray-400 hover:bg-gray-700 hover:text-white"
+                      type="submit"
+                    >
+                      {t('logout')}
+                    </button>
+                  </form>
                 </div>
               </div>
             </Disclosure.Panel>
