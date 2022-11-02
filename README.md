@@ -131,6 +131,12 @@ $ npm run gen
 ✔  ++ /app/features/user-profile/user-name-component.test.tsx
 ```
 
+Out of the box, there are three options:
+
+- React component with unit test
+- Database model utils
+- E2E tests for a route
+
 ### i18n
 
 The French House Stack comes with localization support through

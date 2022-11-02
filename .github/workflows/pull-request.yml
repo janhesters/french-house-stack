@@ -97,7 +97,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: 🎭 Playwright Run
-        run: npm run test:e2e:ci
+        run: npm run test:e2e
         env:
           MAGIC_PUBLISHABLE_KEY: ${{ secrets.MAGIC_PUBLISHABLE_KEY }}
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
