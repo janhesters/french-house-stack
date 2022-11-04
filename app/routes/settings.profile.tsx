@@ -24,7 +24,6 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   return json({
     title: await getPageTitle(request, 'user-profile:profile'),
-    avatar: user.avatar,
     email: user.email,
     name: user.name,
     success,

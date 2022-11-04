@@ -6,7 +6,6 @@ import { z } from 'zod';
 import Form from '~/components/form-component';
 
 export type UserProfileComponentProps = {
-  avatar: string;
   email: string;
   name: string;
   success: boolean;
@@ -17,7 +16,6 @@ export const schema = z.object({
 });
 
 export default function UserProfileComponent({
-  avatar,
   email,
   name,
   success,
@@ -38,7 +36,11 @@ export default function UserProfileComponent({
               </div>
 
               <div className="ml-3">
-                <p className="text-sm font-medium text-green-800">
+                <p
+                  aria-label={'user-profile:success'}
+                  className="text-sm font-medium text-green-800"
+                  role="alert"
+                >
                   {t('user-profile:successful-save')}
                 </p>
               </div>

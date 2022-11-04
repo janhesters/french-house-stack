@@ -1,12 +1,18 @@
 import { describe, expect, it } from 'vitest';
 
-import { render, screen } from '~/test/test-utils';
+import { createRemixStub, render, screen } from '~/test/test-utils';
 
 import NotFoundComponent from './not-found-component';
 
 describe('NotFound component', () => {
   it('given a link: renders error messages and the correct link', async () => {
-    render(<NotFoundComponent />);
+    const RemixStub = createRemixStub([
+      {
+        path: '/some-non-existent-page',
+        element: <NotFoundComponent />,
+      },
+    ]);
+    render(<RemixStub />);
 
     expect(
       screen.getByRole('heading', { level: 1, name: /not found/i }),
