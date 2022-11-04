@@ -1,8 +1,14 @@
 import { ExclamationCircleIcon } from '@heroicons/react/24/solid';
+import {
+  Form as FrameworkForm,
+  useActionData,
+  useSubmit,
+  useTransition as useNavigation,
+} from '@remix-run/react';
 import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FormProps } from 'remix-forms';
-import { Form as RemixForm } from 'remix-forms';
+import { createForm } from 'remix-forms';
 import type { SomeZodObject } from 'zod';
 
 /**
@@ -148,6 +154,13 @@ const TextArea = forwardRef<
       {...props}
     />
   );
+});
+
+const RemixForm = createForm({
+  component: FrameworkForm,
+  useNavigation,
+  useSubmit,
+  useActionData,
 });
 
 const Form = <Schema extends SomeZodObject>(props: FormProps<Schema>) => (
