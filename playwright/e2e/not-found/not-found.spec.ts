@@ -14,13 +14,15 @@ test.describe('not found page', () => {
 
     // It has the correct title and header.
     expect(await page.title()).toEqual('404 Not Found | French House Stack');
-    await page
-      .getByRole('heading', { name: /page not found/i, level: 1 })
-      .isVisible();
+    await expect(
+      page.getByRole('heading', { name: /page not found/i, level: 1 }),
+    ).toBeVisible();
 
     // It renders a link to contact support and a button to navigate to the
     // landing page.
-    await page.getByRole('link', { name: /contact support/i }).isVisible();
+    await expect(
+      page.getByRole('link', { name: /contact support/i }),
+    ).toBeVisible();
     await page.getByRole('link', { name: /home/i }).click();
     expect(page.url()).toEqual(baseURL + '/');
   });
@@ -35,7 +37,9 @@ test.describe('not found page', () => {
     // Clicking the home button navigates the user to the home page.
     await page.getByRole('link', { name: /home/i }).click();
     await page.waitForNavigation();
-    await page.getByRole('heading', { name: /home/i, level: 1 }).isVisible();
+    await expect(
+      page.getByRole('heading', { name: /home/i, level: 1 }),
+    ).toBeVisible();
     expect(page.url()).toEqual(baseURL + '/home');
 
     await page.close();

@@ -25,14 +25,18 @@ test.describe('user profile page', () => {
 
     // The page has the correct title, headings and description.
     expect(await page.title()).toEqual('Profile | French House Stack');
-    await page
-      .getByRole('heading', { name: /settings/i, level: 1 })
-      .isVisible();
-    await page.getByRole('heading', { name: /profile/i, level: 2 }).isVisible();
-    await page.getByText(/information will be displayed publicly/i).isVisible();
+    await expect(
+      page.getByRole('heading', { name: /settings/i, level: 1 }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /profile/i, level: 2 }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/information will be displayed publicly/i),
+    ).toBeVisible();
 
     // It renders the user's email address.
-    await page.getByText(user.email).isVisible();
+    await expect(page.getByText(user.email)).toBeVisible();
 
     // It renders the user's name.
     const nameInput = page.getByLabel(/name/i);
@@ -42,16 +46,16 @@ test.describe('user profile page', () => {
     await nameInput.fill('');
     const saveButton = page.getByRole('button', { name: /save/i });
     await saveButton.click();
-    await page.getByRole('alert', { name: /name is required/i }).isVisible();
+    await expect(page.getByText(/name is required/i)).toBeVisible();
 
     await nameInput.fill('ab');
     await saveButton.click();
-    await page
-      .getByRole('alert', { name: /name must be at least 3 characters/i })
-      .isVisible();
+    await expect(
+      page.getByText(/must be at least 3 characters/i),
+    ).toBeVisible();
 
     // It doesn't show a success message when the form is submitted with errors.
-    await page.getByRole('alert', { name: /saved/i }).isHidden();
+    await page.getByRole('alert', { name: /success/i }).isHidden();
 
     // It lets the user change their name.
     const newName = faker.name.fullName();
@@ -59,9 +63,9 @@ test.describe('user profile page', () => {
     await saveButton.click();
 
     // It shows a success notification that the user can dismiss.
-    await page.getByRole('alert', { name: /saved/i }).isVisible();
+    await expect(page.getByRole('alert', { name: /success/i })).toBeVisible();
     await page.getByRole('link', { name: /dismiss/i }).click();
-    await page.getByRole('alert', { name: /saved/i }).isHidden();
+    await page.getByRole('alert', { name: /success/i }).isHidden();
 
     // Verify that saving the value worked.
     await page.reload();

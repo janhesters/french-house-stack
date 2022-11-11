@@ -122,15 +122,15 @@ test.describe('login page', () => {
 
     // Enter a malformed email and submit the form.
     await page.getByLabel(/email/i).fill('not-an-email@foo');
-    await page
-      .getByText("A valid email consists of characters, '@' and '.'.")
-      .isVisible();
+    await page.keyboard.press('Enter');
     await page.getByRole('button', { name: /sign in/i }).isDisabled();
+    await expect(
+      page.getByText(
+        new RegExp("A valid email consists of characters, '@' and '.'.", 'i'),
+      ),
+    ).toBeVisible();
 
-    // Enter no email at all.
-    await page.getByLabel(/email/i).fill('');
-    await page.getByText(/please enter a valid email/i).isVisible();
-    await page.getByRole('button', { name: /sign in/i }).isDisabled();
+    // TODO: figure out how to test that an email is required.
 
     // Enter an invalid email and submit the form.
     await page.getByLabel(/email/i).fill(invalidMagicEmail);
@@ -138,16 +138,19 @@ test.describe('login page', () => {
     await page.waitForLoadState('networkidle');
 
     // There should be an appropriate error message.
-    await page.getByText(/login failed. please try again/i).isVisible();
+    await expect(
+      page.getByText(/login failed. please try again/i),
+    ).toBeVisible();
 
     // The error should NOT crash the app and the user should be able to log in
     // again with a valid email.
     await page.getByLabel(/email/i).fill(validMagicEmail);
-    await page.getByRole('button', { name: /sign in/i }).isEnabled();
     await page.getByRole('button', { name: /sign in/i }).click();
     await page.waitForURL(baseURL + '/home');
     await page.waitForLoadState('networkidle');
-    await page.getByRole('heading', { level: 1, name: /home/i }).isVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: /home/i }),
+    ).toBeVisible();
     expect(page.url()).toEqual(baseURL + '/home');
 
     await page.context().close();

@@ -74,7 +74,7 @@ test.describe('home page', () => {
     expect(await page.title()).toEqual('Home | French House Stack');
 
     // It retrieves the users data.
-    await page.getByText(email).isVisible();
+    await expect(page.getByText(email)).toBeVisible();
 
     await page.close();
     await deleteUserProfileFromDatabaseById(id);

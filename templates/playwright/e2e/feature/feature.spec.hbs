@@ -19,7 +19,7 @@ test.describe('{{feature}} page', () => {
   test('page has the correct title', async ({ page }) => {
     await page.goto('.{{name}}');
     expect(await page.title()).toEqual('{{titleCase feature}}');
-    await page.getByRole('heading', { level: 1, name: '{{titleCase feature}}' }).isVisible();
+    await expect(page.getByRole('heading', { level: 1, name: '{{titleCase feature}}' })).toBeVisible();
   });
 
   test('page should not have any automatically detectable accessibility issues', async ({

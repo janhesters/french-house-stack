@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 /* eslint-disable unicorn/no-null */
 import { describe } from 'vitest';
 
