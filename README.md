@@ -2,7 +2,8 @@
 
 ![The Remix French House Stack](./public/french-house-stack.png)
 
-The Remix Stack for Web2, Web3 and [Web5](https://developer.tbd.website/blog/what-is-web5/) 💃🕺
+The Remix Stack for Web2, Web3 and
+[Web5](https://developer.tbd.website/blog/what-is-web5/) 💃🕺
 
 Learn more about [Remix Stacks](https://remix.run/stacks).
 
@@ -325,6 +326,6 @@ Here is a list of things this app could use:
 
 ### [Buidl!](https://www.urbandictionary.com/define.php?term=%23BUIDL)
 
-Now go out there make some magic! 🧙‍♂️ 
+Now go out there make some magic! 🧙‍♂️
 
 [Ask better questions! 📈](https://janhesters.com)

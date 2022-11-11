@@ -3,7 +3,7 @@
   "dismiss-alert": "Dismiss notification",
   "email": "Email",
   "name": "Name",
-  "name-required-and-constraints": "A name is required and needs to be at least 3 characters long.",
+  "name-required-and-constraints": "A name is required and must be at least 3 characters long.",
   "profile": "Profile",
   "public-information": "This information will be displayed publicly so be careful what you share.",
   "save": "Save",

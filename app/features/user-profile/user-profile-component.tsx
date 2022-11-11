@@ -37,7 +37,7 @@ export default function UserProfileComponent({
 
               <div className="ml-3">
                 <p
-                  aria-label={'user-profile:success'}
+                  aria-label={t('user-profile:success')}
                   className="text-sm font-medium text-green-800"
                   role="alert"
                 >

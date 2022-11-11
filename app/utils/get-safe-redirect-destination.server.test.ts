@@ -1,3 +1,6 @@
+/**
+ * @vitest-environment jsdom
+ */
 import { describe } from 'vitest';
 
 import { assert } from '~/test/assert';
