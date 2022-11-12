@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 
-import type { EntryContext, Headers } from '@remix-run/node';
+import type { EntryContext } from '@remix-run/node';
 import { Response } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
 import { createInstance } from 'i18next';
@@ -56,8 +56,8 @@ export default async function handleRequest(
 
           resolve(
             new Response(body, {
-              status: didError ? 500 : responseStatusCode,
               headers: responseHeaders,
+              status: didError ? 500 : responseStatusCode,
             }),
           );
 
@@ -68,6 +68,7 @@ export default async function handleRequest(
         },
         onError(error) {
           didError = true;
+
           console.error(error);
         },
       },
