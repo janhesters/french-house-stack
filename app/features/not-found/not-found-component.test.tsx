@@ -6,13 +6,12 @@ import NotFoundComponent from './not-found-component';
 
 describe('NotFound component', () => {
   it('given a link: renders error messages and the correct link', async () => {
+    const path = '/some-non-existent-page';
     const RemixStub = createRemixStub([
-      {
-        path: '/some-non-existent-page',
-        element: <NotFoundComponent />,
-      },
+      { path, element: <NotFoundComponent /> },
     ]);
-    render(<RemixStub />);
+
+    render(<RemixStub initialEntries={[path]} />);
 
     expect(
       screen.getByRole('heading', { level: 1, name: /not found/i }),

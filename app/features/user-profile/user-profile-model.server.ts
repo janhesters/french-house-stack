@@ -2,11 +2,6 @@ import type { UserProfile } from '@prisma/client';
 
 import { prisma } from '~/database.server';
 
-export type PartialUserProfileParameters = Pick<
-  Parameters<typeof prisma.userProfile.create>[0]['data'],
-  'avatar' | 'email' | 'id' | 'name'
->;
-
 // CREATE
 
 /**
@@ -16,7 +11,10 @@ export type PartialUserProfileParameters = Pick<
  * @returns The newly created user profile.
  */
 export async function saveUserProfileToDatabase(
-  userProfile: PartialUserProfileParameters,
+  userProfile: Pick<
+    Parameters<typeof prisma.userProfile.create>[0]['data'],
+    'avatar' | 'email' | 'id' | 'name'
+  >,
 ) {
   return prisma.userProfile.create({ data: userProfile });
 }
@@ -54,7 +52,12 @@ export async function updateUserProfileInDatabaseById({
   /**
    * The values of the user profile you want to change.
    */
-  userProfile: Partial<Omit<PartialUserProfileParameters, 'id'>>;
+  userProfile: Partial<
+    Pick<
+      Parameters<typeof prisma.userProfile.update>[0]['data'],
+      'avatar' | 'email' | 'name'
+    >
+  >;
 }) {
   return prisma.userProfile.update({ where: { id }, data: userProfile });
 }

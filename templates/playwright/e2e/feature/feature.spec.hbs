@@ -6,7 +6,7 @@ import { deleteUserProfileFromDatabaseById } from '~/features/user-profile/user-
 import { loginAndSaveUserProfileToDatabase } from '../../utils';
 
 test.describe('{{feature}} page', () => {
-  test("page redirects you to the login page when you're logged out and remembers the page as the redirectTo query parameter", async ({
+  test("given the user is logged out: page redirects you to the login page and remembers the page as the redirectTo query parameter", async ({
     page,
     baseURL,
   }) => {

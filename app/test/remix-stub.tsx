@@ -1,7 +1,6 @@
-/* eslint-disable unicorn/no-null */
 import type { ShouldReloadFunction } from '@remix-run/react';
-// FIX: This nested import breaks vite's dev bundling and needs a workaround in /.storybook/main.ts
-//      Hopefully an equivalent will be properly exported in Remix v2.
+// TODO - FIX: This nested import breaks vite's dev bundling and needs a workaround in /.storybook/main.ts
+// Hopefully an equivalent will be properly exported in Remix v2.
 import { RemixEntry } from '@remix-run/react/dist/components';
 import type { AssetsManifest, EntryContext } from '@remix-run/react/dist/entry';
 import type { RouteData } from '@remix-run/react/dist/routeData';
@@ -27,9 +26,10 @@ import type {
   LinksFunction,
   MetaFunction,
 } from '@remix-run/server-runtime';
+import { json } from '@remix-run/server-runtime';
 import type { MemoryHistory, Update } from 'history';
 import { createMemoryHistory } from 'history';
-import { useLayoutEffect, useReducer, useRef } from 'react';
+import * as React from 'react';
 
 /**
  * Base RouteObject with common props shared by all types of mock routes
@@ -113,21 +113,24 @@ export function createRemixStub(routes: MockRouteObject[]) {
     initialActionData,
     initialIndex,
   }: RemixStubOptions) {
-    const historyRef = useRef<MemoryHistory>();
-    if (historyRef.current == undefined) {
+    const historyRef = React.useRef<MemoryHistory>();
+    if (historyRef.current == null) {
       historyRef.current = createMemoryHistory({
         initialEntries: initialEntries,
         initialIndex: initialIndex,
       });
     }
 
-    let history = historyRef.current;
-    let [state, dispatch] = useReducer((_: Update, update: Update) => update, {
-      action: history.action,
-      location: history.location,
-    });
+    const history = historyRef.current;
+    const [state, dispatch] = React.useReducer(
+      (_: Update, update: Update) => update,
+      {
+        action: history.action,
+        location: history.location,
+      },
+    );
 
-    useLayoutEffect(() => history.listen(dispatch), [history]);
+    React.useLayoutEffect(() => history.listen(dispatch), [history]);
 
     // Convert path based ids in user supplied initial loader/action data to data route ids
     const loaderData = convertRouteData(dataRoutes, initialLoaderData);
@@ -142,7 +145,7 @@ export function createRemixStub(routes: MockRouteObject[]) {
     );
 
     // Patch fetch so that mock routes can handle action/loader requests
-    monkeyPatchFetch(queryRoute);
+    monkeyPatchFetch(queryRoute, dataRoutes);
 
     return (
       <RemixEntry
@@ -175,6 +178,7 @@ function createRemixContext(
       error: undefined,
       catch: undefined,
     },
+    future: { v2_meta: false },
     matches: convertToEntryRouteMatch(matches),
     routeData: initialLoaderData || [],
     manifest: manifest,
@@ -227,42 +231,44 @@ function createRouteModules(
 }
 
 const originalFetch =
-  typeof global !== 'undefined' ? global.fetch : window.fetch;
-function monkeyPatchFetch(queryRoute: StaticHandler['queryRoute']) {
+  typeof global === 'undefined' ? window.fetch : global.fetch;
+function monkeyPatchFetch(
+  queryRoute: StaticHandler['queryRoute'],
+  dataRoutes: StaticHandler['dataRoutes'],
+) {
   const fetchPatch = async (
     input: RequestInfo | URL,
     init: RequestInit = {},
   ): Promise<Response> => {
     const request = new Request(input, init);
-    try {
-      // Send the request to mock routes via @remix-run/router rather than the normal
-      // @remix-run/server-runtime so that stubs can also be used in browser environments.
-      const response = await queryRoute(request);
+    const url = new URL(request.url);
+
+    // if we have matches, send the request to mock routes via @remix-run/router rather than the normal
+    // @remix-run/server-runtime so that stubs can also be used in browser environments.
+    const matches = matchRoutes(dataRoutes, url);
+    if (matches) {
+      let response = await queryRoute(request);
 
       if (response instanceof Response) {
         return response;
       }
 
-      return new Response(response, {
-        status: 200,
-        headers: { contentType: 'application/json' },
-      });
-    } catch (error) {
-      if (
-        error instanceof Response && // 404 or 405 responses passthrough to the original fetch as mock routes couldn't handle the request.
-        (error.status === 404 || error.status === 405)
-      ) {
-        return originalFetch(input, init);
+      // Mock action returned nothing so return an empty json response
+      if (response === undefined) {
+        response = '{}';
       }
 
-      throw error;
+      return json(response);
     }
+
+    // if no matches, passthrough to the original fetch as mock routes couldn't handle the request.
+    return originalFetch(request, init);
   };
 
-  if (typeof global !== 'undefined') {
-    global.fetch = fetchPatch;
-  } else {
+  if (typeof global === 'undefined') {
     window.fetch = fetchPatch;
+  } else {
+    global.fetch = fetchPatch;
   }
 }
 
@@ -300,14 +306,24 @@ function convertToEntryRouteMatch(
 // e.g. { "/post/:postId": post } to { "0": post }
 function convertRouteData(
   routes: MockRouteObject[],
+  initialRouteData?: RouteData,
   routeData?: RouteData,
 ): RouteData | undefined {
-  if (!routeData) return undefined;
-  return Object.keys(routeData).reduce((data, path) => {
-    const routeId = routes.find(route => route.path === path)?.id;
-    if (routeId) {
-      data[routeId] = routeData[path];
+  if (!initialRouteData) return undefined;
+  return routes.reduce<RouteData>((data, route) => {
+    if (route.children) {
+      convertRouteData(route.children, initialRouteData, data);
     }
+    // Check if any of the initial route data entries match this route
+    Object.keys(initialRouteData).forEach(routePath => {
+      if (
+        routePath === route.path ||
+        // Let '/' refer to the root routes data
+        (routePath === '/' && route.id === '0' && !route.path)
+      ) {
+        data[route.id!] = initialRouteData[routePath];
+      }
+    });
     return data;
-  }, {} as RouteData);
+  }, routeData || {});
 }

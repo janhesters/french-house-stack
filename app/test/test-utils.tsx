@@ -21,5 +21,5 @@ export * from '@testing-library/react';
 
 // override render method
 export { customRender as render };
-export { default as generateRandomDid } from './generate-random-did';
+export { default as generateRandomDid } from './generate-random-did.server';
 export { createRemixStub } from './remix-stub';

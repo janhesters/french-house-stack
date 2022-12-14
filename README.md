@@ -75,7 +75,7 @@ to check for updates and install the latest versions.
   - `MAGIC_PUBLISHABLE_KEY` and `MAGIC_SECRET_KEY` - You'll need to grab a
     public key and a secret key for your project from your Magic dashboard.
   - `SESSION_SECRET` - The session secret can be any string that is at least 32
-    characters long.
+    characters long. It is used for encrypting session cookies.
   - `DATABASE_URL` - The url under which the SQLite database will operate.
   - `SEED_USER_ID` - The user id of the user that will be seeded in the
     database. You can grab it by logging in with Magic and looking at the
@@ -167,7 +167,7 @@ changes.
 for selecting elements on the page semantically.
 
 To run these tests in development, run `npm run test:e2e` which will start the
-dev server for the app as well as the Playwright client.
+dev server for the app as well as the Playwright client. (**Note:** make sure you've run `npm run dev` at least one time before you run the E2E tests.)
 
 #### VSCode Extension
 

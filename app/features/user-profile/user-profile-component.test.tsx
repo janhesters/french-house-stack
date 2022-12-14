@@ -24,14 +24,12 @@ describe('UserProfile component', () => {
   it("given a user's avatar, email and name and no success: renders the correct headings and the user's avatar, email and name and hide the success banner", async () => {
     const user = userEvent.setup();
     const props = createProps();
+    const path = '/settings/profile';
     const RemixStub = createRemixStub([
-      {
-        path: '/settings/profile',
-        element: <UserProfile {...props} />,
-      },
+      { path, element: <UserProfile {...props} /> },
     ]);
 
-    render(<RemixStub />);
+    render(<RemixStub initialEntries={[path]} />);
 
     // It renders the correct headings and a message.
     expect(
@@ -72,14 +70,12 @@ describe('UserProfile component', () => {
 
   it('given a success: renders the success banner', () => {
     const props = createProps({ success: true });
+    const path = '/settings/profile';
     const RemixStub = createRemixStub([
-      {
-        path: '/settings/profile',
-        element: <UserProfile {...props} />,
-      },
+      { path, element: <UserProfile {...props} /> },
     ]);
 
-    render(<RemixStub />);
+    render(<RemixStub initialEntries={[path]} />);
 
     // It renders the success banner.
     expect(screen.getByRole('alert', { name: /success/i })).toBeInTheDocument();

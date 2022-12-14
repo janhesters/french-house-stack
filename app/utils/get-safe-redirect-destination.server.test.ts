@@ -20,7 +20,6 @@ describe('isValidRedirectDestination()', () => {
   assert({
     given: 'no redirect destination and no default redirect destination',
     should: 'return false',
-    // eslint-disable-next-line unicorn/no-null
     actual: isValidRedirectDestination(null),
     expected: false,
   });

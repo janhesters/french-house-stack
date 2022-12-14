@@ -4,8 +4,9 @@ import { asyncPipe } from '~/utils/async-pipe';
 
 import { retrieveUserProfileFromDatabaseById } from './user-profile-model.server';
 
-export const throwIfUserProfileMissing =
-  (userId: string) => (userProfile: UserProfile | null) => {
+export const throwIfUserProfileIsMissing =
+  (userId: string) =>
+  <T extends UserProfile>(userProfile: T | null) => {
     if (!userProfile) {
       // TODO: report error
       throw new Error('No user profile found with id: ' + userId);
@@ -26,5 +27,5 @@ export const throwIfUserProfileMissing =
 export const requireUserProfileExists = (userId: string) =>
   asyncPipe(
     retrieveUserProfileFromDatabaseById,
-    throwIfUserProfileMissing(userId),
+    throwIfUserProfileIsMissing(userId),
   )(userId);
