@@ -45,9 +45,6 @@ test.describe('user profile page', () => {
     // It shows the proper error messages for the name input.
     await nameInput.fill('');
     const saveButton = page.getByRole('button', { name: /save/i });
-    await saveButton.click();
-    await expect(page.getByText(/name is required/i)).toBeVisible();
-
     await nameInput.fill('ab');
     await saveButton.click();
     await expect(
@@ -55,7 +52,7 @@ test.describe('user profile page', () => {
     ).toBeVisible();
 
     // It doesn't show a success message when the form is submitted with errors.
-    await page.getByRole('alert', { name: /success/i }).isHidden();
+    await expect(page.getByRole('alert', { name: /success/i })).toBeHidden();
 
     // It lets the user change their name.
     const newName = faker.name.fullName();
@@ -65,7 +62,7 @@ test.describe('user profile page', () => {
     // It shows a success notification that the user can dismiss.
     await expect(page.getByRole('alert', { name: /success/i })).toBeVisible();
     await page.getByRole('link', { name: /dismiss/i }).click();
-    await page.getByRole('alert', { name: /success/i }).isHidden();
+    await expect(page.getByRole('alert', { name: /success/i })).toBeHidden();
 
     // Verify that saving the value worked.
     await page.reload();

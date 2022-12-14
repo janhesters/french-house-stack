@@ -1,21 +1,12 @@
 import { faker } from '@faker-js/faker';
-import type { FormProps } from '@remix-run/react';
 import userEvent from '@testing-library/user-event';
-import type { RefAttributes } from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
-import { render, screen } from '~/test/test-utils';
+import { createRemixStub, render, screen } from '~/test/test-utils';
 import type { Factory } from '~/utils/types';
 
 import type { UserAuthenticationComponentProps } from './user-authentication-component';
 import UserAuthentication from './user-authentication-component';
-
-vi.mock('@remix-run/react', () => ({
-  Form: ({
-    replace: _,
-    ...props
-  }: FormProps & RefAttributes<HTMLFormElement>) => <form {...props} />,
-}));
 
 const createProps: Factory<UserAuthenticationComponentProps> = ({
   email,
@@ -28,9 +19,13 @@ const createProps: Factory<UserAuthenticationComponentProps> = ({
 describe('UserAuthentication component', () => {
   it('given an idle state and nothing else: renders the user authentication form', async () => {
     const user = userEvent.setup();
+    const path = '/login';
     const props = createProps();
+    const RemixStub = createRemixStub([
+      { path, element: <UserAuthentication {...props} /> },
+    ]);
 
-    render(<UserAuthentication {...props} />);
+    render(<RemixStub initialEntries={[path]} />);
 
     // It renders the correct headings and a sub heading.
     expect(
@@ -63,20 +58,28 @@ describe('UserAuthentication component', () => {
 
   it('given an email: sets the email as the default value for the email input', () => {
     const email = faker.internet.email();
+    const path = '/login';
     const props = createProps({ email });
+    const RemixStub = createRemixStub([
+      { path, element: <UserAuthentication {...props} /> },
+    ]);
 
-    render(<UserAuthentication {...props} />);
+    render(<RemixStub initialEntries={[path]} />);
 
     // It passes the email to the email address input.
     expect(screen.getByLabelText(/email address/i)).toHaveValue(email);
   });
 
   it('given an email and an email error: displays the error for the email field', () => {
+    const path = '/login';
     const email = faker.internet.email();
     const emailError = faker.lorem.sentence();
     const props = createProps({ email, emailError });
+    const RemixStub = createRemixStub([
+      { path, element: <UserAuthentication {...props} /> },
+    ]);
 
-    render(<UserAuthentication {...props} />);
+    render(<RemixStub initialEntries={[path]} />);
 
     // It displays the email error.
     expect(
@@ -89,20 +92,27 @@ describe('UserAuthentication component', () => {
   });
 
   it('given a form error: displays the error for the form', () => {
+    const path = '/login';
     const formError = faker.lorem.sentence();
     const props = createProps({ formError });
+    const RemixStub = createRemixStub([
+      { path, element: <UserAuthentication {...props} /> },
+    ]);
 
-    render(<UserAuthentication {...props} />);
+    render(<RemixStub initialEntries={[path]} />);
 
     // It displays the form error.
     expect(screen.getByRole('alert')).toHaveTextContent(formError);
   });
 
   it('given a state of submitting: disables the email input and submit button', () => {
+    const path = '/login';
     const props = createProps({ state: 'submitting' });
+    const RemixStub = createRemixStub([
+      { path, element: <UserAuthentication {...props} /> },
+    ]);
 
-    render(<UserAuthentication {...props} />);
-
+    render(<RemixStub initialEntries={[path]} />);
     // It disables the email input and submit button.
     expect(screen.getByLabelText(/email address/i)).toBeDisabled();
     expect(

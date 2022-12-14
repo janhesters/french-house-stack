@@ -56,7 +56,6 @@ const ErrorMessage = ({
   </div>
 );
 
-export const intentName = 'intent';
 export const loginIntent = 'login';
 
 export type UserAuthenticationComponentProps = {
@@ -74,12 +73,12 @@ export default function UserAuthenticationComponent({
   inputRef,
   state,
 }: UserAuthenticationComponentProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('user-authentication');
 
   return (
     <>
       <header className="sr-only">
-        <h1>{t('user-authentication:sign-in-or-sign-up')}</h1>
+        <h1>{t('sign-in-or-sign-up')}</h1>
       </header>
 
       <main className="flex min-h-full items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -91,10 +90,10 @@ export default function UserAuthenticationComponent({
               alt={t('app-name')}
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-              {t('user-authentication:sign-in-to-your-account')}
+              {t('sign-in-to-your-account')}
             </h2>
             <p className="mx-auto mt-2 max-w-xs text-center text-sm text-gray-600 dark:text-slate-400">
-              {t('user-authentication:or-create-account')}
+              {t('or-create-account')}
             </p>
           </div>
 
@@ -107,7 +106,7 @@ export default function UserAuthenticationComponent({
             <div className="-space-y-px rounded-md shadow-sm">
               <div>
                 <label className="sr-only" htmlFor="email">
-                  {t('user-authentication:email-address')}
+                  {t('email-address')}
                 </label>
 
                 <input
@@ -119,7 +118,7 @@ export default function UserAuthenticationComponent({
                   disabled={state === 'submitting'}
                   id="email"
                   name="email"
-                  placeholder={t('user-authentication:email-placeholder')}
+                  placeholder={t('email-placeholder')}
                   ref={inputRef}
                   required
                   type="email"
@@ -139,7 +138,7 @@ export default function UserAuthenticationComponent({
               <button
                 className="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
                 disabled={state === 'submitting'}
-                name={intentName}
+                name="_intent"
                 type="submit"
                 value={loginIntent}
               >
@@ -156,8 +155,8 @@ export default function UserAuthenticationComponent({
                   )}
                 </span>
                 {state === 'submitting'
-                  ? t('user-authentication:authenticating')
-                  : t('user-authentication:sign-in-sign-up')}
+                  ? t('authenticating')
+                  : t('sign-in-sign-up')}
               </button>
             </div>
           </Form>

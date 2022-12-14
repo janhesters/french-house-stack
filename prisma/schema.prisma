@@ -11,6 +11,8 @@ datasource db {
 }
 
 model UserProfile {
+  /// The Magic issuer of the user who created the account. Its a decentralized
+  /// identifier (DID) that uniquely identifies the user.
   id        String   @id
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -59,11 +59,11 @@ const CheckBoxWrapper = (props: JSX.IntrinsicElements['div']) => (
 );
 
 const Error = ({ children, ...props }: JSX.IntrinsicElements['div']) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('user-profile');
 
   return (
     <p className="mt-2 text-sm text-red-600" {...props}>
-      {typeof children === 'string' ? t(children, children) : children}
+      {Array.isArray(children) ? t(children[0]) : children}
     </p>
   );
 };

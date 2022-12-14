@@ -70,8 +70,18 @@ jobs:
       - name: 📥 Download deps
         uses: bahmutov/npm-install@v1
 
+      - name: 🛠 Setup Database
+        run: npm run prisma:wipe
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: ⚡ Run vitest
         run: npm run test -- --coverage
+        env:
+          MAGIC_PUBLISHABLE_KEY: ${{ secrets.MAGIC_PUBLISHABLE_KEY }}
+          MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
   playwright:
     name: 🎭 Playwright

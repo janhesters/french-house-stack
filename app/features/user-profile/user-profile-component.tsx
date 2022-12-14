@@ -12,7 +12,7 @@ export type UserProfileComponentProps = {
 };
 
 export const schema = z.object({
-  name: z.string().min(3, 'user-profile:name-required-and-constraints'),
+  name: z.string().min(3, 'name-required-and-constraints'),
 });
 
 export default function UserProfileComponent({
@@ -20,7 +20,7 @@ export default function UserProfileComponent({
   name,
   success,
 }: UserProfileComponentProps) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('user-profile');
 
   return (
     <main className="flex-1 xl:overflow-y-auto">
@@ -37,11 +37,11 @@ export default function UserProfileComponent({
 
               <div className="ml-3">
                 <p
-                  aria-label={t('user-profile:success')}
+                  aria-label={t('success')}
                   className="text-sm font-medium text-green-800"
                   role="alert"
                 >
-                  {t('user-profile:successful-save')}
+                  {t('successful-save')}
                 </p>
               </div>
 
@@ -51,9 +51,7 @@ export default function UserProfileComponent({
                     className="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
                     to="/settings/profile"
                   >
-                    <span className="sr-only">
-                      {t('user-profile:dismiss-alert')}
-                    </span>
+                    <span className="sr-only">{t('dismiss-alert')}</span>
                     <XMarkIcon className="h-5 w-5" aria-hidden="true" />
                   </Link>
                 </div>
@@ -62,12 +60,12 @@ export default function UserProfileComponent({
           </div>
         )}
 
-        <h1 className="sr-only">{t('user-profile:settings')}</h1>
+        <h1 className="sr-only">{t('settings')}</h1>
 
         <Form
-          buttonLabel={t('user-profile:save')}
+          buttonLabel={t('save')}
           className="space-y-8 divide-y divide-gray-200 pt-8"
-          pendingButtonLabel={t('user-profile:saving')}
+          pendingButtonLabel={t('saving')}
           schema={schema}
           values={{ name }}
         >
@@ -77,18 +75,18 @@ export default function UserProfileComponent({
                 <div>
                   <div>
                     <h2 className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
-                      {t('user-profile:profile')}
+                      {t('profile')}
                     </h2>
 
                     <p className="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                      {t('user-profile:public-information')}
+                      {t('public-information')}
                     </p>
                   </div>
 
                   <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
                     <p className="flex items-center sm:col-span-6">
                       <span className="block text-sm font-medium text-gray-700 dark:text-gray-400">
-                        {t('user-profile:email')}
+                        {t('email')}
                       </span>
 
                       <span className="text-blue-gray-900 ml-2 block w-full dark:text-white sm:text-sm">
@@ -98,7 +96,7 @@ export default function UserProfileComponent({
 
                     <Field
                       defaultValue={name || ''}
-                      label={t('user-profile:name')}
+                      label={t('name')}
                       name="name"
                     />
                   </div>
@@ -111,7 +109,7 @@ export default function UserProfileComponent({
                     className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     to="/settings/profile"
                   >
-                    {t('user-profile:cancel')}
+                    {t('cancel')}
                   </Link>
 
                   <Button />

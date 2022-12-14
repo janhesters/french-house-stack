@@ -9,9 +9,8 @@ import {
   createUserSession,
   USER_AUTHENTICATION_SESSION_NAME,
 } from '~/features/user-authentication/user-authentication-session.server';
-import type { PartialUserProfileParameters } from '~/features/user-profile/user-profile-model.server';
 import { saveUserProfileToDatabase } from '~/features/user-profile/user-profile-model.server';
-import generateRandomDid from '~/test/generate-random-did';
+import generateRandomDid from '~/test/generate-random-did.server';
 
 installGlobals();
 
@@ -70,7 +69,7 @@ export async function loginAndSaveUserProfileToDatabase({
   id = generateRandomDid(),
   name = faker.name.fullName(),
   page,
-}: Partial<PartialUserProfileParameters> & { page: Page }) {
+}: Partial<Parameters<typeof saveUserProfileToDatabase>[0]> & { page: Page }) {
   await loginByCookie({ id, page });
   return await saveUserProfileToDatabase({ avatar, email, id, name });
 }

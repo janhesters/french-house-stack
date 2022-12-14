@@ -6,5 +6,8 @@ const { flatRoutes } = require('remix-flat-routes');
  */
 module.exports = {
   ignoredRouteFiles: ['**/*'],
-  routes: defineRoutes => flatRoutes('routes', defineRoutes),
+  routes: defineRoutes =>
+    flatRoutes('routes', defineRoutes, {
+      ignoredRouteFiles: ['**/*.test.{ts,tsx}'],
+    }),
 };
