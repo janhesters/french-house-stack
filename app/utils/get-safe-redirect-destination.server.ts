@@ -30,7 +30,7 @@ export const isValidRedirectDestination = (
  * @param defaultRedirect The redirect to use if the redirectTo is unsafe.
  * @returns A url that can be safely redirected to.
  */
-const getSafeRedirectDestination = (
+export const getSafeRedirectDestination = (
   request: Request,
   defaultRedirect = '/',
 ): string =>
@@ -38,5 +38,3 @@ const getSafeRedirectDestination = (
     getRedirectToSearchParameter,
     ifElse(isValidRedirectDestination, identity, always(defaultRedirect)),
   )(request);
-
-export default getSafeRedirectDestination;

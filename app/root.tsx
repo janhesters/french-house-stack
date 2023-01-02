@@ -17,8 +17,8 @@ import { useChangeLanguage } from 'remix-i18next';
 import invariant from 'tiny-invariant';
 
 import type { EnvironmentVariables } from './entry.client';
-import i18next from './features/localization/i18next.server';
-import NotFoundComponent from './features/not-found/not-found-component';
+import { i18next } from './features/localization/i18next.server';
+import { NotFoundComponent } from './features/not-found/not-found-component';
 import styles from './tailwind.css';
 
 export const handle = { i18n: 'common' };

@@ -10,7 +10,7 @@ import { createRemixStub, render, screen } from '~/test/test-utils';
 import type { Factory } from '~/utils/types';
 
 import type { UserProfileComponentProps } from './user-profile-component';
-import UserProfile from './user-profile-component';
+import { UserProfileComponent } from './user-profile-component';
 
 const createProps: Factory<UserProfileComponentProps> = ({
   email = faker.internet.email(),
@@ -26,7 +26,7 @@ describe('UserProfile component', () => {
     const props = createProps();
     const path = '/settings/profile';
     const RemixStub = createRemixStub([
-      { path, element: <UserProfile {...props} /> },
+      { path, element: <UserProfileComponent {...props} /> },
     ]);
 
     render(<RemixStub initialEntries={[path]} />);
@@ -72,7 +72,7 @@ describe('UserProfile component', () => {
     const props = createProps({ success: true });
     const path = '/settings/profile';
     const RemixStub = createRemixStub([
-      { path, element: <UserProfile {...props} /> },
+      { path, element: <UserProfileComponent {...props} /> },
     ]);
 
     render(<RemixStub initialEntries={[path]} />);

@@ -7,7 +7,7 @@ import { hydrateRoot } from 'react-dom/client';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { getInitialNamespaces } from 'remix-i18next';
 
-import i18n from './features/localization/i18n';
+import { i18n } from './features/localization/i18n';
 
 export type EnvironmentVariables = {
   MAGIC_PUBLISHABLE_KEY: string;

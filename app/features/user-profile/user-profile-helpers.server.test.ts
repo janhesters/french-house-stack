@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { assert } from '~/test/assert';
-import generateRandomDid from '~/test/generate-random-did.server';
+import { generateRandomDid } from '~/test/generate-random-did.server';
 
 import { createPopulatedUserProfile } from './user-profile-factories.server';
 import { throwIfUserProfileIsMissing } from './user-profile-helpers.server';

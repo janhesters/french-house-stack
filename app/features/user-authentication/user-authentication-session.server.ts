@@ -2,7 +2,7 @@ import type { Session } from '@remix-run/node';
 import { createCookieSessionStorage, redirect } from '@remix-run/node';
 import invariant from 'tiny-invariant';
 
-import magicAdmin from './magic-admin.server';
+import { magicAdmin } from './magic-admin.server';
 
 invariant(process.env.SESSION_SECRET, 'SESSION_SECRET must be set');
 

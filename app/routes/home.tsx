@@ -3,11 +3,11 @@ import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { pick } from 'ramda';
 
-import HomePageComponent from '~/features/home/home-page-component';
-import i18next from '~/features/localization/i18next.server';
+import { HomePageComponent } from '~/features/home/home-page-component';
+import { i18next } from '~/features/localization/i18next.server';
 import { requireUserIsAuthenticated } from '~/features/user-authentication/user-authentication-session.server';
 import { requireUserProfileExists } from '~/features/user-profile/user-profile-helpers.server';
-import getPageTitle from '~/utils/get-page-title.server';
+import { getPageTitle } from '~/utils/get-page-title.server';
 
 export const handle = { i18n: 'home' };
 

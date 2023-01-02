@@ -1,7 +1,7 @@
 import { Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
-export default function NotFoundComponent() {
+export function NotFoundComponent() {
   const { t } = useTranslation();
 
   return (

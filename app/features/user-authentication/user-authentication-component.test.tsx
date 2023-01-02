@@ -6,7 +6,7 @@ import { createRemixStub, render, screen } from '~/test/test-utils';
 import type { Factory } from '~/utils/types';
 
 import type { UserAuthenticationComponentProps } from './user-authentication-component';
-import UserAuthentication from './user-authentication-component';
+import { UserAuthenticationComponent } from './user-authentication-component';
 
 const createProps: Factory<UserAuthenticationComponentProps> = ({
   email,
@@ -22,7 +22,7 @@ describe('UserAuthentication component', () => {
     const path = '/login';
     const props = createProps();
     const RemixStub = createRemixStub([
-      { path, element: <UserAuthentication {...props} /> },
+      { path, element: <UserAuthenticationComponent {...props} /> },
     ]);
 
     render(<RemixStub initialEntries={[path]} />);
@@ -61,7 +61,7 @@ describe('UserAuthentication component', () => {
     const path = '/login';
     const props = createProps({ email });
     const RemixStub = createRemixStub([
-      { path, element: <UserAuthentication {...props} /> },
+      { path, element: <UserAuthenticationComponent {...props} /> },
     ]);
 
     render(<RemixStub initialEntries={[path]} />);
@@ -76,7 +76,7 @@ describe('UserAuthentication component', () => {
     const emailError = faker.lorem.sentence();
     const props = createProps({ email, emailError });
     const RemixStub = createRemixStub([
-      { path, element: <UserAuthentication {...props} /> },
+      { path, element: <UserAuthenticationComponent {...props} /> },
     ]);
 
     render(<RemixStub initialEntries={[path]} />);
@@ -96,7 +96,7 @@ describe('UserAuthentication component', () => {
     const formError = faker.lorem.sentence();
     const props = createProps({ formError });
     const RemixStub = createRemixStub([
-      { path, element: <UserAuthentication {...props} /> },
+      { path, element: <UserAuthenticationComponent {...props} /> },
     ]);
 
     render(<RemixStub initialEntries={[path]} />);
@@ -109,7 +109,7 @@ describe('UserAuthentication component', () => {
     const path = '/login';
     const props = createProps({ state: 'submitting' });
     const RemixStub = createRemixStub([
-      { path, element: <UserAuthentication {...props} /> },
+      { path, element: <UserAuthenticationComponent {...props} /> },
     ]);
 
     render(<RemixStub initialEntries={[path]} />);

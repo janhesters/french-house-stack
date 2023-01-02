@@ -15,13 +15,6 @@ describe('assert()', () => {
     expected: true,
   });
 
-  assert.skip({
-    given: 'assert is called with .skip',
-    should: 'skip the test',
-    actual: true,
-    expected: false,
-  });
-
   assert.todo({
     given: 'assert is called with .todo',
     should: 'skip the test and mark it as todo',

@@ -11,16 +11,24 @@ export function badRequest(): TypedResponse<{ message: string }>;
 /**
  * Returns a 400 Bad Request error.
  *
- * @param errors - A string or an object containing the errors from the Zod
- * schema.
+ * @param errors - An object containing the errors from the Zod schema.
  * @returns A response with the 400 status code, a message and the errors.
  */
 export function badRequest<T>(
-  errors?: ZodFormattedError<T> | string,
+  errors?: ZodFormattedError<T>,
 ): TypedResponse<{ message: string; errors: ZodFormattedError<T> }>;
+/**
+ * Returns a 400 Bad Request error.
+ *
+ * @param errors - A string containing the errors.
+ * @returns A response with the 400 status code, a message and the errors.
+ */
+export function badRequest(
+  errors?: string,
+): TypedResponse<{ message: string; errors: string }>;
 export function badRequest<T>(
   errors?: ZodFormattedError<T> | string,
-): TypedResponse<{ message: string; errors?: ZodFormattedError<T> }> {
+): TypedResponse<{ message: string; errors?: ZodFormattedError<T> | string }> {
   return json(
     { message: 'Bad Request', ...(errors && { errors }) },
     { status: 400 },
@@ -46,10 +54,12 @@ export function notFound(): TypedResponse<{ message: string }>;
  * Returns a 404 Not Found error.
  *
  * @param errors - A string for a custom message.
- * @returns A response with the 404 status code and a message.
+ * @returns A response with the 404 status code, a message and the errors.
  */
-export function notFound(errors: string): TypedResponse<{ message: string }>;
-export function notFound(errors?: string): TypedResponse<{ message: string }> {
+export function notFound(
+  errors: string,
+): TypedResponse<{ message: string; errors: string }>;
+export function notFound(errors?: string) {
   return json(
     { message: 'Not Found', ...(errors && { errors }) },
     { status: 404 },

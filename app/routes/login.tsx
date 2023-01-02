@@ -7,10 +7,11 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import i18next from '~/features/localization/i18next.server';
-import magicAdmin from '~/features/user-authentication/magic-admin.server';
-import UserAuthenticationComponent, {
+import { i18next } from '~/features/localization/i18next.server';
+import { magicAdmin } from '~/features/user-authentication/magic-admin.server';
+import {
   loginIntent,
+  UserAuthenticationComponent,
 } from '~/features/user-authentication/user-authentication-component';
 import {
   createUserSession,
@@ -20,10 +21,10 @@ import {
   retrieveUserProfileFromDatabaseById,
   saveUserProfileToDatabase,
 } from '~/features/user-profile/user-profile-model.server';
-import useEffectOnce from '~/hooks/use-effect-once';
-import usePromise from '~/hooks/use-promise';
-import getPageTitle from '~/utils/get-page-title.server';
-import getSafeRedirectDestination from '~/utils/get-safe-redirect-destination.server';
+import { useEffectOnce } from '~/hooks/use-effect-once';
+import { usePromise } from '~/hooks/use-promise';
+import { getPageTitle } from '~/utils/get-page-title.server';
+import { getSafeRedirectDestination } from '~/utils/get-safe-redirect-destination.server';
 
 export const handle = { i18n: 'user-authentication' };
 

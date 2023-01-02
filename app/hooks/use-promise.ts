@@ -9,7 +9,7 @@ type Reference<T> = [
 /**
  * @returns An array containing [promise, resolve, reject].
  */
-export default function usePromise<T>() {
+export function usePromise<T>() {
   const reference = [] as unknown as Reference<T>;
   const container = useRef(reference);
 

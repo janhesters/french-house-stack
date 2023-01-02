@@ -4,7 +4,7 @@ import { describe } from 'vitest';
 
 import { assert } from '~/test/assert';
 
-import getPageTitle from './get-page-title.server';
+import { getPageTitle } from './get-page-title.server';
 
 describe('getPageTitle()', async () => {
   {

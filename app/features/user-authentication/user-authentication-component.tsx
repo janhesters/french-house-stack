@@ -66,7 +66,7 @@ export type UserAuthenticationComponentProps = {
   state: 'idle' | 'submitting' | 'error';
 };
 
-export default function UserAuthenticationComponent({
+export function UserAuthenticationComponent({
   email,
   emailError,
   formError,

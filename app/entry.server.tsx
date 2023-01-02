@@ -10,8 +10,8 @@ import { renderToPipeableStream } from 'react-dom/server';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
 import { PassThrough } from 'stream';
 
-import i18n from './features/localization/i18n';
-import i18next from './features/localization/i18next.server';
+import { i18n } from './features/localization/i18n';
+import { i18next } from './features/localization/i18next.server';
 
 const ABORT_DELAY = 5000;
 
