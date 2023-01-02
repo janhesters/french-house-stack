@@ -2,14 +2,14 @@
 import { faker } from '@faker-js/faker';
 import { describe, vi } from 'vitest';
 
-import magicAdmin from '~/features/user-authentication/magic-admin.server';
+import { magicAdmin } from '~/features/user-authentication/magic-admin.server';
 import { createPopulatedUserProfile } from '~/features/user-profile/user-profile-factories.server';
 import {
   deleteUserProfileFromDatabaseById,
   saveUserProfileToDatabase,
 } from '~/features/user-profile/user-profile-model.server';
 import { assert } from '~/test/assert';
-import generateRandomDid from '~/test/generate-random-did.server';
+import { generateRandomDid } from '~/test/generate-random-did.server';
 
 import { action } from './login';
 

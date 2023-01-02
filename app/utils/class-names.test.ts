@@ -2,7 +2,7 @@ import { describe } from 'vitest';
 
 import { assert } from '~/test/assert';
 
-import classNames from './class-names';
+import { classNames } from './class-names';
 
 describe('classNames()', () => {
   assert({

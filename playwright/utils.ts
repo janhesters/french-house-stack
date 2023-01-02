@@ -10,7 +10,7 @@ import {
   USER_AUTHENTICATION_SESSION_NAME,
 } from '~/features/user-authentication/user-authentication-session.server';
 import { saveUserProfileToDatabase } from '~/features/user-profile/user-profile-model.server';
-import generateRandomDid from '~/test/generate-random-did.server';
+import { generateRandomDid } from '~/test/generate-random-did.server';
 
 installGlobals();
 

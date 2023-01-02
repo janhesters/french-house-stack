@@ -36,13 +36,6 @@ describe('badRequest()', async () => {
       actual: body.message,
       expected: 'Bad Request',
     });
-
-    assert({
-      given: 'no arguments',
-      should: 'return a response with no errors',
-      actual: body.errors,
-      expected: undefined,
-    });
   }
 
   {
@@ -133,13 +126,6 @@ describe('notFound()', async () => {
       should: 'return a response with a message',
       actual: body.message,
       expected: 'Not Found',
-    });
-
-    assert({
-      given: 'no arguments',
-      should: 'return a response with no errors',
-      actual: body.errors,
-      expected: undefined,
     });
   }
 

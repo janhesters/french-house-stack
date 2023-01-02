@@ -4,7 +4,7 @@ import { Link } from '@remix-run/react';
 import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import classNames from '~/utils/class-names';
+import { classNames } from '~/utils/class-names';
 
 export type HomePageComponentProps = {
   userProfile: {
@@ -16,7 +16,7 @@ export type HomePageComponentProps = {
   userNavigation: Array<{ name: string; href: string }>;
 };
 
-export default function HomePageComponent({
+export function HomePageComponent({
   navigation,
   userProfile,
   userNavigation,

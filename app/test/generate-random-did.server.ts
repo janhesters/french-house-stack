@@ -8,6 +8,6 @@ import { randomBytes } from 'crypto';
  *
  * @returns did - Decentralized identity token.
  */
-export default function generateRandomDid() {
+export function generateRandomDid() {
   return 'did:ethr:0x' + randomBytes(32).toString('hex').slice(0, 40);
 }

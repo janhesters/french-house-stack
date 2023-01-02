@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 
-import useEffectOnce from './use-effect-once';
+import { useEffectOnce } from './use-effect-once';
 
 describe('useEffectOnce()', () => {
   it('runs the effect exactly once', () => {

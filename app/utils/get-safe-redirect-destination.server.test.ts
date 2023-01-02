@@ -5,7 +5,8 @@ import { describe } from 'vitest';
 
 import { assert } from '~/test/assert';
 
-import getSafeRedirectDestination, {
+import {
+  getSafeRedirectDestination,
   isValidRedirectDestination,
 } from './get-safe-redirect-destination.server';
 

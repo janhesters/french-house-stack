@@ -44,15 +44,3 @@ assert.todo = function todo<T>(assertion: Assertion<T>) {
     expect(assertion.actual).toEqual(assertion.expected);
   });
 };
-
-assert.only = function only<T>(assertion: Assertion<T>) {
-  test.only(`given ${assertion.given}: should ${assertion.should}`, () => {
-    expect(assertion.actual).toEqual(assertion.expected);
-  });
-};
-
-assert.skip = function skip<T>(assertion: Assertion<T>) {
-  test.skip(`given ${assertion.given}: should ${assertion.should}`, () => {
-    expect(assertion.actual).toEqual(assertion.expected);
-  });
-};

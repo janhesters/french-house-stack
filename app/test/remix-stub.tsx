@@ -14,12 +14,15 @@ import type {
   InitialEntry,
   LoaderFunction,
   Location,
+  MemoryHistory,
   StaticHandler,
 } from '@remix-run/router';
 import {
+  createMemoryHistory,
+  createStaticHandler,
   matchRoutes,
-  unstable_createStaticHandler as createStaticHandler,
 } from '@remix-run/router';
+import type { Update } from '@remix-run/router/dist/history';
 import type { AgnosticRouteMatch } from '@remix-run/router/dist/utils';
 import type {
   ErrorBoundaryComponent,
@@ -27,8 +30,6 @@ import type {
   MetaFunction,
 } from '@remix-run/server-runtime';
 import { json } from '@remix-run/server-runtime';
-import type { MemoryHistory, Update } from 'history';
-import { createMemoryHistory } from 'history';
 import * as React from 'react';
 
 /**

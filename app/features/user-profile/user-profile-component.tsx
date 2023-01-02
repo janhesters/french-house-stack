@@ -3,7 +3,7 @@ import { Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
-import Form from '~/components/form-component';
+import { Form } from '~/components/form-component';
 
 export type UserProfileComponentProps = {
   email: string;
@@ -15,7 +15,7 @@ export const schema = z.object({
   name: z.string().min(3, 'name-required-and-constraints'),
 });
 
-export default function UserProfileComponent({
+export function UserProfileComponent({
   email,
   name,
   success,

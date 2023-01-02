@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { createRemixStub, render, screen } from '~/test/test-utils';
 
-import NotFoundComponent from './not-found-component';
+import { NotFoundComponent } from './not-found-component';
 
 describe('NotFound component', () => {
   it('given a link: renders error messages and the correct link', async () => {

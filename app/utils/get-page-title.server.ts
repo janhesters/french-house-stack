@@ -1,6 +1,6 @@
 import type { StringMap, TFunctionKeys, TOptions } from 'i18next';
 
-import i18next from '~/features/localization/i18next.server';
+import { i18next } from '~/features/localization/i18next.server';
 
 /**
  * Helper function to get the page title.
@@ -11,7 +11,7 @@ import i18next from '~/features/localization/i18next.server';
  * @param prefix - A custom prefix to add to the title.
  * @returns A string containing the page title.
  */
-export default async function getPageTitle(
+export async function getPageTitle(
   request: Request,
   tKey:
     | TFunctionKeys

@@ -1,17 +1,18 @@
 import type { ActionFunction, LoaderArgs, MetaFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
-import { makeDomainFunction } from 'remix-domains';
+import { makeDomainFunction } from 'domain-functions';
 import { z } from 'zod';
 
 import { requireUserIsAuthenticated } from '~/features/user-authentication/user-authentication-session.server';
-import UserProfileComponent, {
+import {
   schema,
+  UserProfileComponent,
 } from '~/features/user-profile/user-profile-component';
 import { requireUserProfileExists } from '~/features/user-profile/user-profile-helpers.server';
 import { updateUserProfileInDatabaseById } from '~/features/user-profile/user-profile-model.server';
-import formAction from '~/utils/form-action.server';
-import getPageTitle from '~/utils/get-page-title.server';
+import { formAction } from '~/utils/form-action.server';
+import { getPageTitle } from '~/utils/get-page-title.server';
 
 export const handle = { i18n: 'user-profile' };
 

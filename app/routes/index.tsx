@@ -4,7 +4,7 @@ import { Link } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 
 import { getUserId } from '~/features/user-authentication/user-authentication-session.server';
-import getSafeRedirectDestination from '~/utils/get-safe-redirect-destination.server';
+import { getSafeRedirectDestination } from '~/utils/get-safe-redirect-destination.server';
 
 import magicLogo from '../../public/magic-icon.png';
 

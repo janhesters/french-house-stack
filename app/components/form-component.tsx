@@ -163,7 +163,9 @@ const RemixForm = createForm({
   useActionData,
 });
 
-const Form = <Schema extends SomeZodObject>(props: FormProps<Schema>) => (
+export const Form = <Schema extends SomeZodObject>(
+  props: FormProps<Schema>,
+) => (
   <RemixForm<Schema>
     className="space-y-8 divide-y divide-gray-200"
     buttonComponent={Button}
@@ -198,5 +200,3 @@ const Form = <Schema extends SomeZodObject>(props: FormProps<Schema>) => (
     {...props}
   />
 );
-
-export default Form;

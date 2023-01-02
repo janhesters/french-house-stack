@@ -56,6 +56,14 @@ to check for updates and install the latest versions.
 
 ### Getting Started
 
+- Make sure you're using Node.js 16.0.0 or higher. You can run:
+
+  ```sh
+  node -v
+  ```
+
+  to check which version you're on.
+
 - Install dependencies:
 
   ```sh
@@ -73,13 +81,23 @@ to check for updates and install the latest versions.
   too):
 
   - `MAGIC_PUBLISHABLE_KEY` and `MAGIC_SECRET_KEY` - You'll need to grab a
-    public key and a secret key for your project from your Magic dashboard.
+    public key and a secret key for your project from your
+    [Magic dashboard](https://magic.link).
   - `SESSION_SECRET` - The session secret can be any string that is at least 32
-    characters long. It is used for encrypting session cookies.
-  - `DATABASE_URL` - The url under which the SQLite database will operate.
-  - `SEED_USER_ID` - The user id of the user that will be seeded in the
-    database. You can grab it by logging in with Magic and looking at the
-    `userId` that gets returned from `requireUserIsAuthenticated()`.
+    characters long.
+  - `DATABASE_URL` - The url under which the SQLite database will operate. You
+    may use the value from `.env.example` for this.
+
+- Add a `console.warn` to `getUserIdFromSession()` in
+  `app/features/user-authentication/user-authentication-session.server.ts`:
+
+  ```ts
+  const getUserIdFromSession = (session: Session): string | undefined => {
+    const userId = session.get(USER_SESSION_KEY);
+    console.warn('userId', userId);
+    return userId;
+  };
+  ```
 
 - Set up the database:
 
@@ -87,19 +105,35 @@ to check for updates and install the latest versions.
   npm run prisma:setup
   ```
 
-- **(Optional)** If you used the user authentication route to log in with Magic,
-  a user profile has been automatically created for you. If not, seed the
-  database with a user profile:
-
-  ```sh
-  npm run prisma:seed
-  ```
-
 - Start dev server:
 
   ```sh
   npm run dev
   ```
+
+- Sign up for an account under `/login` by logging in with Magic.
+
+- Grab the `userId` that you logged out in the previous step from the terminal
+  in which you ran `npm run dev` and add it to your `.env` file as
+  `SEED_USER_ID`.
+
+- Remove the `console.warn` from `getUserIdFromSession()`.
+
+- Now you can add the remaining values to your `.env` file, which are used by
+  the main seed script:
+
+  - `SEED_USER_ID` - The steps above outlined how to get this value. This value
+    is the user id of the user that will be seeded in the database. This value
+    is required for the `"prisma:seed"` script.
+
+- Lastly, stop your `npm run dev` script and run
+
+  ```sh
+  npm run prisma:reset-dev
+  ```
+
+  , which wipes the database, seeds the database with lots of data and starts up
+  the dev server again.
 
 This starts your app in development mode, rebuilding assets on file changes.
 
@@ -111,6 +145,8 @@ This starts your app in development mode, rebuilding assets on file changes.
 - `"prisma:setup"` - Sets up the database.
 - `"prisma:wipe"` - Wipes the database (irrevocably delete all data, but keep
   the schema).
+- `"prisma:reset-dev"` - Wipes the database, seeds it and starts the dev server.
+  This is a utility script that you can use in development to get clean starts.
 
 ### Generating boilerplate
 
@@ -138,6 +174,37 @@ Out of the box, there are three options:
 - Database model utils
 - E2E tests for a route
 
+### Routing
+
+We're using flat routes, a feature which will
+[ship natively with Remix, soon](https://github.com/remix-run/remix/issues/4483).
+
+You can
+[check out this video for an in-depth explanation](https://portal.gitnation.org/contents/remix-flat-routes-an-evolution-in-routing).
+
+### How authentication works 🛡️
+
+We use [Magic](https://magic.link/) for authentication with a custom session
+cookie. You can find the implementation in `app/features/user-authentication`.
+
+Magic keeps track of the user's session in a cookie, but we ignore Magic's
+session and use our own session cookie instead. This is because Magic's sessions
+only last 2 weeks, while our lasts a year. Additionally, it makes E2E tests
+easier because we fully control the auth flow.
+
+We use
+[Remix's session utils](https://remix.run/docs/en/v1/utils/sessions#using-sessions)
+to manage the session cookie. The code for this lives in
+`app/features/user-authentication/user-authentication-session.server.ts`.
+
+When a user signs in or up using Magic, we grab the user id (the one you logged
+out during the getting started section) and store it in the session cookie.
+
+If the user is signing up, we also create a user profile for them using their
+email, which we can grab from Magic during the sign up flow.
+
+When a user signs out, we clear the session cookie.
+
 ### i18n
 
 The French House Stack comes with localization support through
@@ -158,6 +225,9 @@ learn how to use GitHub Actions for continuous integration and deployment.
 
 ### Playwright 🎭
 
+> **Note:** make sure you've run `npm run dev` at least one time before you run
+> the E2E tests!
+
 We use Playwright for our End-to-End tests in this project. You'll find those in
 the `playwright/` directory. As you make changes to your app, add to an existing
 file or create a new file in the `playwright/e2e` directory to test your
@@ -167,7 +237,7 @@ changes.
 for selecting elements on the page semantically.
 
 To run these tests in development, run `npm run test:e2e` which will start the
-dev server for the app as well as the Playwright client. (**Note:** make sure you've run `npm run dev` at least one time before you run the E2E tests.)
+dev server for the app as well as the Playwright client.
 
 #### VSCode Extension
 

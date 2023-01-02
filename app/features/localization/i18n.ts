@@ -1,4 +1,4 @@
-export default {
+export const i18n = {
   // This is the list of languages your application supports.
   supportedLngs: ['en', 'de'],
   // This is the language you want to use in case if the user language is not

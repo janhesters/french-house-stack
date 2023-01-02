@@ -52,6 +52,6 @@ function toErrorWithMessage(maybeError: unknown): ErrorWithMessage {
  * // ↵ '"some-string"'
  * ```
  */
-export default function getErrorMessage(error: unknown) {
+export function getErrorMessage(error: unknown) {
   return toErrorWithMessage(error).message;
 }

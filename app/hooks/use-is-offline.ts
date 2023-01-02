@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
  *
  * @returns Whether browser offline or not.
  */
-export default function useIsOffline() {
+export function useIsOffline() {
   const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
