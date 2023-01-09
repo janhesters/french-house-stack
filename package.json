@@ -16,7 +16,7 @@
     "i18next": "21.10.0",
     "i18next-browser-languagedetector": "6.1.8",
     "i18next-fs-backend": "1.1.5",
-    "i18next-http-backend": "1.4.4",
+    "i18next-http-backend": "2.1.1",
     "isbot": "3.6.5",
     "magic-sdk": "13.1.0",
     "ramda": "0.28.0",
