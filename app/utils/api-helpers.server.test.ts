@@ -1,6 +1,5 @@
-import { describe } from 'vitest';
-
-import { assert } from '~/test/assert';
+import { faker } from '@faker-js/faker';
+import { describe, expect, test } from 'vitest';
 
 import {
   badRequest,
@@ -11,209 +10,89 @@ import {
 } from './api-helpers.server';
 
 describe('badRequest()', async () => {
-  {
+  test('given no arguments: returns a 400 status with a message', async () => {
     const response = badRequest();
 
-    assert({
-      given: 'no arguments',
-      should: 'return a response with the 400 status code',
-      actual: response.status,
-      expected: 400,
-    });
+    expect(response.status).toEqual(400);
+    expect(response.headers.get('Content-Type')).toEqual(
+      'application/json; charset=utf-8',
+    );
+    expect(await response.json()).toEqual({ message: 'Bad Request' });
+  });
 
-    assert({
-      given: 'no arguments',
-      should: 'return a response with the application/json content type',
-      actual: response.headers.get('Content-Type'),
-      expected: 'application/json; charset=utf-8',
-    });
-
-    const body = await response.json();
-
-    assert({
-      given: 'no arguments',
-      should: 'return a response with a message',
-      actual: body.message,
-      expected: 'Bad Request',
-    });
-  }
-
-  {
+  test('given some formatted Zod errors: returns a 400 status with the errors and a message', async () => {
     // @ts-expect-error The typings for Zod are wrong.
     const response = badRequest({ _errors: ['Required'] });
 
-    assert({
-      given: 'some formatted Zod errors',
-      should: 'return a response with the 400 status code',
-      actual: response.status,
-      expected: 400,
+    expect(response.status).toEqual(400);
+    expect(response.headers.get('Content-Type')).toEqual(
+      'application/json; charset=utf-8',
+    );
+    expect(await response.json()).toEqual({
+      message: 'Bad Request',
+      errors: { _errors: ['Required'] },
     });
-
-    assert({
-      given: 'some formatted Zod errors',
-      should: 'return a response with the application/json content type',
-      actual: response.headers.get('Content-Type'),
-      expected: 'application/json; charset=utf-8',
-    });
-
-    const body = await response.json();
-
-    assert({
-      given: 'some formatted Zod errors',
-      should: 'return a response with a message',
-      actual: body.message,
-      expected: 'Bad Request',
-    });
-
-    assert({
-      given: 'some formatted Zod errors',
-      should: 'return a response with the errors',
-      actual: body.errors,
-      expected: { _errors: ['Required'] },
-    });
-  }
-});
-
-describe('forbidden()', async () => {
-  const response = forbidden();
-
-  assert({
-    given: 'no arguments',
-    should: 'return a response with the 403 status code',
-    actual: response.status,
-    expected: 403,
-  });
-
-  assert({
-    given: 'no arguments',
-    should: 'return a response with the application/json content type',
-    actual: response.headers.get('Content-Type'),
-    expected: 'application/json; charset=utf-8',
-  });
-
-  const body = await response.json();
-
-  assert({
-    given: 'no arguments',
-    should: 'return a response with a message',
-    actual: body.message,
-    expected: 'Forbidden',
   });
 });
 
-describe('notFound()', async () => {
-  {
+describe('forbidden', () => {
+  test('given no arguments: returns a 403 status with a message', async () => {
+    const response = forbidden();
+
+    expect(response.status).toEqual(403);
+    expect(response.headers.get('Content-Type')).toEqual(
+      'application/json; charset=utf-8',
+    );
+    expect(await response.json()).toEqual({ message: 'Forbidden' });
+  });
+});
+
+describe('notFound()', () => {
+  test('given no arguments: returns a 404 status with a message', async () => {
     const response = notFound();
 
-    assert({
-      given: 'no arguments',
-      should: 'return a response with the 404 status code',
-      actual: response.status,
-      expected: 404,
-    });
-
-    assert({
-      given: 'no arguments',
-      should: 'return a response with the application/json content type',
-      actual: response.headers.get('Content-Type'),
-      expected: 'application/json; charset=utf-8',
-    });
-
-    const body = await response.json();
-
-    assert({
-      given: 'no arguments',
-      should: 'return a response with a message',
-      actual: body.message,
-      expected: 'Not Found',
-    });
-  }
-
-  {
-    const response = notFound('Custom error message');
-
-    assert({
-      given: 'a custom error message',
-      should: 'return a response with the 404 status code',
-      actual: response.status,
-      expected: 404,
-    });
-
-    assert({
-      given: 'a custom error message',
-      should: 'return a response with the application/json content type',
-      actual: response.headers.get('Content-Type'),
-      expected: 'application/json; charset=utf-8',
-    });
-
-    const body = await response.json();
-
-    assert({
-      given: 'a custom error message',
-      should: 'return a response with a message',
-      actual: body.message,
-      expected: 'Not Found',
-    });
-
-    assert({
-      given: 'a custom error message',
-      should: 'return a response with the custom error message',
-      actual: body.errors,
-      expected: 'Custom error message',
-    });
-  }
-});
-
-describe('notAllowed()', async () => {
-  const response = notAllowed();
-
-  assert({
-    given: 'no arguments',
-    should: 'return a response with the 405 status code',
-    actual: response.status,
-    expected: 405,
+    expect(response.status).toEqual(404);
+    expect(response.headers.get('Content-Type')).toEqual(
+      'application/json; charset=utf-8',
+    );
+    expect(await response.json()).toEqual({ message: 'Not Found' });
   });
 
-  assert({
-    given: 'no arguments',
-    should: 'return a response with the application/json content type',
-    actual: response.headers.get('Content-Type'),
-    expected: 'application/json; charset=utf-8',
-  });
+  test('given a custom error message: returns a 404 status with the custom error message', async () => {
+    const message = faker.lorem.words();
+    const response = notFound(message);
 
-  const body = await response.json();
-
-  assert({
-    given: 'no arguments',
-    should: 'return a response with a message',
-    actual: body.message,
-    expected: 'Method Not Allowed',
+    expect(response.status).toEqual(404);
+    expect(response.headers.get('Content-Type')).toEqual(
+      'application/json; charset=utf-8',
+    );
+    expect(await response.json()).toEqual({
+      message: 'Not Found',
+      errors: message,
+    });
   });
 });
 
-describe('internalServerError()', async () => {
-  const response = internalServerError();
+describe('notAllowed()', () => {
+  test('given no arguments: returns a 405 status with a message', async () => {
+    const response = notAllowed();
 
-  assert({
-    given: 'no arguments',
-    should: 'return a response with the 500 status code',
-    actual: response.status,
-    expected: 500,
+    expect(response.status).toEqual(405);
+    expect(response.headers.get('Content-Type')).toEqual(
+      'application/json; charset=utf-8',
+    );
+    expect(await response.json()).toEqual({ message: 'Method Not Allowed' });
   });
+});
 
-  assert({
-    given: 'no arguments',
-    should: 'return a response with the application/json content type',
-    actual: response.headers.get('Content-Type'),
-    expected: 'application/json; charset=utf-8',
-  });
+describe('internalServerError()', () => {
+  test('given no arguments: returns a 500 status with a message', async () => {
+    const response = internalServerError();
 
-  const body = await response.json();
-
-  assert({
-    given: 'no arguments',
-    should: 'return a response with a message',
-    actual: body.message,
-    expected: 'Internal Server Error',
+    expect(response.status).toEqual(500);
+    expect(response.headers.get('Content-Type')).toEqual(
+      'application/json; charset=utf-8',
+    );
+    expect(await response.json()).toEqual({ message: 'Internal Server Error' });
   });
 });

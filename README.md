@@ -29,9 +29,6 @@ However, Magic is perfectly suited for a regular Web2 app, too.
 - End-to-end testing with [Playwright](https://playwright.dev)
 - Unit testing with [Vitest](https://vitest.dev) and
   [Testing Library](https://testing-library.com)
-  - Comes with a
-    [RITEway-like `assert()`](https://github.com/paralleldrive/riteway#assert)
-    utility function.
 - [SQLite](https://www.sqlite.org/index.html) database with
   [Prisma](https://www.prisma.io/) as the ORM
 - Code formatting with [Prettier](https://prettier.io)
@@ -287,36 +284,6 @@ by the VSCode extension.
 For lower level tests of utilities and individual components, we use `vitest`.
 We have DOM-specific assertion helpers via
 [`@testing-library/jest-dom`](https://testing-library.com/jest-dom).
-
-#### `assert()`
-
-There are
-[5 questions every unit test must answer](https://medium.com/javascript-scene/what-every-unit-test-needs-f6cd34d9836d)
-and [Eric Elliott](https://mobile.twitter.com/_ericelliott) created a testing
-framework called [RITEway](https://github.com/paralleldrive/riteway) that forces
-you to write **R**eadable, **I**solated, and **E**xplicit tests. The framework
-only exposes a single `assert` test function, which performs a deep equality
-check.
-
-The French House Stack features this `assert` testing utility function, but it
-works with Vitest.
-
-```ts
-import { describe } from 'vitest';
-
-import { assert } from '~/test/assert';
-
-const sum = (a: number, b: number) => a + b;
-
-describe('sum()', () => {
-  assert({
-    given: 'two numbers',
-    should: 'returns the sum of the two numbers',
-    actual: sum(21, 21),
-    expected: 42,
-  });
-});
-```
 
 ### Type Checking
 

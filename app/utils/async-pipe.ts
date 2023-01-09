@@ -54,6 +54,7 @@ export function asyncPipe<FS extends any[]>(
 ): AsyncPipeReturnType<FS>;
 export function asyncPipe(...fns: AsyncParameters<any[]>) {
   if (fns.length === 0) return () => Promise.resolve();
-  return (x: Parameters<typeof fns[0]>[0]) =>
+  // eslint-disable-next-line prettier/prettier
+  return (x: Parameters<(typeof fns[0])>[0]) =>
     fns.reduce(async (y, function_) => function_(await y), x);
 }
