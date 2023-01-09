@@ -1,9 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe } from 'vitest';
-
-import { assert } from '~/test/assert';
+import { describe, expect, test } from 'vitest';
 
 import {
   getSearchParameterFromRequest,
@@ -12,68 +10,67 @@ import {
 } from './get-search-parameter-from-request';
 
 describe('requestToUrl()', () => {
-  const url = 'https://www.mozilla.org/favicon.ico';
+  test('given a request with a url: returns a URL object for it', () => {
+    const url = 'https://www.mozilla.org/favicon.ico';
 
-  assert({
-    given: 'a request with a url',
-    should: 'return a URL object for it',
-    actual: requestToUrl(new Request(url)),
-    expected: new URL(url),
+    expect(requestToUrl(new Request(url))).toEqual(new URL(url));
   });
 });
 
 describe('getSearchParameterFromUrl()', () => {
-  {
+  test('given a url and a search parameter that is in the url: returns the value of the search parameter', () => {
     const searchParameter = 'redirectTo';
     const url = new URL(`https://example.com?${searchParameter}=home&foo=bar`);
 
-    assert({
-      given:
-        "a url and a search parameter that is in the url's search parameters",
-      should: 'return the value of the search parameter',
-      actual: getSearchParameterFromUrl(searchParameter)(url),
-      expected: 'home',
-    });
-  }
+    expect(getSearchParameterFromUrl(searchParameter)(url)).toEqual('home');
+  });
 
-  {
+  test('given a url and a search parameter that is NOT in the url: returns null', () => {
     const searchParameter = 'search';
     const url = new URL(`https://example.com?foo=bar`);
 
-    assert({
-      given: 'a url and a search that is NOT in the url',
-      should: 'return null',
-      actual: getSearchParameterFromUrl(searchParameter)(url),
-      expected: null,
-    });
-  }
+    expect(getSearchParameterFromUrl(searchParameter)(url)).toEqual(null);
+  });
 });
 
 describe('getSearchParameterFromRequest()', () => {
-  {
+  test('given a request and a search parameter that is in the request url: returns the value of the search parameter', () => {
     const searchParameter = 'redirectTo';
     const request = new Request(
       `https://example.com?${searchParameter}=home&foo=bar`,
     );
 
-    assert({
-      given: "a request and a search parameter that is in the request's url",
-      should: 'return the value of the search parameter',
-      actual: getSearchParameterFromRequest(searchParameter)(request),
-      expected: 'home',
-    });
-  }
+    expect(getSearchParameterFromRequest(searchParameter)(request)).toEqual(
+      'home',
+    );
+  });
 
-  {
+  test('given a request and a search parameter that is NOT in the request url: returns null', () => {
     const searchParameter = 'filterUsers';
     const request = new Request(`https://example.com?foo=bar`);
 
-    assert({
-      given:
-        "a request and a search parameter that is NOT in the request's url",
-      should: 'return null',
-      actual: getSearchParameterFromRequest(searchParameter)(request),
-      expected: null,
-    });
-  }
+    expect(getSearchParameterFromRequest(searchParameter)(request)).toEqual(
+      null,
+    );
+  });
+
+  test("given a request and a search parameter that is in the request's url: returns the value of the search parameter", () => {
+    const searchParameter = 'redirectTo';
+    const request = new Request(
+      `https://example.com?${searchParameter}=home&foo=bar`,
+    );
+
+    expect(getSearchParameterFromRequest(searchParameter)(request)).toEqual(
+      'home',
+    );
+  });
+
+  test("given a request and a search parameter that is NOT in the request's url: returns null", () => {
+    const searchParameter = 'filterUsers';
+    const request = new Request(`https://example.com?foo=bar`);
+
+    expect(getSearchParameterFromRequest(searchParameter)(request)).toEqual(
+      null,
+    );
+  });
 });
