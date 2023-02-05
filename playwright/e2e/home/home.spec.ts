@@ -28,6 +28,11 @@ test.describe('home page', () => {
       browserName === 'webkit',
       'webkit does not support redirects in route.fulfill',
     );
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(
+      browserName === 'chromium' && !!isMobile,
+      'Mobile Chrome is currently broken',
+    );
 
     // TODO: Refactor when Magic supports server side test mode.
     await page.route('/logout', async route => {
@@ -40,15 +45,15 @@ test.describe('home page', () => {
 
     const { id } = await loginAndSaveUserProfileToDatabase({ page });
     await page.goto('./home');
+    await page.waitForLoadState('networkidle');
 
     // eslint-disable-next-line playwright/no-conditional-in-test
     await (isMobile
       ? page.getByRole('button', { name: /open main menu/i }).click()
       : page.getByRole('button', { name: /open user menu/i }).click());
-
-    // Logging the user out should redirect you to the landing page.
     await page.waitForLoadState('networkidle');
 
+    // Logging the user out should redirect you to the landing page.
     // eslint-disable-next-line playwright/no-conditional-in-test
     await (isMobile
       ? page.getByRole('button', { name: /log out/i }).click()

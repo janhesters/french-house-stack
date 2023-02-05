@@ -2,8 +2,8 @@ import { ExclamationCircleIcon } from '@heroicons/react/24/solid';
 import {
   Form as FrameworkForm,
   useActionData,
+  useNavigation,
   useSubmit,
-  useTransition as useNavigation,
 } from '@remix-run/react';
 import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';

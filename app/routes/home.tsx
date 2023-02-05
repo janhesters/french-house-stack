@@ -1,4 +1,4 @@
-import type { LoaderArgs, MetaFunction } from '@remix-run/node';
+import type { LoaderArgs, V2_MetaFunction } from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { pick } from 'ramda';
@@ -35,9 +35,9 @@ export const loader = async ({ request }: LoaderArgs) => {
   });
 };
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => ({
-  title: data?.title,
-});
+export const meta: V2_MetaFunction<typeof loader> = ({ data }) => [
+  { title: data?.title },
+];
 
 export default function HomePage() {
   const { navigation, userProfile, userNavigation } =

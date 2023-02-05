@@ -1,7 +1,12 @@
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline';
-import type { LinksFunction, LoaderArgs, MetaFunction } from '@remix-run/node';
+import type {
+  LinksFunction,
+  LoaderArgs,
+  V2_MetaFunction,
+} from '@remix-run/node';
 import { json } from '@remix-run/node';
 import {
+  isRouteErrorResponse,
   Link,
   Links,
   LiveReload,
@@ -11,6 +16,7 @@ import {
   ScrollRestoration,
   useLoaderData,
   useLocation,
+  useRouteError,
 } from '@remix-run/react';
 import { useTranslation } from 'react-i18next';
 import { useChangeLanguage } from 'remix-i18next';
@@ -50,18 +56,14 @@ export const loader = async ({ request }: LoaderArgs) => {
   });
 };
 
-export const meta: MetaFunction<typeof loader> = ({
+export const meta: V2_MetaFunction<typeof loader> = ({
   data = { title: 'French House Stack' },
-}) => {
-  const { title } = data as LoaderData;
-
-  return {
-    // eslint-disable-next-line unicorn/text-encoding-identifier-case
-    charset: 'utf-8',
-    title,
-    viewport: 'width=device-width,initial-scale=1',
-  };
-};
+}) => [
+  { title: data.title },
+  // eslint-disable-next-line unicorn/text-encoding-identifier-case
+  { charSet: 'utf-8' },
+  { name: 'viewport', content: 'width=device-width,initial-scale=1' },
+];
 
 export default function App() {
   const { locale, ENV } = useLoaderData<typeof loader>();
@@ -96,8 +98,25 @@ export default function App() {
 export function ErrorBoundary() {
   // TODO: report error
   const location = useLocation();
+  const error = useRouteError();
 
-  return (
+  return isRouteErrorResponse(error) ? (
+    <html
+      className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800"
+      lang="en"
+    >
+      <head>
+        <title>404 Not Found | French House Stack</title>
+        <Meta />
+        <Links />
+      </head>
+
+      <body className="h-full overflow-auto">
+        <NotFoundComponent />;
+        <Scripts />
+      </body>
+    </html>
+  ) : (
     <html className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800">
       <head>
         <title>Oh no!</title>
@@ -151,26 +170,6 @@ export function ErrorBoundary() {
           </div>
         </main>
 
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
-export function CatchBoundary() {
-  return (
-    <html
-      className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800"
-      lang="en"
-    >
-      <head>
-        <title>404 Not Found | French House Stack</title>
-        <Meta />
-        <Links />
-      </head>
-
-      <body className="h-full overflow-auto">
-        <NotFoundComponent />;
         <Scripts />
       </body>
     </html>

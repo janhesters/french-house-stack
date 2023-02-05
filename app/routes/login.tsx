@@ -1,7 +1,7 @@
-import type { ActionArgs, LoaderArgs, MetaFunction } from '@remix-run/node';
+import type { ActionArgs, LoaderArgs, V2_MetaFunction } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { useActionData, useSubmit, useTransition } from '@remix-run/react';
+import { useActionData, useNavigation, useSubmit } from '@remix-run/react';
 import { Magic } from 'magic-sdk';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -41,9 +41,9 @@ export const loader = async ({ request }: LoaderArgs) => {
   });
 };
 
-export const meta: MetaFunction<typeof loader> = ({ data: { title } }) => ({
-  title,
-});
+export const meta: V2_MetaFunction<typeof loader> = ({ data: { title } }) => [
+  { title },
+];
 
 type ActionData = {
   email?: string;
@@ -138,9 +138,9 @@ export const action = async ({ request }: ActionArgs) => {
 export default function LoginPage() {
   const { t } = useTranslation();
   const data = useActionData<ActionData>();
-  const transition = useTransition();
+  const navigation = useNavigation();
   const state: 'idle' | 'error' | 'submitting' =
-    transition.submission || data?.email
+    navigation.state === 'submitting' || data?.email
       ? 'submitting'
       : data?.emailError || data?.formError
       ? 'error'
