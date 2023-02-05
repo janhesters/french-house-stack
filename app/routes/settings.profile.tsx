@@ -1,4 +1,8 @@
-import type { ActionFunction, LoaderArgs, MetaFunction } from '@remix-run/node';
+import type {
+  ActionFunction,
+  LoaderArgs,
+  V2_MetaFunction,
+} from '@remix-run/node';
 import { json } from '@remix-run/node';
 import { useLoaderData } from '@remix-run/react';
 import { makeDomainFunction } from 'domain-functions';
@@ -31,9 +35,9 @@ export const loader = async ({ request }: LoaderArgs) => {
   });
 };
 
-export const meta: MetaFunction<typeof loader> = ({ data }) => ({
-  title: data?.title,
-});
+export const meta: V2_MetaFunction<typeof loader> = ({ data: { title } }) => [
+  { title },
+];
 
 const environmentSchema = z.object({ userId: z.string().length(51) });
 

@@ -22,4 +22,4 @@ export * from '@testing-library/react';
 // override render method
 export { customRender as render };
 export { generateRandomDid } from './generate-random-did.server';
-export { createRemixStub } from './remix-stub';
+export { unstable_createRemixStub as createRemixStub } from '@remix-run/testing';

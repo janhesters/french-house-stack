@@ -48,9 +48,9 @@ test.describe('login page', () => {
       window.runMagicInTestMode = true;
     });
     await page.route(loginLoaderRoute, (route, request) => {
-      const postData = request.postDataJSON();
+      const postData = request.postData();
 
-      if (postData && postData.didToken) {
+      if (postData && postData.includes('didToken')) {
         return route.fulfill({
           headers: {
             'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${cookieToken}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
@@ -77,9 +77,9 @@ test.describe('login page', () => {
     await page.getByRole('button', { name: /sign in/i }).click();
     await page.getByRole('button', { name: /sign in/i }).isHidden();
     await page.getByRole('button', { name: /authenticating/i }).isDisabled();
-    await page.waitForLoadState('networkidle');
 
     // After logging in, the user should be redirected to the home page.
+    await page.waitForURL(baseURL + '/home');
     expect(page.url()).toEqual(baseURL + '/home');
 
     await page.context().close();
@@ -101,9 +101,9 @@ test.describe('login page', () => {
       window.runMagicInTestMode = true;
     });
     await page.route(loginLoaderRoute, (route, request) => {
-      const postData = request.postDataJSON();
+      const postData = request.postData();
 
-      if (postData && postData.didToken) {
+      if (postData && postData.includes('didToken')) {
         return route.fulfill({
           headers: {
             'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${cookieToken}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
@@ -160,7 +160,7 @@ test.describe('login page', () => {
   test('page should not have any automatically detectable accessibility issues', async ({
     page,
   }) => {
-    await page.goto('./home');
+    await page.goto('./login');
 
     const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
 
