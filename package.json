@@ -5,7 +5,7 @@
     }
   },
   "dependencies": {
-    "@headlessui/react": "1.7.9",
+    "@headlessui/react": "1.7.10",
     "@heroicons/react": "2.0.14",
     "@magic-sdk/admin": "1.8.0",
     "@prisma/client": "4.9.0",
