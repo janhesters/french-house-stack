@@ -19,7 +19,7 @@ export const loader = async ({ request }: LoaderArgs) => {
   const userProfile = await requireUserProfileExists(userId);
 
   return json({
-    title: await getPageTitle(request, t('home:home')),
+    title: await getPageTitle(request, t('home:home') ?? undefined),
     userProfile: pick(['avatar', 'email', 'name'], userProfile),
     navigation: [
       { name: t('home:dashboard'), href: '#', current: true },

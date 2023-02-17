@@ -65,10 +65,11 @@ export const action = async ({ request }: ActionArgs) => {
     const { email } = values;
     const emailSchema = z
       .string({
-        required_error: t('user-authentication:email-required'),
-        invalid_type_error: t('user-authentication:email-must-be-string'),
+        required_error: t('user-authentication:email-required') ?? undefined,
+        invalid_type_error:
+          t('user-authentication:email-must-be-string') ?? undefined,
       })
-      .email({ message: t('user-authentication:email-invalid') });
+      .email({ message: t('user-authentication:email-invalid') ?? undefined });
 
     const result = emailSchema.safeParse(email);
 
@@ -85,7 +86,8 @@ export const action = async ({ request }: ActionArgs) => {
     if (typeof didToken !== 'string') {
       // TODO: report error.
       return badRequest({
-        formError: t('user-authentication:did-token-malformed-error'),
+        formError:
+          t('user-authentication:did-token-malformed-error') ?? undefined,
       });
     }
 
@@ -96,7 +98,8 @@ export const action = async ({ request }: ActionArgs) => {
     if (typeof userId !== 'string') {
       // TODO: report error.
       return badRequest({
-        formError: t('user-authentication:missing-issuer-metadata'),
+        formError:
+          t('user-authentication:missing-issuer-metadata') ?? undefined,
       });
     }
 
@@ -131,7 +134,8 @@ export const action = async ({ request }: ActionArgs) => {
   }
 
   return badRequest({
-    formError: t('user-authentication:invalid-intent', { intent: _intent }),
+    formError:
+      t('user-authentication:invalid-intent', { intent: _intent }) ?? undefined,
   });
 };
 
