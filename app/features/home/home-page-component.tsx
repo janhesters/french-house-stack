@@ -35,7 +35,7 @@ export function HomePageComponent({
                     <img
                       className="h-8 w-8"
                       src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg"
-                      alt={t('app-name')}
+                      alt={t('app-name') ?? undefined}
                     />
                   </div>
                   <div className="hidden md:block">
@@ -76,7 +76,7 @@ export function HomePageComponent({
                           <img
                             className="h-8 w-8 rounded-full"
                             src={userProfile.avatar}
-                            alt={t('your-avatar')}
+                            alt={t('your-avatar') ?? undefined}
                           />
                         </Menu.Button>
                       </div>
@@ -164,7 +164,7 @@ export function HomePageComponent({
                     <img
                       className="h-10 w-10 rounded-full"
                       src={userProfile.avatar}
-                      alt={t('your-avatar')}
+                      alt={t('your-avatar') ?? undefined}
                     />
                   </div>
                   <div className="ml-3">

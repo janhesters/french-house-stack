@@ -37,7 +37,7 @@ export function UserProfileComponent({
 
               <div className="ml-3">
                 <p
-                  aria-label={t('success')}
+                  aria-label={t('success') ?? undefined}
                   className="text-sm font-medium text-green-800"
                   role="alert"
                 >
@@ -63,9 +63,9 @@ export function UserProfileComponent({
         <h1 className="sr-only">{t('settings')}</h1>
 
         <Form
-          buttonLabel={t('save')}
+          buttonLabel={t('save') ?? undefined}
           className="space-y-8 divide-y divide-gray-200 pt-8"
-          pendingButtonLabel={t('saving')}
+          pendingButtonLabel={t('saving') ?? undefined}
           schema={schema}
           values={{ name }}
         >
@@ -96,7 +96,7 @@ export function UserProfileComponent({
 
                     <Field
                       defaultValue={name || ''}
-                      label={t('name')}
+                      label={t('name') ?? undefined}
                       name="name"
                     />
                   </div>

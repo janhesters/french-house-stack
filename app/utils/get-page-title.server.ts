@@ -1,4 +1,4 @@
-import type { StringMap, TFunctionKeys, TOptions } from 'i18next';
+import type { StringMap, TFuncKey, TOptions } from 'i18next';
 
 import { i18next } from '~/features/localization/i18next.server';
 
@@ -14,9 +14,9 @@ import { i18next } from '~/features/localization/i18next.server';
 export async function getPageTitle(
   request: Request,
   tKey:
-    | TFunctionKeys
+    | TFuncKey
     | {
-        tKey: TFunctionKeys;
+        tKey: TFuncKey;
         options: TOptions<StringMap>;
       } = '',
   prefix: string = '',

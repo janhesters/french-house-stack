@@ -18,8 +18,8 @@ import {
   useLocation,
   useRouteError,
 } from '@remix-run/react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useChangeLanguage } from 'remix-i18next';
 import invariant from 'tiny-invariant';
 
 import type { EnvironmentVariables } from './entry.client';
@@ -64,6 +64,14 @@ export const meta: V2_MetaFunction<typeof loader> = ({
   { charSet: 'utf-8' },
   { name: 'viewport', content: 'width=device-width,initial-scale=1' },
 ];
+
+function useChangeLanguage(locale: string) {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    i18n.changeLanguage(locale);
+  }, [locale, i18n]);
+}
 
 export default function App() {
   const { locale, ENV } = useLoaderData<typeof loader>();

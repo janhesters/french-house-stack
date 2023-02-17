@@ -87,7 +87,7 @@ export function UserAuthenticationComponent({
             <img
               className="mx-auto h-12 w-auto"
               src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-              alt={t('app-name')}
+              alt={t('app-name') ?? undefined}
             />
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
               {t('sign-in-to-your-account')}
@@ -118,7 +118,7 @@ export function UserAuthenticationComponent({
                   disabled={state === 'submitting'}
                   id="email"
                   name="email"
-                  placeholder={t('email-placeholder')}
+                  placeholder={t('email-placeholder') ?? undefined}
                   ref={inputRef}
                   required
                   type="email"
