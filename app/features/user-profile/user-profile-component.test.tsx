@@ -6,7 +6,7 @@ import { faker } from '@faker-js/faker';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
-import { createRemixStub, render, screen } from '~/test/test-utils';
+import { act, createRemixStub, render, screen } from '~/test/test-utils';
 import type { Factory } from '~/utils/types';
 
 import type { UserProfileComponentProps } from './user-profile-component';
@@ -18,8 +18,6 @@ const createProps: Factory<UserProfileComponentProps> = ({
   success = false,
 } = {}) => ({ email, name, success });
 
-// TODO: fix when Remix unit test utils are available.
-// see: https://github.com/remix-run/remix/discussions/2481
 describe('UserProfile component', () => {
   it("given a user's avatar, email and name and no success: renders the correct headings and the user's avatar, email and name and hide the success banner", async () => {
     const user = userEvent.setup();
@@ -49,8 +47,8 @@ describe('UserProfile component', () => {
     const nameInput = screen.getByLabelText(/name/i);
     expect(nameInput).toHaveValue(props.name);
     const name = faker.name.fullName();
-    await user.clear(nameInput);
-    await user.type(nameInput, name);
+    await act(() => user.clear(nameInput));
+    await act(() => user.type(nameInput, name));
     expect(nameInput).toHaveValue(name);
 
     // It has a submit button to save the changes.
