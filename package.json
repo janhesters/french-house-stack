@@ -46,7 +46,7 @@
     "@types/ramda": "0.28.23",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
-    "@vitejs/plugin-react": "3.1.0",
+    "@vitejs/plugin-react": "4.0.1",
     "@vitest/coverage-c8": "0.28.5",
     "eslint": "8.34.0",
     "eslint-config-prettier": "8.6.0",
