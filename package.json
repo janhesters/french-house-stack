@@ -30,7 +30,7 @@
   },
   "description": "The Remix stack for Web3.",
   "devDependencies": {
-    "@axe-core/playwright": "4.6.0",
+    "@axe-core/playwright": "4.7.3",
     "@commitlint/cli": "17.4.4",
     "@commitlint/config-conventional": "17.4.4",
     "@faker-js/faker": "7.6.0",
