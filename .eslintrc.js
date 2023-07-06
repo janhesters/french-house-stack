@@ -11,6 +11,7 @@ module.exports = {
   ],
   plugins: ['simple-import-sort'],
   rules: {
+    '@typescript-eslint/no-redeclare': 'off',
     'simple-import-sort/imports': 'error',
     'simple-import-sort/exports': 'error',
     // Allow file namings like `$slug.tsx`.
@@ -36,6 +37,7 @@ module.exports = {
         replacements: {
           props: false,
           ref: false,
+          params: false,
         },
       },
     ],
@@ -55,6 +57,9 @@ module.exports = {
         jest: {
           version: 27,
         },
+      },
+      rules: {
+        'jest/no-conditional-expect': 'off',
       },
     },
   ],

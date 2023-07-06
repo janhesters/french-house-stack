@@ -67,7 +67,7 @@ test.describe('login page', () => {
     // Navigate to the login page.
     await page.goto('./login');
 
-    // The page has the correct tile.
+    // The page has the correct title.
     expect(await page.title()).toEqual(
       'Sign In / Sign Up | French House Stack',
     );
@@ -94,9 +94,6 @@ test.describe('login page', () => {
     await saveUserProfileToDatabase(user);
     const cookieToken = await createValidCookieToken(user.id);
 
-    // NOTE: This test has two `waits` to make the test more reliable.
-    // The first wait waits for the page to load. The second wait waits for the
-    // page to correctly navigate to the next page after the successful sign in.
     await page.addInitScript(() => {
       window.runMagicInTestMode = true;
     });
@@ -135,7 +132,6 @@ test.describe('login page', () => {
     // Enter an invalid email and submit the form.
     await page.getByLabel(/email/i).fill(invalidMagicEmail);
     await page.getByRole('button', { name: /sign in/i }).click();
-    await page.waitForLoadState('networkidle');
 
     // There should be an appropriate error message.
     await expect(
@@ -147,7 +143,6 @@ test.describe('login page', () => {
     await page.getByLabel(/email/i).fill(validMagicEmail);
     await page.getByRole('button', { name: /sign in/i }).click();
     await page.waitForURL(baseURL + '/home');
-    await page.waitForLoadState('networkidle');
     await expect(
       page.getByRole('heading', { level: 1, name: /home/i }),
     ).toBeVisible();

@@ -37,6 +37,7 @@ describe('getErrorMessage()', () => {
 
   test("given an error that extended the custom error class: returns the error's message", () => {
     class CustomError extends Error {
+      // eslint-disable-next-line no-useless-constructor
       public constructor(message: string) {
         super(message);
       }

@@ -24,7 +24,7 @@ export function UserProfileComponent({
 
   return (
     <main className="flex-1 xl:overflow-y-auto">
-      <div className="mx-auto max-w-3xl py-6 px-4 sm:px-6 lg:py-8 lg:px-8">
+      <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {success && (
           <div className="rounded-md bg-green-50 p-4 shadow-sm">
             <div className="flex">
@@ -83,7 +83,7 @@ export function UserProfileComponent({
                     </p>
                   </div>
 
-                  <div className="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                  <div className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-6">
                     <p className="flex items-center sm:col-span-6">
                       <span className="block text-sm font-medium text-gray-700 dark:text-gray-400">
                         {t('email')}
@@ -106,7 +106,7 @@ export function UserProfileComponent({
               <div className="pt-5">
                 <div className="flex justify-end">
                   <Link
-                    className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     to="/settings/profile"
                   >
                     {t('cancel')}

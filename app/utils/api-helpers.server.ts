@@ -1,6 +1,32 @@
 import type { TypedResponse } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import type { ZodFormattedError } from 'zod';
+
+type NestedJSON = {
+  [key: string]: string | string[] | boolean | undefined | NestedJSON;
+};
+
+/**
+ * Returns a 201 Created success status response.
+ *
+ * @returns A response with the 201 status code and a message.
+ */
+export function created(): TypedResponse<{ message: string }>;
+/**
+ * Returns a 201 Created success status response.
+ *
+ * @param data - An object containing custom data for the response.
+ * @returns A response with the 201 status code and the provided data.
+ */
+export function created<T extends NestedJSON>(
+  data: T,
+): TypedResponse<{ message: string } & T>;
+export function created<T extends NestedJSON>(
+  data?: T,
+): TypedResponse<{ message: string } | ({ message: string } & T)> {
+  return data
+    ? json({ message: 'Created', ...data }, { status: 201 })
+    : json({ message: 'Created' }, { status: 201 });
+}
 
 /**
  * Returns a 400 Bad Request error.
@@ -11,28 +37,18 @@ export function badRequest(): TypedResponse<{ message: string }>;
 /**
  * Returns a 400 Bad Request error.
  *
- * @param errors - An object containing the errors from the Zod schema.
- * @returns A response with the 400 status code, a message and the errors.
+ * @param errors - An object containing custom error messages.
+ * @returns A response with the 400 status code and the error messages.
  */
-export function badRequest<T>(
-  errors?: ZodFormattedError<T>,
-): TypedResponse<{ message: string; errors: ZodFormattedError<T> }>;
-/**
- * Returns a 400 Bad Request error.
- *
- * @param errors - A string containing the errors.
- * @returns A response with the 400 status code, a message and the errors.
- */
-export function badRequest(
-  errors?: string,
-): TypedResponse<{ message: string; errors: string }>;
-export function badRequest<T>(
-  errors?: ZodFormattedError<T> | string,
-): TypedResponse<{ message: string; errors?: ZodFormattedError<T> | string }> {
-  return json(
-    { message: 'Bad Request', ...(errors && { errors }) },
-    { status: 400 },
-  );
+export function badRequest<T extends NestedJSON>(
+  errors: T,
+): TypedResponse<{ message: string } & T>;
+export function badRequest<T extends NestedJSON>(
+  errors?: T,
+): TypedResponse<{ message: string } | ({ message: string } & T)> {
+  return errors
+    ? json({ message: 'Bad Request', ...errors }, { status: 400 })
+    : json({ message: 'Bad Request' }, { status: 400 });
 }
 
 /**
@@ -40,8 +56,22 @@ export function badRequest<T>(
  *
  * @returns A response with the 403 status code and a message.
  */
-export function forbidden(): TypedResponse<{ message: string }> {
-  return json({ message: 'Forbidden' }, { status: 403 });
+export function forbidden(): TypedResponse<{ message: string }>;
+/**
+ * Returns a 403 Unauthorized error.
+ *
+ * @param errors - An object containing custom error messages.
+ * @returns A response with the 403 status code and the error messages.
+ */
+export function forbidden<T extends NestedJSON>(
+  errors: T,
+): TypedResponse<{ message: string } & T>;
+export function forbidden<T extends NestedJSON>(
+  errors?: T,
+): TypedResponse<{ message: string } | ({ message: string } & T)> {
+  return errors
+    ? json({ message: 'Forbidden', ...errors }, { status: 403 })
+    : json({ message: 'Forbidden' }, { status: 403 });
 }
 
 /**
@@ -53,17 +83,18 @@ export function notFound(): TypedResponse<{ message: string }>;
 /**
  * Returns a 404 Not Found error.
  *
- * @param errors - A string for a custom message.
- * @returns A response with the 404 status code, a message and the errors.
+ * @param errors - An object containing custom error messages.
+ * @returns A response with the 404 status code and the error messages.
  */
-export function notFound(
-  errors: string,
-): TypedResponse<{ message: string; errors: string }>;
-export function notFound(errors?: string) {
-  return json(
-    { message: 'Not Found', ...(errors && { errors }) },
-    { status: 404 },
-  );
+export function notFound<T extends NestedJSON>(
+  errors: T,
+): TypedResponse<{ message: string } & T>;
+export function notFound<T extends NestedJSON>(
+  errors?: T,
+): TypedResponse<{ message: string } | ({ message: string } & T)> {
+  return errors
+    ? json({ message: 'Not Found', ...errors }, { status: 404 })
+    : json({ message: 'Not Found' }, { status: 404 });
 }
 
 /**
@@ -71,29 +102,112 @@ export function notFound(errors?: string) {
  *
  * @returns A response with the 405 status code and a message.
  */
-export const notAllowed = () =>
-  json({ message: 'Method Not Allowed' }, { status: 405 });
+export function notAllowed(): TypedResponse<{ message: string }>;
+/**
+ * Returns a 405 Method Not Allowed error.
+ *
+ * @param errors - An object containing custom error messages.
+ * @returns A response with the 405 status code and the error messages.
+ */
+export function notAllowed<T extends NestedJSON>(
+  errors: T,
+): TypedResponse<{ message: string } & T>;
+export function notAllowed<T extends NestedJSON>(
+  errors?: T,
+): TypedResponse<{ message: string } | ({ message: string } & T)> {
+  return errors
+    ? json({ message: 'Method Not Allowed', ...errors }, { status: 405 })
+    : json({ message: 'Method Not Allowed' }, { status: 405 });
+}
 
 /**
- * Returns a 500 Internal Server Error error.
+ * Returns a 409 Conflict error.
+ *
+ * @returns A response with the 409 status code and a message.
+ */
+export function conflict(): TypedResponse<{ message: string }>;
+/**
+ * Returns a 409 Conflict error.
+ *
+ * @param errors - An object containing custom error messages.
+ * @returns A response with the 409 status code and the error messages.
+ */
+export function conflict<T extends NestedJSON>(
+  errors: T,
+): TypedResponse<{ message: string } & T>;
+export function conflict<T extends NestedJSON>(
+  errors?: T,
+): TypedResponse<{ message: string } | ({ message: string } & T)> {
+  return errors
+    ? json({ message: 'Conflict', ...errors }, { status: 409 })
+    : json({ message: 'Conflict' }, { status: 409 });
+}
+
+/**
+ * Returns a 422 Unprocessable Entity error.
+ *
+ * @returns A response with the 422 status code and a message.
+ */
+export function unprocessableEntity(): TypedResponse<{ message: string }>;
+/**
+ * Returns a 422 Unprocessable Entity error.
+ *
+ * @param errors - An object containing custom error messages.
+ * @returns A response with the 422 status code and the error messages.
+ */
+export function unprocessableEntity<T extends NestedJSON>(
+  errors: T,
+): TypedResponse<{ message: string } & T>;
+export function unprocessableEntity<T extends NestedJSON>(
+  errors?: T,
+): TypedResponse<{ message: string } | ({ message: string } & T)> {
+  return errors
+    ? json({ message: 'Unprocessable Entity', ...errors }, { status: 422 })
+    : json({ message: 'Unprocessable Entity' }, { status: 422 });
+}
+
+/**
+ * Returns a 500 Internal Server Error.
  *
  * @returns A response with the 500 status code and a message.
  */
 export function internalServerError(): TypedResponse<{ message: string }>;
 /**
- * Returns a 500 Internal Server Error error.
+ * Returns a 500 Internal Server Error.
  *
- * @param errors - A string for a custom message.
- * @returns A response with the 500 status code and a message.
+ * @param errors - An object containing custom error messages.
+ * @returns A response with the 500 status code and the error messages.
  */
-export function internalServerError(
-  errors: string,
-): TypedResponse<{ message: string }>;
-export function internalServerError(
-  errors?: string,
-): TypedResponse<{ message: string }> {
-  return json(
-    { message: 'Internal Server Error', ...(errors && { errors }) },
-    { status: 500 },
-  );
+export function internalServerError<T extends NestedJSON>(
+  errors: T,
+): TypedResponse<{ message: string } & T>;
+export function internalServerError<T extends NestedJSON>(
+  errors?: T,
+): TypedResponse<{ message: string } | ({ message: string } & T)> {
+  return errors
+    ? json({ message: 'Internal Server Error', ...errors }, { status: 500 })
+    : json({ message: 'Internal Server Error' }, { status: 500 });
+}
+
+/**
+ * Returns a 502 Bad Gateway error.
+ *
+ * @returns A response with the 502 status code and a message.
+ */
+export function badGateway(): TypedResponse<{ message: string }>;
+/**
+ * Returns a 502 Bad Gateway error.
+ *
+ * @param errors - An object containing custom error messages.
+ * @returns A response with the 502 status code and the error messages.
+ */
+export function badGateway<T extends NestedJSON>(
+  errors: T,
+): TypedResponse<{ message: string } & T>;
+export function badGateway<T extends NestedJSON>(
+  errors?: T,
+): TypedResponse<{ message: string } | ({ message: string } & T)> {
+  return errors
+    ? json({ message: 'Bad Gateway', ...errors }, { status: 502 })
+    : json({ message: 'Bad Gateway' }, { status: 502 });
 }

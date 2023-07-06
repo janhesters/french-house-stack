@@ -1,6 +1,5 @@
 import type { ActionArgs, LoaderArgs, V2_MetaFunction } from '@remix-run/node';
-import { redirect } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { useActionData, useNavigation, useSubmit } from '@remix-run/react';
 import { Magic } from 'magic-sdk';
 import { useEffect, useRef } from 'react';
@@ -41,9 +40,13 @@ export const loader = async ({ request }: LoaderArgs) => {
   });
 };
 
-export const meta: V2_MetaFunction<typeof loader> = ({ data: { title } }) => [
-  { title },
-];
+export const meta: V2_MetaFunction<typeof loader> = ({ data, matches }) => {
+  const parentMeta = matches
+    // @ts-expect-error V2_MetaFunction is typed incorrectly.
+    .flatMap(match => match.meta ?? [])
+    .filter(meta => !('title' in meta));
+  return [...parentMeta, { title: data?.title }];
+};
 
 type ActionData = {
   email?: string;

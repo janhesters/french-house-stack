@@ -8,7 +8,7 @@ The Remix Stack for Web2, Web3 and
 Learn more about [Remix Stacks](https://remix.run/stacks).
 
 ```
-npx create-remix --template janhesters/french-house-stack
+npx create-remix --template ten-x-dev/french-house-stack
 ```
 
 ## What's in the Stack? 🤔
@@ -364,5 +364,3 @@ Here is a list of things this app could use:
 ### [Buidl!](https://www.urbandictionary.com/define.php?term=%23BUIDL)
 
 Now go out there make some magic! 🧙‍♂️
-
-[Ask better questions! 📈](https://janhesters.com)

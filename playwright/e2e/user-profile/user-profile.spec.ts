@@ -40,7 +40,7 @@ test.describe('user profile page', () => {
 
     // It renders the user's name.
     const nameInput = page.getByLabel(/name/i);
-    expect(await nameInput.inputValue()).toEqual(user.name);
+    await expect(nameInput).toHaveValue(user.name);
 
     // It shows the proper error messages for the name input.
     await nameInput.fill('');
@@ -66,12 +66,13 @@ test.describe('user profile page', () => {
 
     // Verify that saving the value worked.
     await page.reload();
-    expect(await nameInput.inputValue()).toEqual(newName);
+    await expect(nameInput).toHaveValue(newName);
 
     await page.close();
     await deleteUserProfileFromDatabaseById(user.id);
   });
 
+  // eslint-disable-next-line playwright/expect-expect
   test('given there is no user profile for the given user: renders a message to the user', ({}, testInfo) => {
     testInfo.fixme();
   });

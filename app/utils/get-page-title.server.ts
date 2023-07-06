@@ -1,6 +1,9 @@
-import type { StringMap, TFuncKey, TOptions } from 'i18next';
+import type { TOptions } from 'i18next';
 
 import { i18next } from '~/features/localization/i18next.server';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type $Dictionary<T = any> = { [key: string]: T };
 
 /**
  * Helper function to get the page title.
@@ -14,12 +17,12 @@ import { i18next } from '~/features/localization/i18next.server';
 export async function getPageTitle(
   request: Request,
   tKey:
-    | TFuncKey
+    | string
     | {
-        tKey: TFuncKey;
-        options: TOptions<StringMap>;
+        tKey: string;
+        options: TOptions<$Dictionary>;
       } = '',
-  prefix: string = '',
+  prefix = '',
 ) {
   const t = await i18next.getFixedT(request);
   const translation =
