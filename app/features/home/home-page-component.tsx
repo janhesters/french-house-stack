@@ -140,7 +140,7 @@ export function HomePageComponent({
             </div>
 
             <Disclosure.Panel className="md:hidden">
-              <div className="space-y-1 px-2 pt-2 pb-3 sm:px-3">
+              <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
                 {navigation.map(item => (
                   <Disclosure.Button
                     key={item.name}
@@ -158,7 +158,7 @@ export function HomePageComponent({
                   </Disclosure.Button>
                 ))}
               </div>
-              <div className="border-t border-gray-700 pt-4 pb-3">
+              <div className="border-t border-gray-700 pb-3 pt-4">
                 <div className="flex items-center px-5">
                   <div className="flex-shrink-0">
                     <img
@@ -210,7 +210,7 @@ export function HomePageComponent({
       </Disclosure>
 
       <header className="bg-white shadow dark:bg-slate-800">
-        <div className="mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             {t('home')}
           </h1>

@@ -1,27 +1,41 @@
 // @vitest-environment node
+import { faker } from '@faker-js/faker';
 import { describe, expect, test } from 'vitest';
-
-import { generateRandomDid } from '~/test/generate-random-did.server';
 
 import { createPopulatedUserProfile } from './user-profile-factories.server';
 import { throwIfUserProfileIsMissing } from './user-profile-helpers.server';
 
 describe('throwIfUserProfileIsMissing()', () => {
-  test('given a user profile (the user exists): returns the user', () => {
+  test('given a request and a user profile: returns the user profile', async () => {
     const user = createPopulatedUserProfile();
 
-    expect(throwIfUserProfileIsMissing(generateRandomDid())(user)).toEqual(
-      user,
-    );
+    expect(
+      await throwIfUserProfileIsMissing(
+        new Request(faker.internet.url()),
+        user,
+      ),
+    ).toEqual(user);
   });
 
-  test("given null (the user doesn't exist): throws the correct error", () => {
-    // `retrieveUserProfileFromDatabaseById` returns a UserProfile or null.
-    const user = null;
-    const userId = generateRandomDid();
+  test('given a request and null: throws a redirect to the login page and removes any auth cookies', async () => {
+    expect.assertions(1);
 
-    expect(() => throwIfUserProfileIsMissing(userId)(user)).toThrowError(
-      'No user profile found with id: ' + userId,
-    );
+    try {
+      await throwIfUserProfileIsMissing(
+        new Request(faker.internet.url()),
+        null,
+      );
+    } catch (error) {
+      expect(error).toEqual(
+        new Response(null, {
+          status: 302,
+          headers: {
+            Location: '/',
+            'Set-Cookie':
+              '__user-authentication-session=; Max-Age=0; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax',
+          },
+        }),
+      );
+    }
   });
 });

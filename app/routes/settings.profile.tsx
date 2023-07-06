@@ -22,7 +22,7 @@ export const handle = { i18n: 'user-profile' };
 
 export const loader = async ({ request }: LoaderArgs) => {
   const userId = await requireUserIsAuthenticated(request);
-  const user = await requireUserProfileExists(userId);
+  const user = await requireUserProfileExists(request, userId);
 
   const url = new URL(request.url);
   const success = url.searchParams.get('success') === 'true';
@@ -35,9 +35,13 @@ export const loader = async ({ request }: LoaderArgs) => {
   });
 };
 
-export const meta: V2_MetaFunction<typeof loader> = ({ data: { title } }) => [
-  { title },
-];
+export const meta: V2_MetaFunction<typeof loader> = ({ data, matches }) => {
+  const parentMeta = matches
+    // @ts-expect-error V2_MetaFunction is typed incorrectly.
+    .flatMap(match => match.meta ?? [])
+    .filter(meta => !('title' in meta));
+  return [...parentMeta, { title: data?.title }];
+};
 
 const environmentSchema = z.object({ userId: z.string().length(51) });
 

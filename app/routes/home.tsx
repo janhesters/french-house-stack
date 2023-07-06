@@ -16,7 +16,7 @@ export const loader = async ({ request }: LoaderArgs) => {
     i18next.getFixedT(request),
     requireUserIsAuthenticated(request),
   ]);
-  const userProfile = await requireUserProfileExists(userId);
+  const userProfile = await requireUserProfileExists(request, userId);
 
   return json({
     title: await getPageTitle(request, t('home:home') ?? undefined),

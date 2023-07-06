@@ -45,13 +45,13 @@ test.describe('home page', () => {
 
     const { id } = await loginAndSaveUserProfileToDatabase({ page });
     await page.goto('./home');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // eslint-disable-next-line playwright/no-conditional-in-test
     await (isMobile
       ? page.getByRole('button', { name: /open main menu/i }).click()
       : page.getByRole('button', { name: /open user menu/i }).click());
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('load');
 
     // Logging the user out should redirect you to the landing page.
     // eslint-disable-next-line playwright/no-conditional-in-test
@@ -99,6 +99,7 @@ test.describe('home page', () => {
     await deleteUserProfileFromDatabaseById(id);
   });
 
+  // eslint-disable-next-line playwright/expect-expect
   test('given there is no user profile for the given user: renders a message to the user', ({}, testInfo) => {
     testInfo.fixme();
   });
