@@ -36,7 +36,7 @@ export const mapIdToAutoComplete = (id?: string) =>
 
 const Button = ({ className, ...props }: JSX.IntrinsicElements['button']) => (
   <button
-    className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+    className="ml-3 inline-flex justify-center rounded-md border border-transparent bg-orange-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
     {...props}
   />
 );
@@ -45,7 +45,7 @@ const CheckBox = forwardRef<HTMLInputElement, JSX.IntrinsicElements['input']>(
   function CheckBox({ type = 'checkbox', ...props }, ref) {
     return (
       <input
-        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+        className="h-4 w-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
         ref={ref}
         type={type}
         {...props}
@@ -99,7 +99,7 @@ const Input = forwardRef<HTMLInputElement, JSX.IntrinsicElements['input']>(
     return (
       <input
         autoComplete={mapIdToAutoComplete(props.name)}
-        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-slate-500 dark:bg-slate-700 dark:text-white sm:text-sm"
+        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:border-slate-500 dark:bg-slate-700 dark:text-white sm:text-sm"
         ref={ref}
         type={type}
         {...props}
@@ -121,7 +121,7 @@ export const Radio = forwardRef<
 >(function Radio({ type = 'radio', ...props }, ref) {
   return (
     <input
-      className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+      className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
       ref={ref}
       type={type}
       {...props}
@@ -134,7 +134,7 @@ const Select = forwardRef<HTMLSelectElement, JSX.IntrinsicElements['select']>(
     return (
       <select
         autoComplete={mapIdToAutoComplete(props.name)}
-        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
         ref={ref}
         {...props}
       />
@@ -148,7 +148,7 @@ const TextArea = forwardRef<
 >(function TextArea(props, ref) {
   return (
     <textarea
-      className="block w-full rounded-md border-gray-300 text-gray-800 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+      className="block w-full rounded-md border-gray-300 text-gray-800 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
       ref={ref}
       rows={3}
       {...props}
