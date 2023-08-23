@@ -32,8 +32,8 @@ export default function LandingPage() {
             <div className="absolute inset-0">
               <img
                 className="h-full w-full object-cover"
-                src="https://images.unsplash.com/photo-1530352865347-3c2e277abefe"
-                alt="A DJ by https://unsplash.com/@emilianovittoriosi"
+                src="https://images.unsplash.com/photo-1606755456206-b25206cde27e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=987&q=80"
+                alt="A pack of french fries"
               />
               <div className="absolute inset-0 bg-[color:rgba(79,70,229,0.5)] mix-blend-multiply" />
             </div>
