@@ -29,6 +29,7 @@ export async function getSession(request: Request) {
 
 const getUserIdFromSession = (session: Session): string | undefined => {
   const userId = session.get(USER_SESSION_KEY);
+  console.warn('userId', userId);
   return userId;
 };
 
