@@ -6,9 +6,12 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   test: {
     environment: 'happy-dom',
+    environmentMatchGlobs: [
+      ['**/*.server.{spec,test}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}', 'node'],
+    ],
     globals: true,
     setupFiles: ['./app/test/setup-test-environment.ts'],
-    include: ['./**/*.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: ['./app/**/*.{spec,test}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     watchExclude: [
       '.*\\/node_modules\\/.*',
       '.*\\/build\\/.*',

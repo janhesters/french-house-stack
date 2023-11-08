@@ -1,3 +1,4 @@
+/* eslint-disable unicorn/prefer-module */
 import { resolve } from 'node:path';
 
 import type { EntryContext } from '@remix-run/node';
@@ -12,6 +13,13 @@ import { PassThrough } from 'stream';
 
 import { i18n } from './features/localization/i18n';
 import { i18next } from './features/localization/i18next.server';
+
+if (process.env.SERVER_MOCKS === 'true') {
+  // @ts-expect-error - global is readonly and for some reason MSW accesses it.
+  global.location = { protocol: 'http', host: 'localhost' };
+  const { exampleHandlers } = require('./test/mocks/handlers/example');
+  require('./test/mocks/server').startMockServer([...exampleHandlers]);
+}
 
 const ABORT_DELAY = 5000;
 

@@ -1,11 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-import { createRemixStub, render, screen } from '~/test/test-utils';
+import { createRemixStub, render, screen } from '~/test/react-test-utils';
 
 import { NotFoundComponent } from './not-found-component';
 
 describe('NotFound component', () => {
-  it('given a link: renders error messages and the correct link', async () => {
+  test('given a link: renders error messages and the correct link', async () => {
     const path = '/some-non-existent-page';
     const RemixStub = createRemixStub([
       { path, element: <NotFoundComponent /> },
@@ -21,8 +21,9 @@ describe('NotFound component', () => {
       'href',
       '/',
     );
-    expect(
-      screen.getByRole('link', { name: /french house stack/i }),
-    ).toHaveAttribute('href', '/');
+    expect(screen.getByRole('link', { name: /fastnote/i })).toHaveAttribute(
+      'href',
+      '/',
+    );
   });
 });

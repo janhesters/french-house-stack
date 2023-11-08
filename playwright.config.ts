@@ -98,7 +98,9 @@ const config: PlaywrightTestConfig = {
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: process.env.CI ? 'npm run build && npm run start' : 'npm run dev',
+    command: process.env.CI
+      ? 'npm run build && npm run start-with-server-mocks'
+      : 'npm run dev-with-server-mocks',
     port: 3000,
   },
 };

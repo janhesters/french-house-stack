@@ -1,8 +1,16 @@
 {
+  "404-error": "404 Error",
   "app-name": "French House Stack",
-  "logout": "Ausloggen",
-  "open-main-menu": "Hauptmenü öffnen",
-  "open-user-menu": "Benutzermenü öffnen",
-  "settings": "Einstellungen",
-  "your-profile": "Dein Profil"
+  "contact-support": "Contact Support",
+  "go-back-home": "Go back home",
+  "logout": "Log out",
+  "open-main-menu": "Open main menu",
+  "open-user-menu": "Open user menu",
+  "page-not-found": "Page not found.",
+  "settings": "Settings",
+  "sorry-we-could-not-find-page": "Sorry, we couldn't find the page you're looking for.",
+  "status": "Status",
+  "twitter": "Twitter",
+  "your-avatar": "Your avatar",
+  "your-profile": "Your Profile"
 }

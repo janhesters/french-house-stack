@@ -2,6 +2,11 @@ import type { UserProfile } from '@prisma/client';
 
 import { prisma } from '~/database.server';
 
+export type PartialUserProfileParameters = Pick<
+  Parameters<typeof prisma.userProfile.create>[0]['data'],
+  'acceptedTermsAndConditions' | 'did' | 'email' | 'id' | 'name'
+>;
+
 // CREATE
 
 /**
@@ -11,10 +16,7 @@ import { prisma } from '~/database.server';
  * @returns The newly created user profile.
  */
 export async function saveUserProfileToDatabase(
-  userProfile: Pick<
-    Parameters<typeof prisma.userProfile.create>[0]['data'],
-    'avatar' | 'email' | 'id' | 'name'
-  >,
+  userProfile: PartialUserProfileParameters,
 ) {
   return prisma.userProfile.create({ data: userProfile });
 }
@@ -31,6 +33,19 @@ export async function retrieveUserProfileFromDatabaseById(
   id: UserProfile['id'],
 ) {
   return prisma.userProfile.findUnique({ where: { id } });
+}
+
+/**
+ * Returns the first user profile that exists in the database with the given
+ * email.
+ *
+ * @param email - The email of the user profile to retrieve.
+ * @returns The user profile with the given email, or null if it wasn't found.
+ */
+export async function retrieveFirstUserProfileFromDatabaseByEmail(
+  email: string,
+) {
+  return prisma.userProfile.findFirst({ where: { email } });
 }
 
 // UPDATE
@@ -53,10 +68,7 @@ export async function updateUserProfileInDatabaseById({
    * The values of the user profile you want to change.
    */
   userProfile: Partial<
-    Pick<
-      Parameters<typeof prisma.userProfile.update>[0]['data'],
-      'avatar' | 'email' | 'name'
-    >
+    Omit<Parameters<typeof prisma.userProfile.update>[0]['data'], 'id'>
   >;
 }) {
   return prisma.userProfile.update({ where: { id }, data: userProfile });

@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker';
 import type { UserProfile } from '@prisma/client';
+import cuid from 'cuid';
 
 import { generateRandomDid } from '~/test/generate-random-did.server';
 import type { Factory } from '~/utils/types';
@@ -13,12 +14,21 @@ import type { Factory } from '~/utils/types';
  */
 export const createUserProfile: Factory<UserProfile> = ({
   id = '',
-  email = '',
-  name = '',
-  avatar = '',
   createdAt = new Date(),
   updatedAt = new Date(),
-} = {}) => ({ id, email, name, avatar, createdAt, updatedAt });
+  did = '',
+  email = '',
+  name = '',
+  acceptedTermsAndConditions = false,
+} = {}) => ({
+  id,
+  did,
+  email,
+  name,
+  createdAt,
+  updatedAt,
+  acceptedTermsAndConditions,
+});
 
 /**
  * Creates a user profile with populated values.
@@ -27,10 +37,19 @@ export const createUserProfile: Factory<UserProfile> = ({
  * @returns A populated user profile with given params.
  */
 export const createPopulatedUserProfile: Factory<UserProfile> = ({
-  id = generateRandomDid(),
+  id = cuid(),
+  did = generateRandomDid(),
   email = faker.internet.email(),
-  name = faker.name.fullName(),
-  avatar = faker.image.avatar(),
-  updatedAt = faker.date.recent(10),
-  createdAt = faker.date.past(3, updatedAt),
-} = {}) => createUserProfile({ id, email, name, avatar, createdAt, updatedAt });
+  name = faker.person.fullName(),
+  updatedAt = faker.date.recent({ days: 10 }),
+  createdAt = faker.date.past({ years: 3, refDate: updatedAt }),
+  acceptedTermsAndConditions = true,
+} = {}) => ({
+  id,
+  did,
+  email,
+  name,
+  createdAt,
+  updatedAt,
+  acceptedTermsAndConditions,
+});

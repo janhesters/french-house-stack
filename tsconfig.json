@@ -6,7 +6,8 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ES2019"],
+    "lib": ["DOM", "DOM.Iterable", "ES2021"],
+    "module": "esnext",
     "moduleResolution": "node",
     // Remix takes care of building everything in `remix build`.
     "noEmit": true,

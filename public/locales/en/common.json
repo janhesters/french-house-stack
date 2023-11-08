@@ -1,16 +1,8 @@
 {
   "404-error": "404 Error",
-  "app-name": "French House Stack",
-  "contact-support": "Contact Support",
+  "app-name": "FastNote",
   "go-back-home": "Go back home",
   "logout": "Log out",
-  "open-user-menu": "Open user menu",
-  "open-main-menu": "Open main menu",
   "page-not-found": "Page not found.",
-  "settings": "Settings",
-  "sorry-we-could-not-find-page": "Sorry, we couldn't find the page you're looking for.",
-  "status": "Status",
-  "twitter": "Twitter",
-  "your-avatar": "Your avatar",
-  "your-profile": "Your Profile"
+  "sorry-we-could-not-find-page": "Sorry, we couldn't find the page you're looking for."
 }

@@ -51,15 +51,22 @@ to check for updates and install the latest versions.
 
 ## Development 🛠
 
-### Getting Started
+### Getti### Getting Started
 
-- Make sure you're using Node.js 16.0.0 or higher. You can run:
+- Make sure you're using Node.js 18.15.0 or higher. You can run:
 
   ```sh
   node -v
   ```
 
   to check which version you're on.
+
+  If you need to upgrade, we recommend using
+  [`nvm`](https://github.com/nvm-sh/nvm):
+
+  ```sh
+  nvm install --lts && nvm alias default 'lts/*'
+  ```
 
 - Install dependencies:
 
@@ -134,16 +141,48 @@ to check for updates and install the latest versions.
 
 This starts your app in development mode, rebuilding assets on file changes.
 
+### Dev with Mocks
+
+You can run the app with MSW mocking requests to third party services by running
+
+```sh
+npm run dev-with-mocks
+```
+
+Make sure you run `npx msw init ./public` once before you run this command to
+initialize the MSW service worker. It should create a file in
+`/public/mockServiceWorker.js` for you.
+
 ### Prisma helper scripts
 
-- `"prisma:apply-changes"` - Applies changes to the database schema to the
-  database.
-- `"prisma:seed"` - Seeds the database with a user profile.
-- `"prisma:setup"` - Sets up the database.
-- `"prisma:wipe"` - Wipes the database (irrevocably delete all data, but keep
-  the schema).
-- `"prisma:reset-dev"` - Wipes the database, seeds it and starts the dev server.
-  This is a utility script that you can use in development to get clean starts.
+- `"prisma:deploy"` - Applies all pending migrations from the
+  `prisma/migrations` directory to the database. This is typically used in a
+  production environment where you want to apply version-controlled schema
+  changes.
+- `"prisma:migrate"` - Run via `npm run prisma:migrate -- "my_migration_name"`
+  to create a new migration file in the `prisma/migrations` directory based on
+  the changes made to your Prisma schema. This command also applies the
+  migration to your development database.
+- `"prisma:push"` - Applies changes from the Prisma schema to the database
+  without creating a migration file. This is useful for quick prototyping and
+  development.
+- `"prisma:reset-dev"` - Wipes the database, seeds it, and starts the
+  development server. This is a utility script that you can use in development
+  to get a clean start.
+- `"prisma:reset-dev-with-mocks"` - Wipes the database, seeds it, starts the
+  development server, and mocks all API requests. This is a utility script that
+  you can use in development to get clean starts and to develop offline or
+  without hitting any API.
+- `"prisma:seed"` - Seeds the database with predefined data. This is useful for
+  setting up a consistent state for testing or development.
+- `"prisma:setup"` - Generates Prisma Client, applies all pending migrations to
+  the database, and then pushes any remaining changes in the Prisma schema that
+  are not yet represented by a migration.
+- `"prisma:studio"` - Opens Prisma Studio, a visual interface for viewing and
+  editing data in your database.
+- `"prisma:wipe"` - Wipes the database, deleting all data but keeping the
+  schema. This is a utility script that you can use in development to get a
+  clean start.
 
 ### Generating boilerplate
 
@@ -284,6 +323,17 @@ by the VSCode extension.
 For lower level tests of utilities and individual components, we use `vitest`.
 We have DOM-specific assertion helpers via
 [`@testing-library/jest-dom`](https://testing-library.com/jest-dom).
+
+By default, Vitest runs tests in the [`"happy-dom"` environment](https://vitest.dev/config/#environment). However, test files that have `.server` in the name will be run in the `"node"` environment.
+
+### Test Scripts
+
+- `npm run test` - Runs all Vitest tests.
+- `npm run test:unit` - Runs all unit tests with Vitest. Your unit tests should test components or function in isolation, run fast, and are files that end with `.test.ts` or `.test.tsx`.
+- `npm run test:integration` - Runs all integration tests Vitest. Your integration tests should test multiple components or functions together, run slower than unit tests (e.g. because they hit the database), and are files that end with `.spec.ts` or `.spec.tsx`.
+- `npm run test:coverage` - Runs all Vitest tests and generates a coverage report.
+- `npm run test:e2e` - Runs all E2E tests with Playwright.
+- `npm run test:e2e:ui` - Runs all E2E tests with Playwright in UI mode.
 
 ### Type Checking
 

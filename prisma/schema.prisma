@@ -11,12 +11,63 @@ datasource db {
 }
 
 model UserProfile {
+  id                         String            @id @default(cuid())
   /// The Magic issuer of the user who created the account. Its a decentralized
   /// identifier (DID) that uniquely identifies the user.
-  id        String   @id
+  did                        String            @unique
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
+  email                      String            @unique
+  name                       String            @default("")
+  acceptedTermsAndConditions Boolean           @default(false)
+  memberships                Membership[]
+  authSession                UserAuthSession[]
+  notes                      Note[]
+}
+
+model UserAuthSession {
+  id             String      @id @default(cuid())
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  user           UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  expirationDate DateTime
+}
+
+model Organization {
+  id          String       @id() @default(cuid())
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  name        String
+  /// We avoid conflicts from slugs by using Prisma middleware. See the file
+  /// `database.server.ts`.
+  slug        String       @unique
+  memberships Membership[]
+  Note        Note[]
+}
+
+model Membership {
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  member         UserProfile  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberId       String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  deactivatedAt  DateTime?
+  role           String       @default("member")
+
+  @@id([memberId, organizationId])
+}
+
+model Note {
+  id        String   @id @unique @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  email     String   @unique
-  name      String   @default("")
-  avatar    String   @default("")
+
+  title          String
+  content        String
+  creator        UserProfile  @relation(fields: [creatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  creatorId      String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId String
 }

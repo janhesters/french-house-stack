@@ -8,7 +8,5 @@ import { tap } from 'ramda';
  * @returns A function that takes in a value and returns it while logging out
  * the value with the given message.
  */
-const trace: (message: string) => <T>(value: T) => T = message =>
+export const trace: (message: string) => <T>(value: T) => T = message =>
   tap(x => console.log(message, x));
-
-export default trace;

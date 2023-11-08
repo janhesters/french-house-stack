@@ -8,7 +8,7 @@ import { parse } from 'cookie';
 import {
   createUserSession,
   USER_AUTHENTICATION_SESSION_NAME,
-} from '~/features/user-authentication/user-authentication-session.server';
+} from '~/features/user-authentication/user-authentication-session-old.server';
 import { saveUserProfileToDatabase } from '~/features/user-profile/user-profile-model.server';
 import { generateRandomDid } from '~/test/generate-random-did.server';
 

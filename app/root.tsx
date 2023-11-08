@@ -22,15 +22,22 @@ import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
+import darkStyles from '~/styles/dark.css';
+import styles from '~/styles/tailwind.css';
+
 import type { EnvironmentVariables } from './entry.client';
 import { i18next } from './features/localization/i18next.server';
 import { NotFoundComponent } from './features/not-found/not-found-component';
-import styles from './tailwind.css';
 
 export const handle = { i18n: 'common' };
 
 export const links: LinksFunction = () => [
   { rel: 'stylesheet', href: styles },
+  {
+    rel: 'stylesheet',
+    href: darkStyles,
+    media: '(prefers-color-scheme: dark)',
+  },
   { rel: 'stylesheet', href: 'https://rsms.me/inter/inter.css' },
 ];
 
@@ -79,16 +86,13 @@ export default function App() {
   useChangeLanguage(locale);
 
   return (
-    <html
-      lang={locale}
-      className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800"
-      dir={i18n.dir()}
-    >
+    <html lang={locale} className="h-full" dir={i18n.dir()}>
       <head>
         <Meta />
         <Links />
       </head>
-      <body className="h-full overflow-auto">
+
+      <body className="h-full overflow-auto overscroll-none bg-background text-foreground">
         <Outlet />
         <ScrollRestoration />
         <script
@@ -109,29 +113,27 @@ export function ErrorBoundary() {
   const error = useRouteError();
 
   return isRouteErrorResponse(error) ? (
-    <html
-      className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800"
-      lang="en"
-    >
+    <html className="h-full" lang="en">
       <head>
         <title>404 Not Found | French House Stack</title>
         <Meta />
         <Links />
       </head>
 
-      <body className="h-full overflow-auto">
+      <body className="h-full overflow-auto overscroll-none bg-background text-foreground">
         <NotFoundComponent />;
         <Scripts />
       </body>
     </html>
   ) : (
-    <html className="h-full overflow-hidden bg-gray-100 dark:bg-slate-800">
+    <html className="h-full">
       <head>
         <title>Oh no!</title>
         <Meta />
         <Links />
       </head>
-      <body className="h-full overflow-auto">
+
+      <body className="h-full overflow-auto overscroll-none bg-background text-foreground">
         <main className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
