@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-conditional-expect */
 import { faker } from '@faker-js/faker';
 import { describe, expect, test } from 'vitest';
 
@@ -6,7 +5,7 @@ import { getErrorMessage } from './get-error-message';
 
 describe('getErrorMessage()', () => {
   test("given an error: returns the error's message", () => {
-    const message = faker.random.words();
+    const message = faker.word.words();
 
     expect(getErrorMessage(new Error(message))).toEqual(message);
   });
@@ -19,7 +18,7 @@ describe('getErrorMessage()', () => {
     try {
       throw someString;
     } catch (error) {
-      expect(getErrorMessage(error)).toEqual(JSON.stringify(someString));
+      expect(getErrorMessage(error)).toEqual(someString);
     }
   });
 
@@ -43,18 +42,18 @@ describe('getErrorMessage()', () => {
       }
     }
 
-    const message = faker.random.words();
+    const message = faker.word.words();
 
     expect(getErrorMessage(new CustomError(message))).toEqual(message);
   });
 
   test("given a custom error object with a message property: returns the object's message property", () => {
-    const message = faker.random.words();
+    const message = faker.word.words();
 
     expect(getErrorMessage({ message })).toEqual(message);
   });
 
-  it('given circular references: handles them', () => {
+  test('given circular references: handles them', () => {
     expect.assertions(1);
 
     const object = { circular: this };

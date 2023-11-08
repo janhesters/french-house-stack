@@ -1,7 +1,5 @@
 import type { EffectCallback } from 'react';
-import { useEffect } from 'react';
-
-import { useFirstMountState } from './use-first-mount-state';
+import { useEffect, useRef } from 'react';
 
 /**
  * Accepts a function that contains imperative, possibly effectful code.
@@ -14,10 +12,12 @@ import { useFirstMountState } from './use-first-mount-state';
  * @param effect Imperative function that can return a cleanup function
  */
 export function useEffectOnce(effect: EffectCallback) {
-  const isFirstMount = useFirstMountState();
+  const isFirstMount = useRef(true);
 
   useEffect(() => {
-    if (isFirstMount) {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+
       return effect();
     }
 

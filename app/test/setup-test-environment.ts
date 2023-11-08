@@ -1,5 +1,5 @@
 import 'dotenv/config';
-import '@testing-library/jest-dom/extend-expect';
+import '@testing-library/jest-dom/vitest';
 
 import { installGlobals } from '@remix-run/node';
 

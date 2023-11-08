@@ -6,17 +6,17 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ES2019"],
-    "moduleResolution": "node",
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     // Remix takes care of building everything in `remix build`.
     "noEmit": true,
     "paths": {
       "~/*": ["./app/*"]
     },
     "resolveJsonModule": true,
-    "skipLibCheck": true,
     "strict": true,
-    "target": "ES2019"
+    "target": "ES2022"
   },
   "include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx"]
 }

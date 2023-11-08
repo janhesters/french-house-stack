@@ -1,8 +1,7 @@
 {
+  "404-error": "404 Error",
   "app-name": "French House Stack",
-  "logout": "Ausloggen",
-  "open-main-menu": "Hauptmenü öffnen",
-  "open-user-menu": "Benutzermenü öffnen",
-  "settings": "Einstellungen",
-  "your-profile": "Dein Profil"
+  "go-back-home": "Zurück zur Startseite",
+  "page-not-found": "Seite nicht gefunden.",
+  "sorry-we-could-not-find-page": "Sorry, wir konnten die Seite nicht finden nach der du suchst."
 }

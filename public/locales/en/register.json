@@ -1,0 +1,23 @@
+{
+  "already-a-member": "Already a member?",
+  "create-your-account": "Create your account",
+  "did-token-malformed-error": "A DID token must be string.",
+  "did-token-missing": "Registration failed. No DID token.",
+  "email-address": "Email address",
+  "email-description": "Your account's email address.",
+  "email-invalid": "A valid email consists of characters, '@' and '.'.",
+  "email-must-be-string": "A valid email address must be string.",
+  "email-placeholder": "Your email address ...",
+  "email-required": "Please enter a valid email (required).",
+  "failed-to-load-magic": "Failed to load authentication provider https://magic.link. Please reload the page to try again.",
+  "log-in-to-your-account": "Log in to your account.",
+  "missing-email-metadata": "Missing email from Magic metadata.",
+  "missing-issuer-metadata": "Missing issuer from Magic metadata.",
+  "register": "Register",
+  "registering": "Registering ...",
+  "registration-failed": "Registration failed. Please try again.",
+  "terms-description": "By signing up, you are creating an account and you agree to our <1>Terms of Use</1> and <2>Privacy Policy</2>.",
+  "terms-label": "I accept the terms and conditions.",
+  "terms-must-be-accepted": "You must accept the terms and conditions.",
+  "user-already-exists": "User with given email already exists. Did you mean to log in instead?"
+}

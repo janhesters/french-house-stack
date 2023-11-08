@@ -1,31 +1,54 @@
 import 'dotenv/config';
 
+import { exit } from 'node:process';
+
 import { faker } from '@faker-js/faker';
+import { createId } from '@paralleldrive/cuid2';
 import { PrismaClient } from '@prisma/client';
-import { exit } from 'process';
 
 const prettyPrint = (object: any) =>
   console.log(JSON.stringify(object, undefined, 2));
 
 const prisma = new PrismaClient();
 
-const userId = process.env.SEED_USER_ID;
+const userDid = process.env.SEED_USER_DID;
 
 async function seed() {
-  if (!userId) {
-    throw new Error('Please provide a userId to seed.ts');
+  if (!userDid) {
+    throw new Error('Please provide a userDid to seed.ts');
   }
 
+  console.log('👤 Creating user profile ...');
   const user = await prisma.userProfile.create({
     data: {
-      id: userId,
+      did: userDid,
       email: faker.internet.email(),
-      name: faker.name.fullName(),
-      avatar: faker.image.avatar(),
+      id: createId(),
+      name: faker.person.fullName(),
     },
   });
-  console.log('========= result of seed: =========');
-  prettyPrint({ user });
+
+  console.log('🏢 Creating organization ...');
+  const organizationName = faker.company.name();
+  const organization = await prisma.organization.create({
+    data: {
+      name: organizationName,
+      slug: faker.helpers.slugify(organizationName).toLowerCase(),
+    },
+  });
+
+  console.log('👥 Adding user to organization ...');
+  await prisma.organization.update({
+    where: { id: organization.id },
+    data: {
+      memberships: {
+        create: [{ member: { connect: { id: user.id } }, role: 'owner' }],
+      },
+    },
+  });
+
+  console.log('========= 🌱 result of seed: =========');
+  prettyPrint({ user, organization });
 }
 
 seed()

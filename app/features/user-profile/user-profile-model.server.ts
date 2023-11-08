@@ -2,6 +2,11 @@ import type { UserProfile } from '@prisma/client';
 
 import { prisma } from '~/database.server';
 
+export type PartialUserProfileParameters = Pick<
+  Parameters<typeof prisma.userProfile.create>[0]['data'],
+  'acceptedTermsAndConditions' | 'did' | 'email' | 'id' | 'name'
+>;
+
 // CREATE
 
 /**
@@ -11,10 +16,7 @@ import { prisma } from '~/database.server';
  * @returns The newly created user profile.
  */
 export async function saveUserProfileToDatabase(
-  userProfile: Pick<
-    Parameters<typeof prisma.userProfile.create>[0]['data'],
-    'avatar' | 'email' | 'id' | 'name'
-  >,
+  userProfile: PartialUserProfileParameters,
 ) {
   return prisma.userProfile.create({ data: userProfile });
 }
@@ -24,13 +26,67 @@ export async function saveUserProfileToDatabase(
 /**
  * Retrieves a user profile record from the database based on its id.
  *
- * @param id - The id of the user profile to get.
+ * @param id - The id of the user profile to retrieve.
  * @returns The user profile with a given id or null if it wasn't found.
  */
 export async function retrieveUserProfileFromDatabaseById(
   id: UserProfile['id'],
 ) {
   return prisma.userProfile.findUnique({ where: { id } });
+}
+/**
+ * Retrieves a user profile from the database based on their decentralized id.
+ *
+ * @param did - The `did` of the user profile to retrieve.
+ * @returns The user profile with the given `did`, or null if it wasn't found.
+ */
+export async function retrieveUserProfileFromDatabaseByDid(
+  did: UserProfile['did'],
+) {
+  return prisma.userProfile.findUnique({ where: { did } });
+}
+
+/**
+ * Returns the first user profile that exists in the database with the given
+ * email.
+ *
+ * @param email - The email of the user profile to retrieve.
+ * @returns The user profile with the given email, or null if it wasn't found.
+ */
+export async function retrieveFirstUserProfileFromDatabaseByEmail(
+  email: string,
+) {
+  return prisma.userProfile.findFirst({ where: { email } });
+}
+
+/**
+ * Retrieves a user profile record from the database based on its id and
+ * includes the active memberships for the organizations the user is a member
+ * of.
+ *
+ * @param id - The id of the user profile to get.
+ * @returns The user profile with their active memberships for the organizations
+ * of which they are a member of for the given id or null if it wasn't found.
+ */
+export async function retrieveUserProfileWithMembershipsFromDatabaseById(
+  id: UserProfile['id'],
+) {
+  return prisma.userProfile.findUnique({
+    where: { id },
+    include: {
+      memberships: {
+        where: {
+          // eslint-disable-next-line unicorn/no-null
+          OR: [{ deactivatedAt: null }, { deactivatedAt: { gt: new Date() } }],
+        },
+        select: {
+          organization: { select: { id: true, name: true, slug: true } },
+          role: true,
+          deactivatedAt: true,
+        },
+      },
+    },
+  });
 }
 
 // UPDATE
@@ -53,10 +109,7 @@ export async function updateUserProfileInDatabaseById({
    * The values of the user profile you want to change.
    */
   userProfile: Partial<
-    Pick<
-      Parameters<typeof prisma.userProfile.update>[0]['data'],
-      'avatar' | 'email' | 'name'
-    >
+    Omit<Parameters<typeof prisma.userProfile.update>[0]['data'], 'id'>
   >;
 }) {
   return prisma.userProfile.update({ where: { id }, data: userProfile });

@@ -48,7 +48,21 @@ export function asyncPipe<A, B, C, D, E>(
   cd: (c: C) => MaybePromise<D>,
   de: (d: D) => MaybePromise<E>,
 ): (a: A) => Promise<E>;
+export function asyncPipe<A, B, C, D, E, F>(
+  ab: (a: A) => MaybePromise<B>,
+  bc: (b: B) => MaybePromise<C>,
+  cd: (c: C) => MaybePromise<D>,
+  de: (d: D) => MaybePromise<E>,
+  // eslint-disable-next-line unicorn/prevent-abbreviations
+  ef: (e: E) => MaybePromise<F>,
+): (a: A) => Promise<F>;
 
+/**
+ * Composes functions which can, but don't have to, return promises.
+ *
+ * @param fns - The functions to compose.
+ * @returns A function that takes an argument and returns a promise.
+ */
 export function asyncPipe<FS extends any[]>(
   ...fns: AsyncParameters<FS>
 ): AsyncPipeReturnType<FS>;

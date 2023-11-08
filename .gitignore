@@ -7,11 +7,11 @@ coverage
 /public/build
 .env
 
-/test-results/
-/playwright-report/
-/playwright/.cache/
-
 /prisma/data.db
 /prisma/data.db-journal
 
 .DS_Store
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

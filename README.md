@@ -13,8 +13,7 @@ npx create-remix --template ten-x-dev/french-house-stack
 
 ## What's in the Stack? 🤔
 
-The French House Stack is a starter template for
-[developing DApps by using Magic](https://magic.link/docs/home#blockchains).
+The French House Stack is a starter template for SaaS apps in general, but also for [developing DApps by using Magic](https://magic.link/docs/home#blockchains).
 However, Magic is perfectly suited for a regular Web2 app, too.
 
 - Authentication with [Magic](https://magic.link/) and with
@@ -24,11 +23,11 @@ However, Magic is perfectly suited for a regular Web2 app, too.
   production and staging environments
 - Styling with [Tailwind](https://tailwindcss.com/).
   - Includes [dark mode](https://tailwindcss.com/docs/dark-mode).
-  - The routes in this app have been build using the
-    [free components from Tailwind UI](https://tailwindui.com/preview)
+- Components by [ShadcnUI](https://ui.shadcn.com/) (plus a handful of unique custom components.)
 - End-to-end testing with [Playwright](https://playwright.dev)
 - Unit testing with [Vitest](https://vitest.dev) and
   [Testing Library](https://testing-library.com)
+- [MSW](https://mswjs.io/) for mocking API requests in tests and during development.
 - [SQLite](https://www.sqlite.org/index.html) database with
   [Prisma](https://www.prisma.io/) as the ORM
 - Code formatting with [Prettier](https://prettier.io)
@@ -53,13 +52,22 @@ to check for updates and install the latest versions.
 
 ### Getting Started
 
-- Make sure you're using Node.js 16.0.0 or higher. You can run:
+- Make sure you're using Node.js 20.10.0 or higher. You can run:
 
   ```sh
   node -v
   ```
 
   to check which version you're on.
+
+  If you need to upgrade, we recommend using
+  [`nvm`](https://github.com/nvm-sh/nvm):
+
+  ```sh
+  nvm install --lts
+  nvm use --lts
+  nvm alias default 'lts/*'
+  ```
 
 - Install dependencies:
 
@@ -85,15 +93,13 @@ to check for updates and install the latest versions.
   - `DATABASE_URL` - The url under which the SQLite database will operate. You
     may use the value from `.env.example` for this.
 
-- Add a `console.warn` to `getUserIdFromSession()` in
-  `app/features/user-authentication/user-authentication-session.server.ts`:
+- Add a `console.warn` to the `'magicEmailRegistration'` case in the `registerHandler()` in
+  `app/features/user-authentication/user-authentication-actions.server.ts`:
 
   ```ts
-  const getUserIdFromSession = (session: Session): string | undefined => {
-    const userId = session.get(USER_SESSION_KEY);
-    console.warn('userId', userId);
-    return userId;
-  };
+  const { email, issuer: did } =
+    await magicAdmin.users.getMetadataByToken(didToken);
+  cosole.warn('did', did);
   ```
 
 - Set up the database:
@@ -108,18 +114,18 @@ to check for updates and install the latest versions.
   npm run dev
   ```
 
-- Sign up for an account under `/login` by logging in with Magic.
+- Sign up for an account under `/register` by signing up with Magic.
 
-- Grab the `userId` that you logged out in the previous step from the terminal
+- Grab the `did` that you logged out in the previous step from the terminal
   in which you ran `npm run dev` and add it to your `.env` file as
-  `SEED_USER_ID`.
+  `SEED_USER_DID`.
 
-- Remove the `console.warn` from `getUserIdFromSession()`.
+- Remove the `console.warn` from the `registerHandler()`.
 
 - Now you can add the remaining values to your `.env` file, which are used by
   the main seed script:
 
-  - `SEED_USER_ID` - The steps above outlined how to get this value. This value
+  - `SEED_USER_DID` - The steps above outlined how to get this value. This value
     is the user id of the user that will be seeded in the database. This value
     is required for the `"prisma:seed"` script.
 
@@ -134,16 +140,60 @@ to check for updates and install the latest versions.
 
 This starts your app in development mode, rebuilding assets on file changes.
 
+### Dev with Mocks
+
+You can run the app with MSW mocking requests to third party services by running:
+
+```sh
+npm run dev-with-mocks
+```
+
+mocking requests from both the client and the server, or
+
+```sh
+npm run dev-with-server-mocks
+```
+
+mocking only requests from the server.
+
+Make sure you run `npx msw init ./public` once before you run this command to
+initialize the MSW service worker. It should create a file in
+`/public/mockServiceWorker.js` for you.
+
+This is useful for developing offline or without hitting any API.
+
+By default, MSW is used in the French House Stack to mock requests to Magic in your E2E tests. Check out `playwright/e2e/user-authentication/logout.spec.ts` and `app/test/mocks/handlers/magic.ts` to see how to use MSW on the server.
+
 ### Prisma helper scripts
 
-- `"prisma:apply-changes"` - Applies changes to the database schema to the
-  database.
-- `"prisma:seed"` - Seeds the database with a user profile.
-- `"prisma:setup"` - Sets up the database.
-- `"prisma:wipe"` - Wipes the database (irrevocably delete all data, but keep
-  the schema).
-- `"prisma:reset-dev"` - Wipes the database, seeds it and starts the dev server.
-  This is a utility script that you can use in development to get clean starts.
+- `"prisma:deploy"` - Applies all pending migrations from the
+  `prisma/migrations` directory to the database. This is typically used in a
+  production environment where you want to apply version-controlled schema
+  changes.
+- `"prisma:migrate"` - Run via `npm run prisma:migrate -- "my_migration_name"`
+  to create a new migration file in the `prisma/migrations` directory based on
+  the changes made to your Prisma schema. This command also applies the
+  migration to your development database.
+- `"prisma:push"` - Applies changes from the Prisma schema to the database
+  without creating a migration file. This is useful for quick prototyping and
+  development.
+- `"prisma:reset-dev"` - Wipes the database, seeds it, and starts the
+  development server. This is a utility script that you can use in development
+  to get a clean start.
+- `"prisma:reset-dev-with-mocks"` - Wipes the database, seeds it, starts the
+  development server, and mocks all API requests. This is a utility script that
+  you can use in development to get clean starts and to develop offline or
+  without hitting any API.
+- `"prisma:seed"` - Seeds the database with predefined data. This is useful for
+  setting up a consistent state for testing or development.
+- `"prisma:setup"` - Generates Prisma Client, applies all pending migrations to
+  the database, and then pushes any remaining changes in the Prisma schema that
+  are not yet represented by a migration.
+- `"prisma:studio"` - Opens Prisma Studio, a visual interface for viewing and
+  editing data in your database.
+- `"prisma:wipe"` - Wipes the database, deleting all data but keeping the
+  schema. This is a utility script that you can use in development to get a
+  clean start.
 
 ### Generating boilerplate
 
@@ -202,12 +252,27 @@ email, which we can grab from Magic during the sign up flow.
 
 When a user signs out, we clear the session cookie.
 
+### ShadcnUI & Custom Components
+
+ShadcnUI is configured in the "New York" setting, but it uses icons from `lucide-react`, so when generating a component you need to switch out that import because the "New York" setting usually uses icons from `@radix-ui/react-icons`. `lucide-react` is used because it has a wider selection of icons.
+
+In addition to the components from ShadcnUI, the French House Stack comes with
+some custom components:
+
+- `app/components/disableable-link.tsx` - A link tag that can be disabled.
+- `app/components/drag-and-drop.tsx` - A drag and drop file input component.
+- `app/components/general-error-boundary.tsx` - An error boundary component inspired by the [Epic Stack](https://github.com/epicweb-dev/epic-stack/blob/main/app/components/error-boundary.tsx).
+- `app/components/sidebar.tsx` - A sidebar with header and burger menu component. It is recommended to configure things like its title using Remix' `useMatches` on a per route basis. (See `app/features/organizations/organizations-sidebar-component.tsx` for an example.)
+- `app/components/text.tsx` - Various text components that can be used to render text, links and code blocks.
+
 ### i18n
 
 The French House Stack comes with localization support through
 [remix-i18next](https://github.com/sergiodxa/remix-i18next).
 
 The namespaces live in `public/locales/`.
+
+Remember to add new namespaces to `app/features/localization/i18next.server.ts` to make them available in the server bundle and to `app/test/i18n.ts` to make sure they're available in the React component tests.
 
 ## GitHub Actions
 
@@ -235,6 +300,29 @@ for selecting elements on the page semantically.
 
 To run these tests in development, run `npm run test:e2e` which will start the
 dev server for the app as well as the Playwright client.
+
+> **Note:** You might need to run `npx playwright install` to install the
+> Playwright browsers before running your tests for the first time.
+
+#### Problems with ShadcnUI
+
+Some of the colors of ShadcnUI's components are lacking the necessary contrast.
+
+You can deactivate those elements in checks like this:
+
+```ts
+const accessibilityScanResults = await new AxeBuilder({ page })
+  .disableRules('color-contrast')
+  .analyze();
+
+// or
+
+const accessibilityScanResults = await new AxeBuilder({ page })
+  .disableRules('color-contrast')
+  .analyze();
+```
+
+or pick a color scheme like "purple" that has good contrast.
 
 #### VSCode Extension
 
@@ -285,6 +373,17 @@ For lower level tests of utilities and individual components, we use `vitest`.
 We have DOM-specific assertion helpers via
 [`@testing-library/jest-dom`](https://testing-library.com/jest-dom).
 
+By default, Vitest runs tests in the [`"happy-dom"` environment](https://vitest.dev/config/#environment). However, test files that have `.server` in the name will be run in the `"node"` environment.
+
+### Test Scripts
+
+- `npm run test` - Runs all Vitest tests.
+- `npm run test:unit` - Runs all unit tests with Vitest. Your unit tests should test components or function in isolation, run fast, and are files that end with `.test.ts` or `.test.tsx`.
+- `npm run test:integration` - Runs all integration tests Vitest. Your integration tests should test multiple components or functions together, run slower than unit tests (e.g. because they hit the database), and are files that end with `.spec.ts` or `.spec.tsx`.
+- `npm run test:coverage` - Runs all Vitest tests and generates a coverage report.
+- `npm run test:e2e` - Runs all E2E tests with Playwright.
+- `npm run test:e2e:ui` - Runs all E2E tests with Playwright in UI mode.
+
 ### Type Checking
 
 This project uses TypeScript. It's recommended to get TypeScript set up for your
@@ -294,7 +393,7 @@ auto-complete. To run type checking across the whole project, run
 
 ### Linting
 
-This project uses ESLint for linting. That is configured in `.eslintrc.js`.
+This project uses ESLint for linting. That is configured in `.eslintrc.cjs`.
 
 ### Formatting
 
@@ -359,7 +458,7 @@ Here is a list of things this app could use:
 
 - error reporting
 - feature flags
-- use feedback capturing and tracking
+- user feedback capturing and tracking
 
 ### [Buidl!](https://www.urbandictionary.com/define.php?term=%23BUIDL)
 

@@ -1,0 +1,17 @@
+{
+  "name-max-length": "Your organization name must be at most 255 characters long.",
+  "name-min-length": "Your organization name must be at least 3 characters long.",
+  "name-must-be-string": "Your organization's name must be a string.",
+  "onboarding": "Onboarding",
+  "onboarding-organization": "Onboarding Organization",
+  "onboarding-progress": "Onboarding progress",
+  "organization": "Organization",
+  "organization-card-description": "You can invite other users to join your organization later.",
+  "organization-card-title": "Create your organization",
+  "organization-name-description": "Please enter the name of your organization.",
+  "organization-name-label": "Organization name",
+  "organization-name-placeholder": "Your organization's name ...",
+  "save": "Save",
+  "saving": "Saving ...",
+  "user-profile": "User profile"
+}
