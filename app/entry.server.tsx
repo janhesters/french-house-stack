@@ -1,32 +1,43 @@
+/* eslint-disable unicorn/prefer-module */
 import { resolve } from 'node:path';
+import { PassThrough } from 'node:stream';
 
-import type { EntryContext } from '@remix-run/node';
-import { Response } from '@remix-run/node';
+import {
+  createReadableStreamFromReadable,
+  type HandleDocumentRequestFunction,
+} from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
 import { createInstance } from 'i18next';
 import Backend from 'i18next-fs-backend';
-import isBot from 'isbot';
+import { isbot } from 'isbot';
 import { renderToPipeableStream } from 'react-dom/server';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
-import { PassThrough } from 'stream';
 
 import { i18n } from './features/localization/i18n';
 import { i18next } from './features/localization/i18next.server';
 
+if (process.env.SERVER_MOCKS === 'true') {
+  // @ts-expect-error - global is readonly and for some reason MSW accesses it.
+  global.location = { protocol: 'http', host: 'localhost' };
+  const { magicHandlers } = require('./test/mocks/handlers/magic');
+  require('./test/mocks/server').startMockServer([...magicHandlers]);
+}
+
 const ABORT_DELAY = 5000;
 
-export default async function handleRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
-) {
-  const callbackName = isBot(request.headers.get('user-agent'))
+const handleRequest: HandleDocumentRequestFunction = async (
+  request,
+  responseStatusCode,
+  responseHeaders,
+  remixContext,
+) => {
+  const callbackName = isbot(request.headers.get('user-agent') || '')
     ? 'onAllReady'
     : 'onShellReady';
 
   const instance = createInstance();
   const lng = await i18next.getLocale(request);
+  // @ts-expect-error - getRouteNamespaces is not in the types.
   const ns = i18next.getRouteNamespaces(remixContext);
 
   await instance
@@ -55,7 +66,7 @@ export default async function handleRequest(
           responseHeaders.set('Content-Type', 'text/html');
 
           resolve(
-            new Response(body, {
+            new Response(createReadableStreamFromReadable(body), {
               headers: responseHeaders,
               status: didError ? 500 : responseStatusCode,
             }),
@@ -76,4 +87,6 @@ export default async function handleRequest(
 
     setTimeout(abort, ABORT_DELAY);
   });
-}
+};
+
+export default handleRequest;

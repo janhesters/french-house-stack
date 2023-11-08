@@ -1,18 +1,19 @@
-import type { Session } from '@remix-run/node';
-import { createCookieSessionStorage, redirect } from '@remix-run/node';
+import { createCookieSessionStorage, type Session } from '@remix-run/node';
 import invariant from 'tiny-invariant';
 
-import { magicAdmin } from './magic-admin.server';
+import { asyncPipe } from '~/utils/async-pipe';
 
 invariant(process.env.SESSION_SECRET, 'SESSION_SECRET must be set');
 
+const USER_AUTH_SESSION_KEY = 'userAuthSessionId';
 export const USER_AUTHENTICATION_SESSION_NAME = '__user-authentication-session';
+export const ONE_YEAR_IN_SECONDS = 60 * 60 * 24 * 365;
 
-export const sessionStorage = createCookieSessionStorage({
+export const userAuthenticationSessionStorage = createCookieSessionStorage({
   cookie: {
-    name: USER_AUTHENTICATION_SESSION_NAME,
     httpOnly: true,
     maxAge: 0,
+    name: USER_AUTHENTICATION_SESSION_NAME,
     path: '/',
     sameSite: 'lax',
     secrets: [process.env.SESSION_SECRET],
@@ -20,78 +21,26 @@ export const sessionStorage = createCookieSessionStorage({
   },
 });
 
-const USER_SESSION_KEY = 'userId';
+const getCookie = (request: Request) => request.headers.get('Cookie');
 
-export async function getSession(request: Request) {
-  const cookie = request.headers.get('Cookie');
-  return sessionStorage.getSession(cookie);
-}
+const getSessionFromCookie = (cookie: string | null) =>
+  userAuthenticationSessionStorage.getSession(cookie);
 
-const getUserIdFromSession = (session: Session): string | undefined => {
-  const userId = session.get(USER_SESSION_KEY);
-  return userId;
-};
+export const getSession = asyncPipe(getCookie, getSessionFromCookie);
 
-export async function getUserId(request: Request): Promise<string | undefined> {
-  const session = await getSession(request);
-  return getUserIdFromSession(session);
-}
+export const getUserAuthSessionId = (session: Session): string | undefined =>
+  session.get(USER_AUTH_SESSION_KEY);
 
-/**
- * A function to use in loader functions to make sure the user is authenticated.
- * @param request The request to check.
- * @param redirectTo The path to redirect to if not logged in.
- * @returns The current user's id.
- */
-export async function requireUserIsAuthenticated(
-  request: Request,
-  redirectTo: string = new URL(request.url).pathname,
-) {
-  const userId = await getUserId(request);
-
-  if (!userId) {
-    const searchParameters = new URLSearchParams([['redirectTo', redirectTo]]);
-    throw redirect(`/login?${searchParameters}`);
-  }
-
-  return userId;
-}
-
-export async function createUserSession({
+export async function createCookieForUserAuthSession({
   request,
-  userId,
-  remember,
-  redirectTo,
+  userAuthSessionId,
 }: {
   request: Request;
-  userId: string;
-  remember: boolean;
-  redirectTo: string;
+  userAuthSessionId: string;
 }) {
   const session = await getSession(request);
-  session.set(USER_SESSION_KEY, userId);
-  return redirect(redirectTo, {
-    headers: {
-      'Set-Cookie': await sessionStorage.commitSession(session, {
-        maxAge: remember
-          ? 60 * 60 * 24 * 365 // 365 days
-          : undefined,
-      }),
-    },
-  });
-}
-
-export async function logout(request: Request) {
-  const session = await getSession(request);
-  const userId = getUserIdFromSession(session);
-
-  if (userId) {
-    await magicAdmin.users.logoutByIssuer(userId);
-  }
-
-  return redirect('/', {
-    headers: {
-      'Set-Cookie': await sessionStorage.destroySession(session),
-    },
+  session.set(USER_AUTH_SESSION_KEY, userAuthSessionId);
+  return userAuthenticationSessionStorage.commitSession(session, {
+    maxAge: ONE_YEAR_IN_SECONDS,
   });
 }

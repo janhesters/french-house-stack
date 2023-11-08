@@ -1,0 +1,20 @@
+{
+  "authenticating": "Authenticating ...",
+  "create-your-account": "Create your account.",
+  "did-token-malformed-error": "A DID token must be string.",
+  "did-token-missing": "Login failed. No DID token.",
+  "email-address": "Email address",
+  "email-description": "Your account's email address.",
+  "email-invalid": "A valid email consists of characters, '@' and '.'.",
+  "email-must-be-string": "A valid email address must be string.",
+  "email-placeholder": "Your email address ...",
+  "email-required": "Please enter a valid email (required).",
+  "failed-to-load-magic": "Failed to load authentication provider https://magic.link. Please reload the page to try again.",
+  "log-in-to-your-account": "Log in to your account",
+  "login": "Login",
+  "login-failed": "Login failed. Please try again.",
+  "missing-email-metadata": "Missing email from Magic metadata.",
+  "missing-issuer-metadata": "Missing issuer from Magic metadata.",
+  "not-a-member": "Not a member?",
+  "user-doesnt-exist": "User with given email doesn't exist. Did you mean to create a new account instead?"
+}

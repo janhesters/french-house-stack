@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/prefer-module */
 module.exports = function (
   /** @type {import('plop').NodePlopAPI} */
   plop,
@@ -37,8 +36,8 @@ module.exports = function (
             fileType === 'dbHelper'
               ? 'those CRUD helpers'
               : fileType === 'reactComponent'
-              ? 'the React component'
-              : 'the E2E tests';
+                ? 'the React component'
+                : 'the E2E tests';
           return `For what feature do you want to generate ${ressourceToGenerate}?`;
         },
       },

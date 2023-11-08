@@ -11,12 +11,99 @@ datasource db {
 }
 
 model UserProfile {
+  id                         String                   @id @default(cuid())
   /// The Magic issuer of the user who created the account. Its a decentralized
   /// identifier (DID) that uniquely identifies the user.
-  id        String   @id
+  did                        String                   @unique
+  createdAt                  DateTime                 @default(now())
+  updatedAt                  DateTime                 @updatedAt
+  email                      String                   @unique
+  name                       String                   @default("")
+  acceptedTermsAndConditions Boolean                  @default(false)
+  memberships                Membership[]
+  authSession                UserAuthSession[]
+  notes                      Note[]
+  createdInviteLinks         OrganizationInviteLink[]
+  inviteLinkUses             InviteLinkUses[]
+}
+
+model UserAuthSession {
+  id             String      @id @default(cuid())
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  user           UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  expirationDate DateTime
+}
+
+model Organization {
+  id                      String                   @id() @default(cuid())
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  name                    String
+  /// We avoid conflicts from slugs by using Prisma middleware. See the file
+  /// `database.server.ts`.
+  slug                    String                   @unique
+  memberships             Membership[]
+  Note                    Note[]
+  organizationInviteLinks OrganizationInviteLink[]
+}
+
+model Membership {
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  member         UserProfile  @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberId       String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  deactivatedAt  DateTime?
+  role           String       @default("member")
+
+  @@id([memberId, organizationId])
+}
+
+model Note {
+  id        String   @id @unique @default(cuid())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  email     String   @unique
-  name      String   @default("")
-  avatar    String   @default("")
+
+  title          String
+  content        String
+  creator        UserProfile  @relation(fields: [creatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  creatorId      String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  organizationId String
+}
+
+model OrganizationInviteLink {
+  id             String           @id @default(cuid())
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+  // The user who created the invite link.
+  creator        UserProfile      @relation(fields: [creatorId], references: [id])
+  creatorId      String
+  // Users who used the invite link.
+  linkUsages     InviteLinkUses[]
+  // The date when the invite link expires.
+  expiresAt      DateTime
+  // The token that is used to authenticate the invite link.
+  token          String           @unique
+  // The date when the link was manually deactivated.
+  deactivatedAt  DateTime?
+}
+
+model InviteLinkUses {
+  id           String                 @id @default(cuid())
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  // The invite link that was used.
+  inviteLink   OrganizationInviteLink @relation(fields: [inviteLinkId], references: [id], onDelete: Cascade)
+  inviteLinkId String
+  // The user who used the invite link.
+  user         UserProfile            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+
+  @@unique([inviteLinkId, userId])
 }

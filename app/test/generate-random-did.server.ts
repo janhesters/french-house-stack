@@ -1,4 +1,4 @@
-import { randomBytes } from 'crypto';
+import { randomBytes } from 'node:crypto';
 
 /**
  * Generates a random decentralized identity token (DID). This function is to

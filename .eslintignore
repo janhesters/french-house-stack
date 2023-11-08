@@ -3,3 +3,4 @@
 **/.cache/*
 **/coverage/*
 **/playwright-report/*
+mockServiceWorker.js

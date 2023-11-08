@@ -1,18 +1,15 @@
-/* eslint-disable unicorn/prefer-module */
-
 /**
  * @type {import('@remix-run/dev').AppConfig}
  */
-module.exports = {
-  future: {
-    v2_routeConvention: true,
-    v2_meta: true,
-    v2_errorBoundary: true,
-    v2_normalizeFormMethod: true,
-    v2_headers: true,
-    v2_dev: true,
-  },
+const remixConfig = {
   ignoredRouteFiles: ['**/.*', '*/*.test.ts', '*/*.test.tsx'],
-  serverModuleFormat: 'cjs',
-  tailwind: true,
+  // See: https://remix.run/docs/en/main/guides/gotchas#importing-esm-packages
+  serverDependenciesToBundle: [
+    'remix-i18next', // https://github.com/sergiodxa/remix-i18next/issues/143#issuecomment-1749463869
+    '@magic-sdk/admin',
+    'msw',
+    'path-to-regexp',
+  ],
 };
+
+export default remixConfig;
