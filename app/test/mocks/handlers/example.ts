@@ -1,9 +1,9 @@
-import { rest } from 'msw';
+import { http, HttpResponse } from 'msw';
 
 const exampleComRegex = /(^https?:\/\/)?(www\.)?example\.com($|\/)/;
 
 export const exampleHandlers = [
-  rest.post(exampleComRegex, (request, response, context) =>
-    response(context.status(201), context.json({ message: 'Created' })),
+  http.post(exampleComRegex, () =>
+    HttpResponse.json({ message: 'Created' }, { status: 201 }),
   ),
 ];

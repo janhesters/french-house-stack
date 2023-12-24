@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
+import { createId } from '@paralleldrive/cuid2';
 import type { UserProfile } from '@prisma/client';
-import cuid from 'cuid';
 
 import { generateRandomDid } from '~/test/generate-random-did.server';
 import type { Factory } from '~/utils/types';
@@ -37,7 +37,7 @@ export const createUserProfile: Factory<UserProfile> = ({
  * @returns A populated user profile with given params.
  */
 export const createPopulatedUserProfile: Factory<UserProfile> = ({
-  id = cuid(),
+  id = createId(),
   did = generateRandomDid(),
   email = faker.internet.email(),
   name = faker.person.fullName(),

@@ -1,12 +1,13 @@
-import { conform, useForm } from '@conform-to/react';
-import { parse, refine } from '@conform-to/zod';
-import { json, redirect } from '@remix-run/node';
-import { Form, Link, useActionData, useFetcher } from '@remix-run/react';
-import type { ActionArgs } from '@remix-run/server-runtime';
+import {
+  type ActionFunctionArgs,
+  json,
+  type LoaderFunctionArgs,
+  redirect,
+} from '@remix-run/node';
+import { Form, Link, useActionData, useSubmit } from '@remix-run/react';
 import { Magic } from 'magic-sdk';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { badRequest } from 'remix-utils';
 import { z } from 'zod';
 
 import { GoogleLogo } from '~/components/google-logo';
@@ -16,144 +17,133 @@ import { Label } from '~/components/ui/label';
 import { doesUserProfileExistByEmail } from '~/features/user-profile/user-profile-helpers.server';
 import { useEffectOnce } from '~/hooks/use-effect-once';
 import { usePromise } from '~/hooks/use-promise';
+import { badRequest } from '~/utils/http-responses.server';
+import { parseFormData } from '~/utils/parse-form-data.server';
 
-export async function loader({}: LoaderArgs) {
+export async function loader({}: LoaderFunctionArgs) {
   return json({});
 }
 
-function createSchema(
-  intent: string,
-  constraints: {
-    emailExists?: (email: string) => Promise<boolean>;
-  } = {},
-) {
-  return z.discriminatedUnion('intent', [
-    z.object({
-      intent: z.literal('emailLogin'),
-      email: z
-        .string()
-        .min(1, 'Email is required')
-        .email('Email is invalid')
-        .superRefine((email, context) =>
-          refine(context, {
-            validate: () => constraints.emailExists?.(email),
-            when: intent === 'submit' || intent === 'validate/email',
-            message: 'User not found. Did you mean to create an account?',
-          }),
-        ),
-    }),
-    z.object({ intent: z.literal('magicLogin'), didToken: z.string() }),
-    z.object({ intent: z.literal('googleLogin') }),
-  ]);
-}
+const schema = z.discriminatedUnion('intent', [
+  z.object({
+    intent: z.literal('emailLogin'),
+    email: z.string().min(1, 'Email is required').email('Email is invalid'),
+  }),
+  z.object({ intent: z.literal('magicEmailLogin'), didToken: z.string() }),
+  z.object({ intent: z.literal('magicGoogleLogin') }),
+  z.object({ intent: z.literal('magicError'), formError: z.string() }),
+]);
 
-export async function action({ request }: ActionArgs) {
-  const formData = await request.formData();
-  const submission = await parse(formData, {
-    schema: intent =>
-      createSchema(intent, {
-        async emailExists(email) {
-          return await doesUserProfileExistByEmail(email);
-        },
-      }),
-    async: true,
-  });
+type LoginActionData = {
+  email?: string;
+  errors?: {
+    email?: string;
+  };
+};
 
-  if (!submission.value || submission.intent !== 'submit') {
-    return badRequest(submission);
+export async function action({ request }: ActionFunctionArgs) {
+  const data = await parseFormData(schema, request);
+
+  switch (data.intent) {
+    case 'emailLogin': {
+      const { email } = data;
+
+      const userProfileExists = await doesUserProfileExistByEmail(email);
+
+      if (!userProfileExists) {
+        throw badRequest({
+          errors: {
+            email: `User with email ${email} doesn't exist. Did you mean to create a new account instead?`,
+          },
+        });
+      }
+
+      return json({ email });
+    }
+    case 'magicEmailLogin': {
+      const foo = '';
+    }
+    case 'magicGoogleLogin': {
+      const foo = '';
+    }
+    case 'magicError': {
+      return json({ errors: { form: data.formError } });
+    }
   }
-
-  if (submission.value.intent === 'emailLogin') {
-    return json(submission);
-  }
-
-  return redirect('/onboarding');
 }
 
 export default function Login() {
   const { t } = useTranslation();
 
-  const lastSubmission = useActionData<typeof action>();
-  const [form, fields] = useForm({
-    lastSubmission,
-    onValidate({ formData }) {
-      console.log('onValidate', formData);
-      return parse(formData, { schema: intent => createSchema(intent) });
-    },
-    onSubmit(event, { submission }) {
-      console.log('onSubmit', submission);
-    },
+  const actionData = useActionData<LoginActionData>();
+
+  const [magicReady, setMagicReady] = usePromise<{ magic: Magic }>();
+  const submit = useSubmit();
+
+  async function downloadMagicStaticAssets() {
+    const magic = new Magic(window.ENV.MAGIC_PUBLISHABLE_KEY, {
+      /**
+       * @see https://magic.link/docs/introduction/test-mode
+       */
+      testMode: window.runMagicInTestMode,
+    });
+    await magic.preload();
+    setMagicReady({ magic });
+  }
+
+  useEffectOnce(() => {
+    downloadMagicStaticAssets().catch(() => {
+      // TODO: force user to reload page
+      // TODO: report error
+      submit(
+        {
+          intent: 'magicError',
+          formError: 'user-authentication:failed-to-load-magic',
+        },
+        { method: 'post', replace: true },
+      );
+    });
   });
 
-  const fetcher = useFetcher();
-
   useEffect(() => {
-    function submitWithDebounce() {
-      setTimeout(() => {
-        console.log('submitting');
-        // fetcher.submit does NOT trigger the validation ...
-        fetcher.submit(
-          { intent: 'emailLogin', email: 'bob' },
-          {
-            method: 'POST',
-            replace: true,
-          },
-        );
-      }, 5000);
+    if (typeof actionData?.email === 'string' && actionData?.email.length > 0) {
+      async function loginWithMagic() {
+        try {
+          const { magic } = await magicReady;
+          const didToken = await magic.auth.loginWithMagicLink({
+            email: actionData!.email!,
+          });
+
+          if (didToken) {
+            submit(
+              { didToken, intent: 'magicEmailLogin' },
+              { method: 'post', replace: true },
+            );
+          } else {
+            // TODO: report error
+            submit(
+              {
+                intent: 'magicError',
+                formError: 'user-authentication:did-token-missing',
+              },
+              { method: 'post', replace: true },
+            );
+          }
+        } catch {
+          // TODO: reportError
+          submit(
+            {
+              intent: 'magicError',
+              formError: 'user-authentication:login-failed',
+            },
+            { method: 'post', replace: true },
+          );
+        }
+      }
+
+      loginWithMagic();
     }
-
-    submitWithDebounce();
-  }, []);
-
-  // const fetcher = useFetcher();
-  // const [magicReady, setMagicReady] = usePromise<{ magic: Magic }>();
-
-  // useEffectOnce(() => {
-  //   // eslint-disable-next-line unicorn/consistent-function-scoping
-  //   async function downloadMagicStaticAssets() {
-  //     const magic = new Magic(window.ENV.MAGIC_PUBLISHABLE_KEY, {
-  //       /**
-  //        * @see https://magic.link/docs/introduction/test-mode
-  //        */
-  //       testMode: window.runMagicInTestMode,
-  //     });
-
-  //     await magic.preload();
-
-  //     setMagicReady({ magic });
-  //   }
-
-  //   // magic.preload() can never throw, so we don't need to catch anything.
-  //   // See: https://github.com/magiclabs/magic-js/blob/master/packages/@magic-sdk/provider/src/core/view-controller.ts#L195
-  //   downloadMagicStaticAssets();
-  // });
-
-  // useEffect(() => {
-  //   if (lastSubmission?.value?.intent === 'emailLogin') {
-  //     const { email } = lastSubmission.value;
-
-  //     async function loginWithMagic() {
-  //       try {
-  //         const { magic } = await magicReady;
-  //         const didToken = await magic.auth.loginWithMagicLink({ email });
-
-  //         if (didToken) {
-  //           fetcher.submit(
-  //             { intent: 'magicLogin', didToken },
-  //             { method: 'POST', replace: true },
-  //           );
-  //         } else {
-  //           // TODO:
-  //         }
-  //       } catch {
-  //         // TODO:
-  //       }
-  //     }
-
-  //     loginWithMagic();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [lastSubmission?.value?.email]);
+  }, [actionData, actionData?.email, magicReady, submit]);
 
   return (
     <main className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -166,18 +156,20 @@ export default function Login() {
       </h1>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <fetcher.Form className="space-y-6" method="POST" {...form.props}>
+        <Form className="space-y-6" method="POST">
           <div>
             <Label htmlFor="email">Email</Label>
 
             <div className="mt-2">
               <InputWithError
-                {...conform.input(fields.email)}
                 autoCapitalize="none"
                 autoComplete="email"
                 autoCorrect="off"
-                error={fields.email.error}
+                error={t(actionData?.errors?.email)}
                 id="email"
+                name="email"
+                placeholder="To be done"
+                ref={null}
                 required
                 type="email"
               />
@@ -192,7 +184,7 @@ export default function Login() {
           >
             Login
           </Button>
-        </fetcher.Form>
+        </Form>
 
         <div>
           <div className="relative mt-10">

@@ -1,8 +1,10 @@
 /* eslint-disable unicorn/prefer-module */
 import { resolve } from 'node:path';
 
-import type { EntryContext } from '@remix-run/node';
-import { Response } from '@remix-run/node';
+import {
+  createReadableStreamFromReadable,
+  type HandleDocumentRequestFunction,
+} from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
 import { createInstance } from 'i18next';
 import Backend from 'i18next-fs-backend';
@@ -23,12 +25,12 @@ if (process.env.SERVER_MOCKS === 'true') {
 
 const ABORT_DELAY = 5000;
 
-export default async function handleRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
-) {
+const handleRequest: HandleDocumentRequestFunction = async (
+  request,
+  responseStatusCode,
+  responseHeaders,
+  remixContext,
+) => {
   const callbackName = isBot(request.headers.get('user-agent'))
     ? 'onAllReady'
     : 'onShellReady';
@@ -63,7 +65,7 @@ export default async function handleRequest(
           responseHeaders.set('Content-Type', 'text/html');
 
           resolve(
-            new Response(body, {
+            new Response(createReadableStreamFromReadable(body), {
               headers: responseHeaders,
               status: didError ? 500 : responseStatusCode,
             }),
@@ -84,4 +86,6 @@ export default async function handleRequest(
 
     setTimeout(abort, ABORT_DELAY);
   });
-}
+};
+
+export default handleRequest;

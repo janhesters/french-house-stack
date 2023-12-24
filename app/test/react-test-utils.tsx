@@ -21,5 +21,5 @@ export * from '@testing-library/react';
 
 // override render method
 export { customRender as render };
-export { unstable_createRemixStub as createRemixStub } from '@remix-run/testing';
+export { createRemixStub } from '@remix-run/testing';
 export { default as userEvent } from '@testing-library/user-event';

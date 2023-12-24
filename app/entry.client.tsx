@@ -22,7 +22,7 @@ declare global {
   }
 }
 
-async function prepareApp() {
+async function activateMsw() {
   if (ENV.CLIENT_MOCKS === 'true') {
     const { worker } = await import('./test/mocks/browser');
 
@@ -32,42 +32,36 @@ async function prepareApp() {
   return;
 }
 
-function hydrate() {
-  startTransition(() => {
-    hydrateRoot(
-      document,
-      <StrictMode>
-        <I18nextProvider i18n={i18next}>
-          <RemixBrowser />
-        </I18nextProvider>
-      </StrictMode>,
-    );
-  });
-}
+async function hydrate() {
+  await activateMsw();
 
-// eslint-disable-next-line unicorn/prefer-top-level-await
-prepareApp().then(() =>
-  i18next
+  await i18next
     .use(initReactI18next)
     .use(LanguageDetector)
     .use(Backend)
     .init({
       ...i18n,
       ns: getInitialNamespaces(),
-      backend: {
-        loadPath: '/locales/{{lng}}/{{ns}}.json',
-        // requestOptions: { cache: 'no-cache' },
-      },
+      backend: { loadPath: '/locales/{{lng}}/{{ns}}.json' },
       detection: { order: ['htmlTag'], caches: [] },
-    })
-    // eslint-disable-next-line unicorn/prefer-top-level-await
-    .then(() => {
-      if (window.requestIdleCallback) {
-        window.requestIdleCallback(hydrate);
-      } else {
-        // Safari doesn't support requestIdleCallback
-        // https://caniuse.com/requestidlecallback
-        window.setTimeout(hydrate, 1);
-      }
-    }),
-);
+    });
+
+  startTransition(() => {
+    hydrateRoot(
+      document,
+      <I18nextProvider i18n={i18next}>
+        <StrictMode>
+          <RemixBrowser />
+        </StrictMode>
+      </I18nextProvider>,
+    );
+  });
+}
+
+if (window.requestIdleCallback) {
+  window.requestIdleCallback(hydrate);
+} else {
+  // Safari doesn't support requestIdleCallback
+  // https://caniuse.com/requestidlecallback
+  window.setTimeout(hydrate, 1);
+}

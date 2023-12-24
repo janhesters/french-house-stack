@@ -1,3 +1,4 @@
+import { createId } from '@paralleldrive/cuid2';
 import type { Organization, UserProfile } from '@prisma/client';
 
 import { createPopulatedOrganization } from '~/features/organization/organization-factories.server';
@@ -8,7 +9,8 @@ import {
 } from '~/features/organization/organization-model.server';
 import type { OrganizationMembershipRole } from '~/features/organizations/organizations-constants';
 import { ORGANIZATION_MEMBERSHIP_ROLES } from '~/features/organizations/organizations-constants';
-import { createCookieForUserSession } from '~/features/user-authentication/user-authentication-session-old.server';
+import { saveUserAuthSessionToDatabase } from '~/features/user-authentication/user-auth-session-model.server';
+import { createCookieForUserAuthSession } from '~/features/user-authentication/user-authentication-session.server';
 import { createPopulatedUserProfile } from '~/features/user-profile/user-profile-factories.server';
 import {
   deleteUserProfileFromDatabaseById,
@@ -64,8 +66,11 @@ export async function teardownOrganizationAndMember({
   await deleteUserProfileFromDatabaseById(user.id);
 }
 
+const ONE_YEAR_IN_SECONDS = 1000 * 60 * 60 * 24 * 365;
+
 /**
- * Creates an authenticated request object with the given parameters.
+ * Creates an authenticated request object with the given parameters and a user
+ * auth session behind the scenes.
  *
  * @param options - An object containing the url and user id as well as optional
  * form data.
@@ -83,9 +88,17 @@ export async function createAuthenticatedRequest({
   formData?: FormData;
 }) {
   const request = new Request(url, { method, body: formData });
+  const userAuthSession = await saveUserAuthSessionToDatabase({
+    expirationDate: new Date(Date.now() + ONE_YEAR_IN_SECONDS),
+    id: createId(),
+    userId,
+  });
   request.headers.set(
     'Cookie',
-    await createCookieForUserSession({ request, userId, remember: true }),
+    await createCookieForUserAuthSession({
+      request,
+      userAuthSessionId: userAuthSession.id,
+    }),
   );
   return request;
 }
@@ -117,30 +130,3 @@ export function clearCookieAttributes(request: Request): Request {
 
   return newRequest;
 }
-
-/**
- * Creates a mocked GPT-4 response object for testing purposes.
- * The function generates an object structure similar to what the OpenAI API
- * would return for a chat completion.
- *
- * @param content - The message content for the `'assistant'` role in the chat.
- * Defaults to `'\n\nHello there, how may I assist you today?'`.
- * @returns An object mimicking a typical OpenAI API chat completion response,
- * with the provided content as the assistant's message.
- */
-export const createGpt4CompletionResponse = (
-  content = '\n\nHello there, how may I assist you today?',
-): CreateChatCompletionResponse => ({
-  id: 'chatcmpl-123',
-  model: 'gpt-4',
-  object: 'chat.completion',
-  created: 1_677_652_288,
-  choices: [
-    {
-      index: 0,
-      message: { role: 'assistant', content },
-      finish_reason: 'stop',
-    },
-  ],
-  usage: { prompt_tokens: 9, completion_tokens: 12, total_tokens: 21 },
-});

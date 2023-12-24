@@ -46,7 +46,7 @@ export async function retrieveUserAuthSessionFromDatabaseById(
  * @returns The active user auth session for a given user or null if it wasn't
  * found.
  */
-export async function retrieveActiveUserAuthSessionFromDatabaseById(
+export async function retrieveActiveUserAuthSessionFromDatabaseByUserProfileId(
   userId: UserProfile['id'],
 ) {
   const currentDate = new Date();
@@ -106,4 +106,18 @@ export async function deleteUserAuthSessionFromDatabaseById(
   id: UserAuthSession['id'],
 ) {
   return prisma.userAuthSession.delete({ where: { id } });
+}
+
+/**
+ * Deletes all user auth sessions for a given user id.
+ *
+ * @param userId - The id of the user whose auth sessions should be deleted.
+ * @returns A count of how many records were deleted.
+ */
+export async function deleteUserAuthSessionsFromDatabaseByUserId(
+  userId: UserProfile['id'],
+) {
+  return prisma.userAuthSession.deleteMany({
+    where: { userId },
+  });
 }

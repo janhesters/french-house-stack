@@ -1,51 +1,93 @@
-import type { Submission } from '@conform-to/dom';
-import { parse } from '@conform-to/zod';
-import { badRequest } from 'remix-utils';
-import type { output, ZodErrorMap, ZodTypeAny } from 'zod';
+import type { output, ZodType } from 'zod';
 
 import { asyncPipe } from './async-pipe';
+import { badRequest } from './http-responses.server';
 
-const toFormData = (request: Request) => request.formData();
+/**
+ * Converts a Request object into FormData.
+ *
+ * @param request - The Request object to be converted.
+ * @returns - A Promise that resolves to the FormData object.
+ */
+export const requestToFormData = (request: Request) => request.formData();
 
-type ParseConfig<Schema extends ZodTypeAny> = {
-  schema: Schema | ((intent: string) => Schema);
-  acceptMultipleErrors?: ({
-    name,
-    intent,
-    payload,
-  }: {
-    name: string;
-    intent: string;
-    payload: Record<string, any>;
-  }) => boolean;
-  async?: boolean;
-  errorMap?: ZodErrorMap;
-};
+/**
+ * Converts FormData into a plain object.
+ *
+ * @param formData - The FormData object to be converted.
+ * @returns - The resulting object, where each key-value pair corresponds to a
+ * field in the FormData.
+ */
+export const formDataToObject = (formData: FormData) =>
+  Object.fromEntries(formData.entries());
 
-const parseFormData =
-  <Schema extends ZodTypeAny>(config: ParseConfig<Schema>) =>
-  (formData: FormData) =>
-    // @ts-expect-error `async` can be undefined, true, or false, but since the
-    // types of `parse` are overloaded, TS complains when `async` is undefined.
-    parse(formData, config);
+/**
+ * Validates an object against a Zod schema and handles any errors.
+ *
+ * This higher-order function takes a Zod schema as an argument and returns a
+ * new function. The returned function accepts an object, which is typically the
+ * output of `formDataToObject`, and validates this object against the provided
+ * Zod schema. If the validation fails, it throws a BadRequest error with
+ * detailed information about form-level and field-level errors. If the
+ * validation succeeds, it returns the validated data.
+ *
+ * @typeParam Schema - A generic parameter that extends `ZodType`, representing
+ * the schema against which the data will be validated.
+ * @param schema - A Zod schema instance to validate the data against.
+ * @returns A function that takes an object to validate and either throws a
+ * BadRequest error or returns the validated data.
+ */
+export const validateFormData =
+  <Schema extends ZodType>(schema: Schema) =>
+  (values: ReturnType<typeof formDataToObject>): output<Schema> => {
+    const result = schema.safeParse(values);
 
-const throwIfInvalid = <Schema extends ZodTypeAny>(
-  submission: Submission<output<Schema>>,
-) => {
-  if (!submission.value || submission.intent !== 'submit') {
-    return badRequest(submission);
-  }
+    if (!result.success) {
+      const { formErrors, fieldErrors } = result.error.flatten();
 
-  return submission;
-};
+      throw badRequest({
+        errors: {
+          ...(formErrors.length > 0 && { form: formErrors }),
+          ...fieldErrors,
+        },
+      });
+    }
 
-const validateFormData = <Schema extends ZodTypeAny>(
-  config: ParseConfig<Schema>,
-) => asyncPipe(toFormData, parseFormData(config), throwIfInvalid);
+    return result.data;
+  };
 
+/**
+ * Converts a Request into FormData, then into a plain object, and
+ * finally validates the object against a Zod schema.
+ *
+ * @param schema - The Zod schema to validate against.
+ * @returns - A function that takes a Request and returns a Promise that
+ * resolves to the result of the Zod schema's safeParse method.
+ */
+export const parseFormData = <Schema extends ZodType>(
+  schema: Schema,
+  request: Request,
+) =>
+  asyncPipe(
+    requestToFormData,
+    formDataToObject,
+    validateFormData(schema),
+  )(request);
+
+/**
+ * A middleware that validates the form data from a request against a provided
+ * Zod schema.
+ *
+ * @param schema - The Zod schema to validate the form data against.
+ * @param request - The request with form data to be parsed.
+ * @returns The middleware object with the parsed form data.
+ * @throws Will throw a 400 Bad Request error if the form data does not conform
+ * to the schema with an  object containing the formatted error details.
+ */
 export const withValidatedFormData =
-  <Schema extends ZodTypeAny>(config: ParseConfig<Schema>) =>
-  async <T extends { request: Request }>(middleware: T) =>
-    Object.assign(middleware, {
-      submission: await validateFormData(config)(middleware.request),
-    });
+  <Schema extends ZodType>(schema: Schema) =>
+  async <T extends { request: Request }>({ request, ...rest }: T) => ({
+    request,
+    ...rest,
+    ...(await parseFormData(schema, request)),
+  });
