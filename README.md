@@ -128,6 +128,7 @@ to check for updates and install the latest versions.
   - `SEED_USER_DID` - The steps above outlined how to get this value. This value
     is the user id of the user that will be seeded in the database. This value
     is required for the `"prisma:seed"` script.
+  - `SENTRY_DSN` - The DSN for your Sentry project. This value is optional.
 
 - Lastly, stop your `npm run dev` script and run
 
@@ -273,6 +274,16 @@ The French House Stack comes with localization support through
 The namespaces live in `public/locales/`.
 
 Remember to add new namespaces to `app/features/localization/i18next.server.ts` to make them available in the server bundle and to `app/test/i18n.ts` to make sure they're available in the React component tests.
+
+### Monitoring
+
+The French House Stack comes with error reporting using Sentry build in.
+
+To use it, you need to set the `SENTRY_DSN` environment variable. You can get
+this value from your Sentry project.
+
+If you want to configure source maps, look up how to do that in the
+[Sentry docs](https://docs.sentry.io/platforms/javascript/guides/remix/sourcemaps/).
 
 ## GitHub Actions
 
@@ -451,14 +462,10 @@ to work with any chain.
 
 ### To-Dos
 
-There are a bunch of TODOs in the code, for example for error reporting. This
-stack leaves it to you to handle error reporting.
-
 Here is a list of things this app could use:
 
-- error reporting
 - feature flags
-- user feedback capturing and tracking
+- user feedback capturing and tracking (you can use Sentry for this).
 
 ### [Buidl!](https://www.urbandictionary.com/define.php?term=%23BUIDL)
 

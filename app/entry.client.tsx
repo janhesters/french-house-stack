@@ -13,13 +13,23 @@ import { onUnhandledRequest } from './test/mocks/msw-utils';
 export type EnvironmentVariables = {
   MAGIC_PUBLISHABLE_KEY: string;
   CLIENT_MOCKS?: string;
+  SENTRY_DSN?: string;
+  ENVIRONMENT?: string;
 };
+
 declare global {
   var ENV: EnvironmentVariables;
 
   interface Window {
     runMagicInTestMode?: boolean;
   }
+}
+
+if (ENV.ENVIRONMENT === 'production' && ENV.SENTRY_DSN) {
+  const { initializeClientMonitoring } = await import(
+    './features/monitoring/monitoring-helpers.client'
+  );
+  initializeClientMonitoring();
 }
 
 async function activateMsw() {
