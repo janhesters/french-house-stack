@@ -4,6 +4,7 @@ import {
   useParams,
   useRouteError,
 } from '@remix-run/react';
+import { captureRemixErrorBoundaryError } from '@sentry/remix';
 
 import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert';
 import { getErrorMessage } from '~/utils/get-error-message';
@@ -49,6 +50,7 @@ export function GeneralErrorBoundary({
   unexpectedErrorHandler?: (error: unknown) => JSX.Element | null;
 }) {
   const error = useRouteError();
+  captureRemixErrorBoundaryError(error);
   const params = useParams();
 
   if (typeof document !== 'undefined') {

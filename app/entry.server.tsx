@@ -2,10 +2,8 @@
 import { resolve } from 'node:path';
 import { PassThrough } from 'node:stream';
 
-import {
-  createReadableStreamFromReadable,
-  type HandleDocumentRequestFunction,
-} from '@remix-run/node';
+import type { HandleDocumentRequestFunction } from '@remix-run/node';
+import { createReadableStreamFromReadable } from '@remix-run/node';
 import { RemixServer } from '@remix-run/react';
 import { createInstance } from 'i18next';
 import Backend from 'i18next-fs-backend';
@@ -21,6 +19,13 @@ if (process.env.SERVER_MOCKS === 'true') {
   global.location = { protocol: 'http', host: 'localhost' };
   const { magicHandlers } = require('./test/mocks/handlers/magic');
   require('./test/mocks/server').startMockServer([...magicHandlers]);
+}
+
+if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {
+  const { initializeServerMonitoring } = await import(
+    './features/monitoring/monitoring-helpers.server'
+  );
+  initializeServerMonitoring();
 }
 
 const ABORT_DELAY = 5000;
@@ -90,3 +95,5 @@ const handleRequest: HandleDocumentRequestFunction = async (
 };
 
 export default handleRequest;
+
+export { wrapRemixHandleError as handleError } from '@sentry/remix';

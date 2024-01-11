@@ -16,6 +16,7 @@ import {
   useLoaderData,
   useRouteError,
 } from '@remix-run/react';
+import { withSentry } from '@sentry/remix';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
@@ -60,7 +61,7 @@ type LoaderData = {
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { MAGIC_PUBLISHABLE_KEY } = process.env;
+  const { MAGIC_PUBLISHABLE_KEY, NODE_ENV, SENTRY_DSN } = process.env;
   invariant(MAGIC_PUBLISHABLE_KEY, 'MAGIC_PUBLISHABLE_KEY must be set');
 
   const locale = await i18next.getLocale(request);
@@ -69,7 +70,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const title = t('app-name');
 
   return json<LoaderData>({
-    ENV: { MAGIC_PUBLISHABLE_KEY: MAGIC_PUBLISHABLE_KEY },
+    ENV: { MAGIC_PUBLISHABLE_KEY, ENVIRONMENT: NODE_ENV, SENTRY_DSN },
     locale,
     title,
   });
@@ -87,7 +88,7 @@ function useChangeLanguage(locale: string) {
   }, [locale, i18n]);
 }
 
-export default function App() {
+function App() {
   const { locale, ENV } = useLoaderData<typeof loader>();
   const { i18n } = useTranslation();
   useChangeLanguage(locale);
@@ -115,6 +116,8 @@ export default function App() {
     </html>
   );
 }
+
+export default withSentry(App);
 
 export function ErrorBoundary() {
   const error = useRouteError();
