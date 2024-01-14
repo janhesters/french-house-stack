@@ -42,7 +42,6 @@ const handleRequest: HandleDocumentRequestFunction = async (
 
   const instance = createInstance();
   const lng = await i18next.getLocale(request);
-  // @ts-expect-error - getRouteNamespaces is not in the types.
   const ns = i18next.getRouteNamespaces(remixContext);
 
   await instance

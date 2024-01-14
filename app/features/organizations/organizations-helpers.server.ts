@@ -1,5 +1,6 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 
+import type { HeaderUserProfileDropDownProps } from '~/components/header';
 import { asyncPipe } from '~/utils/async-pipe';
 import { throwIfEntityIsMissing } from '~/utils/throw-if-entity-is-missing.server';
 
@@ -63,6 +64,11 @@ export const mapOrganizationAndUserDataToSidebarProps = <
   organizationSlug,
   user,
 }: Data): OrganizationsSideBarComponentProps => ({
+  organizations: user.memberships.map(({ organization: { name, slug } }) => ({
+    isCurrent: slug === organizationSlug,
+    name,
+    slug,
+  })),
   organizationSlug,
   userNavigation: {
     abbreviation: getNameAbbreviation(user.name),
@@ -70,4 +76,29 @@ export const mapOrganizationAndUserDataToSidebarProps = <
     name: user.name,
     items: [],
   },
+});
+
+/**
+ *  Maps the user data to the props needed for the new organization page.
+ *
+ * @param data - An object containing the user data.
+ * @param data.user - The user object to map to the sidebar props.
+ * @returns The props needed for the new organization page.
+ */
+export const mapOrganizationAndUserDataToNewOrganizationProps = <
+  Data extends {
+    user: OnboardingUser;
+  },
+>({
+  user,
+  ...rest
+}: Data) => ({
+  userNavigation: {
+    abbreviation: getNameAbbreviation(user.name),
+    email: user.email,
+    name: user.name,
+    items: [] as HeaderUserProfileDropDownProps['items'],
+  },
+  user,
+  ...rest,
 });

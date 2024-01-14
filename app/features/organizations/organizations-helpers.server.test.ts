@@ -8,6 +8,7 @@ import { createPopulatedOrganization } from './organizations-factories.server';
 import {
   getOrganizationIsInUserMembershipList,
   getOrganizationSlug,
+  mapOrganizationAndUserDataToNewOrganizationProps,
   mapOrganizationAndUserDataToSidebarProps,
 } from './organizations-helpers.server';
 
@@ -95,14 +96,38 @@ describe('getOrganizationIsInUserMembershipList()', () => {
 
 describe('mapOrganizationAndUserDataToSidebarProps()', () => {
   test('given a user and an organization slug: returns the correct sidebar props', async () => {
-    const organizationSlug = createPopulatedOrganization().slug;
-    const user = createUserWithOrganizations({ name: 'Jordan Carter' });
+    const organizationSlug = 'tesla';
+    const user = createUserWithOrganizations({
+      name: 'Jordan Carter',
+      memberships: [
+        {
+          role: 'member',
+          organization: createPopulatedOrganization({ name: 'X' }),
+          deactivatedAt: null,
+        },
+        {
+          role: 'member',
+          organization: createPopulatedOrganization({ name: 'Tesla' }),
+          deactivatedAt: null,
+        },
+        {
+          role: 'member',
+          organization: createPopulatedOrganization({ name: 'Shopify' }),
+          deactivatedAt: null,
+        },
+      ],
+    });
 
     const actual = mapOrganizationAndUserDataToSidebarProps({
       organizationSlug,
       user,
     });
     const expected = {
+      organizations: [
+        { name: 'X', isCurrent: false, slug: 'x' },
+        { name: 'Tesla', isCurrent: true, slug: 'tesla' },
+        { name: 'Shopify', isCurrent: false, slug: 'shopify' },
+      ],
       organizationSlug,
       userNavigation: {
         abbreviation: 'JC',
@@ -110,6 +135,25 @@ describe('mapOrganizationAndUserDataToSidebarProps()', () => {
         name: user.name,
         items: [],
       },
+    };
+
+    expect(actual).toEqual(expected);
+  });
+});
+
+describe('mapOrganizationAndUserDataToNewOrganizationProps()', () => {
+  test('given a user: returns the correct new organization props', async () => {
+    const user = createUserWithOrganizations({ name: 'Jordan Carter' });
+
+    const actual = mapOrganizationAndUserDataToNewOrganizationProps({ user });
+    const expected = {
+      userNavigation: {
+        abbreviation: 'JC',
+        email: user.email,
+        name: user.name,
+        items: [],
+      },
+      user,
     };
 
     expect(actual).toEqual(expected);

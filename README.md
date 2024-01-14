@@ -13,7 +13,8 @@ npx create-remix --template ten-x-dev/french-house-stack
 
 ## What's in the Stack? 🤔
 
-The French House Stack is a starter template for SaaS apps in general, but also for [developing DApps by using Magic](https://magic.link/docs/home#blockchains).
+The French House Stack is a starter template for SaaS apps in general, but also
+for [developing DApps by using Magic](https://magic.link/docs/home#blockchains).
 However, Magic is perfectly suited for a regular Web2 app, too.
 
 - Authentication with [Magic](https://magic.link/) and with
@@ -23,11 +24,13 @@ However, Magic is perfectly suited for a regular Web2 app, too.
   production and staging environments
 - Styling with [Tailwind](https://tailwindcss.com/).
   - Includes [dark mode](https://tailwindcss.com/docs/dark-mode).
-- Components by [ShadcnUI](https://ui.shadcn.com/) (plus a handful of unique custom components.)
+- Components by [ShadcnUI](https://ui.shadcn.com/) (plus a handful of unique
+  custom components.)
 - End-to-end testing with [Playwright](https://playwright.dev)
 - Unit testing with [Vitest](https://vitest.dev) and
   [Testing Library](https://testing-library.com)
-- [MSW](https://mswjs.io/) for mocking API requests in tests and during development.
+- [MSW](https://mswjs.io/) for mocking API requests in tests and during
+  development.
 - [SQLite](https://www.sqlite.org/index.html) database with
   [Prisma](https://www.prisma.io/) as the ORM
 - Code formatting with [Prettier](https://prettier.io)
@@ -93,7 +96,8 @@ to check for updates and install the latest versions.
   - `DATABASE_URL` - The url under which the SQLite database will operate. You
     may use the value from `.env.example` for this.
 
-- Add a `console.warn` to the `'magicEmailRegistration'` case in the `registerHandler()` in
+- Add a `console.warn` to the `'magicEmailRegistration'` case in the
+  `registerHandler()` in
   `app/features/user-authentication/user-authentication-actions.server.ts`:
 
   ```ts
@@ -116,9 +120,8 @@ to check for updates and install the latest versions.
 
 - Sign up for an account under `/register` by signing up with Magic.
 
-- Grab the `did` that you logged out in the previous step from the terminal
-  in which you ran `npm run dev` and add it to your `.env` file as
-  `SEED_USER_DID`.
+- Grab the `did` that you logged out in the previous step from the terminal in
+  which you ran `npm run dev` and add it to your `.env` file as `SEED_USER_DID`.
 
 - Remove the `console.warn` from the `registerHandler()`.
 
@@ -128,6 +131,8 @@ to check for updates and install the latest versions.
   - `SEED_USER_DID` - The steps above outlined how to get this value. This value
     is the user id of the user that will be seeded in the database. This value
     is required for the `"prisma:seed"` script.
+  - `SEED_SEED_USER_EMAIL` - The email of the user that will be seeded in the
+    database. This value is required for the `"prisma:seed"` script.
   - `SENTRY_DSN` - The DSN for your Sentry project. This value is optional.
 
 - Lastly, stop your `npm run dev` script and run
@@ -143,7 +148,8 @@ This starts your app in development mode, rebuilding assets on file changes.
 
 ### Dev with Mocks
 
-You can run the app with MSW mocking requests to third party services by running:
+You can run the app with MSW mocking requests to third party services by
+running:
 
 ```sh
 npm run dev-with-mocks
@@ -163,7 +169,9 @@ initialize the MSW service worker. It should create a file in
 
 This is useful for developing offline or without hitting any API.
 
-By default, MSW is used in the French House Stack to mock requests to Magic in your E2E tests. Check out `playwright/e2e/user-authentication/logout.spec.ts` and `app/test/mocks/handlers/magic.ts` to see how to use MSW on the server.
+By default, MSW is used in the French House Stack to mock requests to Magic in
+your E2E tests. Check out `playwright/e2e/user-authentication/logout.spec.ts`
+and `app/test/mocks/handlers/magic.ts` to see how to use MSW on the server.
 
 ### Prisma helper scripts
 
@@ -255,16 +263,27 @@ When a user signs out, we clear the session cookie.
 
 ### ShadcnUI & Custom Components
 
-ShadcnUI is configured in the "New York" setting, but it uses icons from `lucide-react`, so when generating a component you need to switch out that import because the "New York" setting usually uses icons from `@radix-ui/react-icons`. `lucide-react` is used because it has a wider selection of icons.
+ShadcnUI is configured in the "New York" setting, but it uses icons from
+`lucide-react`, so when generating a component you need to switch out that
+import because the "New York" setting usually uses icons from
+`@radix-ui/react-icons`. `lucide-react` is used because it has a wider selection
+of icons.
 
 In addition to the components from ShadcnUI, the French House Stack comes with
 some custom components:
 
 - `app/components/disableable-link.tsx` - A link tag that can be disabled.
 - `app/components/drag-and-drop.tsx` - A drag and drop file input component.
-- `app/components/general-error-boundary.tsx` - An error boundary component inspired by the [Epic Stack](https://github.com/epicweb-dev/epic-stack/blob/main/app/components/error-boundary.tsx).
-- `app/components/sidebar.tsx` - A sidebar with header and burger menu component. It is recommended to configure things like its title using Remix' `useMatches` on a per route basis. (See `app/features/organizations/organizations-sidebar-component.tsx` for an example.)
-- `app/components/text.tsx` - Various text components that can be used to render text, links and code blocks.
+- `app/components/general-error-boundary.tsx` - An error boundary component
+  inspired by the
+  [Epic Stack](https://github.com/epicweb-dev/epic-stack/blob/main/app/components/error-boundary.tsx).
+- `app/components/sidebar.tsx` - A sidebar with header and burger menu
+  component. It is recommended to configure things like its title using Remix'
+  `useMatches` on a per route basis. (See
+  `app/features/organizations/organizations-sidebar-component.tsx` for an
+  example.)
+- `app/components/text.tsx` - Various text components that can be used to render
+  text, links and code blocks.
 
 ### i18n
 
@@ -273,7 +292,9 @@ The French House Stack comes with localization support through
 
 The namespaces live in `public/locales/`.
 
-Remember to add new namespaces to `app/features/localization/i18next.server.ts` to make them available in the server bundle and to `app/test/i18n.ts` to make sure they're available in the React component tests.
+Remember to add new namespaces to `app/features/localization/i18next.server.ts`
+to make them available in the server bundle and to `app/test/i18n.ts` to make
+sure they're available in the React component tests.
 
 ### Monitoring
 
@@ -384,14 +405,23 @@ For lower level tests of utilities and individual components, we use `vitest`.
 We have DOM-specific assertion helpers via
 [`@testing-library/jest-dom`](https://testing-library.com/jest-dom).
 
-By default, Vitest runs tests in the [`"happy-dom"` environment](https://vitest.dev/config/#environment). However, test files that have `.server` in the name will be run in the `"node"` environment.
+By default, Vitest runs tests in the
+[`"happy-dom"` environment](https://vitest.dev/config/#environment). However,
+test files that have `.server` in the name will be run in the `"node"`
+environment.
 
 ### Test Scripts
 
 - `npm run test` - Runs all Vitest tests.
-- `npm run test:unit` - Runs all unit tests with Vitest. Your unit tests should test components or function in isolation, run fast, and are files that end with `.test.ts` or `.test.tsx`.
-- `npm run test:integration` - Runs all integration tests Vitest. Your integration tests should test multiple components or functions together, run slower than unit tests (e.g. because they hit the database), and are files that end with `.spec.ts` or `.spec.tsx`.
-- `npm run test:coverage` - Runs all Vitest tests and generates a coverage report.
+- `npm run test:unit` - Runs all unit tests with Vitest. Your unit tests should
+  test components or function in isolation, run fast, and are files that end
+  with `.test.ts` or `.test.tsx`.
+- `npm run test:integration` - Runs all integration tests Vitest. Your
+  integration tests should test multiple components or functions together, run
+  slower than unit tests (e.g. because they hit the database), and are files
+  that end with `.spec.ts` or `.spec.tsx`.
+- `npm run test:coverage` - Runs all Vitest tests and generates a coverage
+  report.
 - `npm run test:e2e` - Runs all E2E tests with Playwright.
 - `npm run test:e2e:ui` - Runs all E2E tests with Playwright in UI mode.
 

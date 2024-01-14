@@ -10,9 +10,9 @@ import {
   useNavigation,
   useSubmit,
 } from '@remix-run/react';
-import { Loader2 } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { Magic } from 'magic-sdk';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
@@ -54,12 +54,7 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function Login() {
   const { t } = useTranslation('login');
   const navigation = useNavigation();
-  const isLoggingInViaEmail =
-    navigation.formData?.get('intent') === 'emailLogin' ||
-    navigation.formData?.get('intent') === 'magicEmailLogin';
-
   const actionData = useActionData<LoginActionData>();
-
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: { email: '' },
@@ -68,11 +63,11 @@ export default function Login() {
   });
 
   const submit = useSubmit();
-
   const onSubmit = form.handleSubmit(data => {
     submit(data, { method: 'post', replace: true });
   });
 
+  const [isLoggingInWithMagic, setIsLoggingInWithMagic] = useState(false);
   const [magicReady, setMagicReady] = usePromise<{ magic: Magic }>();
 
   async function downloadMagicStaticAssets() {
@@ -96,6 +91,7 @@ export default function Login() {
     if (typeof actionData?.email === 'string' && actionData?.email.length > 0) {
       async function loginWithMagic() {
         try {
+          setIsLoggingInWithMagic(true);
           const { magic } = await magicReady;
           const didToken = await magic.auth.loginWithMagicLink({
             email: actionData!.email!,
@@ -111,12 +107,20 @@ export default function Login() {
           }
         } catch {
           form.setError('email', { message: t('login-failed') });
+        } finally {
+          setIsLoggingInWithMagic(false);
         }
       }
 
       loginWithMagic();
     }
-  }, [actionData, form, t, actionData?.email, magicReady, submit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionData?.email]);
+
+  const isLoggingInViaEmail =
+    navigation.formData?.get('intent') === 'emailLogin' ||
+    navigation.formData?.get('intent') === 'magicEmailLogin' ||
+    isLoggingInWithMagic;
 
   return (
     <main className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -159,7 +163,7 @@ export default function Login() {
               >
                 {isLoggingInViaEmail ? (
                   <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    <Loader2Icon className="mr-2 size-4 animate-spin" />
                     {t('authenticating')}
                   </>
                 ) : (

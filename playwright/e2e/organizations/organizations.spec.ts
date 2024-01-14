@@ -1,5 +1,3 @@
-import { describe } from 'node:test';
-
 import { expect, test } from '@playwright/test';
 
 import { deleteUserProfileFromDatabaseById } from '~/features/user-profile/user-profile-model.server';
@@ -11,7 +9,7 @@ import {
   setupOrganizationAndLoginAsMember,
 } from '../../utils';
 
-describe('organizations root page', () => {
+test.describe('organizations root page', () => {
   test('given a logged out user: redirects the user to the login page', async ({
     page,
   }) => {

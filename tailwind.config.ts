@@ -67,6 +67,11 @@ const config = {
           to: { height: '0' },
         },
       },
+      width: {
+        '66': '16.5rem',
+        '68': '17rem',
+        '82': '20.5rem',
+      },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',

@@ -1,0 +1,9 @@
+{
+  "go-back": "Go back",
+  "log-out": "Log out",
+  "open-user-menu": "Open user menu",
+  "search": "Search",
+  "search-placeholder": "Search ...",
+  "view-n-new-notifications": "View {{count}} new notifications",
+  "view-notifications": "View notifications"
+}

@@ -34,7 +34,11 @@ module.exports = {
       'error',
       {
         case: 'kebabCase',
-        ignore: [/.*\._index\.tsx$/, /.*\$[A-Za-z]+Slug(\.[A-Za-z]+)*\.tsx$/],
+        ignore: [
+          /.*\._index\.tsx$/,
+          /.*\$[A-Za-z]+Slug(\.[A-Za-z]+)*\.tsx$/,
+          /.*organizations_.*\..+$/,
+        ],
       },
     ],
   },

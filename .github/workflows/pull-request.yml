@@ -278,7 +278,6 @@ jobs:
           path: playwright-report/
           retention-days: 30
 
-
   dependabot:
     name: 🤖 Dependabot
     runs-on: ubuntu-latest

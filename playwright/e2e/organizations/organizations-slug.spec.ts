@@ -1,5 +1,3 @@
-import { describe } from 'node:test';
-
 import { expect, test } from '@playwright/test';
 
 import { createPopulatedOrganization } from '~/features/organizations/organizations-factories.server';
@@ -16,7 +14,7 @@ import {
   setupOrganizationAndLoginAsMember,
 } from '../../utils';
 
-describe('organizations slug page', () => {
+test.describe('organizations slug page', () => {
   test('given a logged out user: redirects the user to the login page', async ({
     page,
   }) => {
