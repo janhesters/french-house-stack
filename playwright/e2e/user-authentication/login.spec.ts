@@ -2,6 +2,7 @@ import 'dotenv/config';
 
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import type { UserProfile } from '@prisma/client';
 
 import { createPopulatedUserAuthSession } from '~/features/user-authentication/user-auth-session-factories.server';
 import { saveUserAuthSessionToDatabase } from '~/features/user-authentication/user-auth-session-model.server';
@@ -38,73 +39,86 @@ test.describe('login page', () => {
     await teardownOrganizationAndMember({ organization, user });
   });
 
-  test('given a logged out user and entering valid credentials, but with an error in Magic: fails gracefully', async ({
-    page,
-    browserName,
-  }) => {
-    // eslint-disable-next-line playwright/no-skipped-test
-    test.skip(
-      browserName === 'webkit',
-      'Safari (Desktop & Mobile) fails in CI. Locally it works ...',
-    );
+  test.describe('login with setup', () => {
+    // Because this test is flaky, we're going to do the setup and teardown in
+    // before each and after each hooks.
+    let user: UserProfile;
+    let failingUser: UserProfile;
 
-    const user = createPopulatedUserProfile({ email: validMagicEmail });
-    await saveUserProfileToDatabase(user);
-    const userAuthSession = createPopulatedUserAuthSession({ userId: user.id });
-    await saveUserAuthSessionToDatabase(userAuthSession);
-    const cookieToken = await createValidCookieToken(userAuthSession.id);
-    const failingUser = createPopulatedUserProfile({
-      email: invalidMagicEmail,
-    });
-    await saveUserProfileToDatabase(failingUser);
-
-    await page.addInitScript(() => {
-      window.runMagicInTestMode = true;
-    });
-    await page.route(loginLoaderRoute, (route, request) => {
-      const postData = request.postData();
-
-      if (postData && postData.includes('didToken')) {
-        return route.fulfill({
-          headers: {
-            'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${cookieToken}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
-            'X-Remix-Redirect': '/onboarding',
-            'X-Remix-Revalidate': 'yes',
-          },
-          status: 204,
-        });
-      }
-
-      return route.continue();
+    test.beforeEach(async () => {
+      user = createPopulatedUserProfile({ email: validMagicEmail });
+      await saveUserProfileToDatabase(user);
+      failingUser = createPopulatedUserProfile({ email: invalidMagicEmail });
+      await saveUserProfileToDatabase(failingUser);
     });
 
-    // Navigate to the login page.
-    await page.goto('/login');
+    test.afterEach(async () => {
+      await deleteUserProfileFromDatabaseById(user.id);
+      await deleteUserProfileFromDatabaseById(failingUser.id);
+    });
 
-    // The page has the correct title.
-    expect(await page.title()).toEqual('Login | French House Stack');
+    test('given a logged out user and entering valid credentials, but with an error in Magic: fails gracefully', async ({
+      page,
+      browserName,
+    }) => {
+      // eslint-disable-next-line playwright/no-skipped-test
+      test.skip(
+        browserName === 'webkit',
+        'Safari (Desktop & Mobile) fails in CI. Locally it works ...',
+      );
 
-    // Enter an invalid email and submit the form.
-    await page.getByLabel(/email/i).fill(invalidMagicEmail);
-    await page.getByRole('button', { name: /login/i }).click();
+      const userAuthSession = createPopulatedUserAuthSession({
+        userId: user.id,
+      });
+      await saveUserAuthSessionToDatabase(userAuthSession);
+      const cookieToken = await createValidCookieToken(userAuthSession.id);
 
-    // There should be an appropriate error message.
-    await expect(
-      page.getByText(/login failed. please try again/i),
-    ).toBeVisible();
+      await page.addInitScript(() => {
+        window.runMagicInTestMode = true;
+      });
+      await page.route(loginLoaderRoute, (route, request) => {
+        const postData = request.postData();
 
-    // Enter the valid email and submit the form.
-    await page.getByLabel(/email/i).fill(validMagicEmail);
-    await page.getByRole('button', { name: /login/i }).click();
-    await page.getByRole('button', { name: /authenticating/i }).isDisabled();
+        if (postData && postData.includes('didToken')) {
+          return route.fulfill({
+            headers: {
+              'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${cookieToken}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
+              'X-Remix-Redirect': '/onboarding',
+              'X-Remix-Revalidate': 'yes',
+            },
+            status: 204,
+          });
+        }
 
-    // After logging in, the user should be redirected to the onboarding page.
-    await page.waitForURL('/onboarding/organization');
-    expect(getPath(page)).toEqual('/onboarding/organization');
+        return route.continue();
+      });
 
-    await page.context().close();
-    await deleteUserProfileFromDatabaseById(user.id);
-    await deleteUserProfileFromDatabaseById(failingUser.id);
+      // Navigate to the login page.
+      await page.goto('/login');
+
+      // The page has the correct title.
+      expect(await page.title()).toEqual('Login | French House Stack');
+
+      // Enter an invalid email and submit the form.
+      await page.getByLabel(/email/i).fill(invalidMagicEmail);
+      await page.getByRole('button', { name: /login/i }).click();
+
+      // There should be an appropriate error message.
+      await expect(
+        page.getByText(/login failed. please try again/i),
+      ).toBeVisible();
+
+      // Enter the valid email and submit the form.
+      await page.getByLabel(/email/i).fill(validMagicEmail);
+      await page.getByRole('button', { name: /login/i }).click();
+      await page.getByRole('button', { name: /authenticating/i }).isDisabled();
+
+      // After logging in, the user should be redirected to the onboarding page.
+      await page.waitForURL('/onboarding/organization');
+      expect(getPath(page)).toEqual('/onboarding/organization');
+
+      await page.context().close();
+    });
   });
 
   test('given a logged out user and entering invalid data: shows the correct error messages', async ({

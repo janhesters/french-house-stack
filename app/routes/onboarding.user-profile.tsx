@@ -4,8 +4,14 @@ import type {
   LoaderFunctionArgs,
   MetaFunction,
 } from '@remix-run/node';
-import { Form, useNavigation, useSubmit } from '@remix-run/react';
-import { Loader2 } from 'lucide-react';
+import {
+  Form,
+  useActionData,
+  useNavigation,
+  useSubmit,
+} from '@remix-run/react';
+import { Loader2Icon } from 'lucide-react';
+import type { FieldErrors } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
@@ -51,9 +57,15 @@ export default function OnboardingUserProfile() {
   const { t } = useTranslation('onboarding-user-profile');
   const navigation = useNavigation();
   const isCreatingUserProfile = navigation.formData?.get('intent') === 'create';
+
+  const actionData = useActionData<{
+    errors: FieldErrors<z.infer<typeof onboardingUserProfileSchema>>;
+  }>();
   const form = useForm<z.infer<typeof onboardingUserProfileSchema>>({
     resolver: zodResolver(onboardingUserProfileSchema),
     defaultValues: { name: '' },
+    // @ts-expect-error JsonifyObject causes trouble here.
+    errors: actionData?.errors,
   });
   const submit = useSubmit();
   const onSubmit = form.handleSubmit(data => {
@@ -132,7 +144,7 @@ export default function OnboardingUserProfile() {
                     >
                       {isCreatingUserProfile ? (
                         <>
-                          <Loader2 className="mr-2 size-4 animate-spin" />
+                          <Loader2Icon className="mr-2 size-4 animate-spin" />
                           {t('saving')}
                         </>
                       ) : (

@@ -21,13 +21,15 @@ const ErrorMessage = ({
   title: string;
   description: string;
 }) => (
-  <Alert
-    className="flex h-full flex-col items-center justify-center"
-    variant="destructive"
-  >
-    <AlertTitle className="font-semibold">{title}</AlertTitle>
-    <AlertDescription>{description}</AlertDescription>
-  </Alert>
+  <div className="flex h-full flex-col p-2">
+    <Alert
+      className="flex h-full flex-col items-center justify-center"
+      variant="destructive"
+    >
+      <AlertTitle className="font-semibold">{title}</AlertTitle>
+      <AlertDescription>{description}</AlertDescription>
+    </Alert>
+  </div>
 );
 
 /**

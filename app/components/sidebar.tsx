@@ -1,44 +1,29 @@
-import {
-  Form,
-  Link,
-  NavLink,
-  Outlet,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from '@remix-run/react';
-import {
-  ArrowLeftCircleIcon,
-  BellIcon,
-  MenuIcon,
-  SearchIcon,
-} from 'lucide-react';
+import { Link, NavLink, Outlet, useLocation } from '@remix-run/react';
+import { MenuIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
 import { useTranslation } from '~/features/localization/use-translation';
 import { cn } from '~/utils/shadcn-ui';
 
+import type { HeaderUserProfileDropDownProps } from './header';
+import {
+  Header,
+  HeaderBackButton,
+  HeaderNotificationsBell,
+  HeaderSearchBar,
+  HeaderSeperator,
+  HeaderTitle,
+  HeaderUserProfileDropdown,
+} from './header';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from './ui/accordion';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Button, buttonVariants } from './ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu';
-import { Input } from './ui/input';
 import { ScrollArea } from './ui/scroll-area';
-import { Separator } from './ui/separator';
 import { Sheet, SheetContent } from './ui/sheet';
 
 type Icon = typeof MenuIcon;
@@ -114,19 +99,6 @@ type NavigationItemGroup = {
   items: NavigationItem[];
 };
 
-type UserNavigationItem = {
-  name: string;
-  href: string;
-};
-
-export type SidebarUserNavigation = {
-  avatar?: string;
-  abbreviation: string;
-  email: string;
-  name: string;
-  items: UserNavigationItem[];
-};
-
 export type SidebarProps = {
   headerTitle?: ReactNode;
   navigation: NavigationItemGroup[];
@@ -135,7 +107,7 @@ export type SidebarProps = {
   renderSearchBar?: boolean;
   renderStaticSidebar?: boolean;
   sidebarTitle?: ReactNode;
-  userNavigation: SidebarUserNavigation;
+  userNavigation: HeaderUserProfileDropDownProps;
 };
 
 function SidebarContent({
@@ -219,18 +191,7 @@ export function Sidebar({
 }: SidebarProps) {
   const { t } = useTranslation('sidebar');
 
-  /** Sidebar open state */
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  /** Back button navigation logic */
-  const navigate = useNavigate();
-  const goBack = () => navigate(-1);
-
-  /** Search bar query param management */
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const [searchParams] = useSearchParams();
-  const searchQuery = searchParams.get('search') || '';
 
   return (
     <div>
@@ -266,7 +227,7 @@ export function Sidebar({
       )}
 
       <div className={cn(renderStaticSidebar && 'lg:pl-72')}>
-        <header className="flex h-13 items-center gap-x-2 border-b pl-2 pr-2 shadow-sm md:pr-4 dark:shadow-none">
+        <Header>
           {/* Burger menu button */}
           <Button
             aria-label={t('open-sidebar')}
@@ -279,140 +240,33 @@ export function Sidebar({
           </Button>
 
           {/* Back button */}
-          {renderBackButton && (
-            <Button
-              aria-label={t('go-back')}
-              onClick={goBack}
-              variant="ghost"
-              size="icon"
-            >
-              <ArrowLeftCircleIcon aria-hidden="true" className="size-5" />
-            </Button>
-          )}
+          {renderBackButton && <HeaderBackButton />}
 
-          <Separator className="mx-2 h-6 lg:hidden" orientation="vertical" />
+          <HeaderSeperator className="lg:hidden" />
 
           {/* Header page title */}
           {headerTitle ? (
-            <h1
-              className={cn(
-                renderSearchBar
-                  ? 'sr-only'
-                  : 'line-clamp-2 flex-1 text-lg font-semibold',
-              )}
-            >
+            <HeaderTitle className={cn(renderSearchBar && 'sr-only')}>
               {headerTitle}
-            </h1>
+            </HeaderTitle>
           ) : (
             <div className="flex-1" />
           )}
 
-          {renderSearchBar && (
-            <Form action={currentPath} className="relative flex flex-1" replace>
-              <label className="sr-only" htmlFor="search-field">
-                {t('search')}
-              </label>
-
-              <SearchIcon
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-y-0 left-2 h-full w-5 text-gray-400"
-              />
-
-              <Input
-                id="search-field"
-                className="pl-10"
-                defaultValue={searchQuery}
-                placeholder={t('search-placeholder')}
-                name="search"
-                type="search"
-              />
-            </Form>
-          )}
+          {renderSearchBar && <HeaderSearchBar />}
 
           <div className="flex items-center gap-x-2">
             {/* Notifications bell */}
             {typeof notifications === 'number' && (
-              <Button className="relative" size="icon" variant="ghost">
-                <BellIcon aria-hidden="true" className="size-6" />
-
-                <span className="sr-only">
-                  {notifications === 0
-                    ? t('view-notifications')
-                    : t('view-n-new-notifications', {
-                        count: notifications,
-                      })}
-                </span>
-
-                {notifications > 0 && (
-                  <span className="absolute right-2.5 top-2 block size-2 rounded-full bg-destructive ring-2 ring-background" />
-                )}
-              </Button>
+              <HeaderNotificationsBell notifications={notifications} />
             )}
 
-            <Separator
-              className="mx-2 hidden h-6 lg:block"
-              orientation="vertical"
-            />
+            <HeaderSeperator className="hidden lg:block" />
 
             {/* User profile dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  className="relative h-8 w-8 rounded-full"
-                  aria-label={t('open-user-menu')}
-                  variant="ghost"
-                >
-                  <Avatar className="size-8">
-                    <AvatarImage
-                      alt={userNavigation.name}
-                      src={userNavigation.avatar}
-                    />
-
-                    <AvatarFallback>
-                      {userNavigation.abbreviation}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent className="w-56" align="end" forceMount>
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {userNavigation.name}
-                    </p>
-
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {userNavigation.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-
-                <DropdownMenuSeparator />
-
-                {userNavigation.items.length > 0 && (
-                  <>
-                    <DropdownMenuGroup>
-                      {userNavigation.items.map(item => (
-                        <DropdownMenuItem key={item.name}>
-                          {item.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuGroup>
-
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-
-                <DropdownMenuItem>
-                  <form method="POST" action="/logout">
-                    <button type="submit">{t('log-out')}</button>
-                  </form>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <HeaderUserProfileDropdown {...userNavigation} />
           </div>
-        </header>
+        </Header>
 
         <main>
           <Outlet />

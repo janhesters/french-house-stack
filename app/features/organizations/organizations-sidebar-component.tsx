@@ -4,8 +4,11 @@ import { HomeIcon } from 'lucide-react';
 import { findLast, has, pipe, prop } from 'ramda';
 import { useTranslation } from 'react-i18next';
 
-import type { SidebarUserNavigation } from '~/components/sidebar';
+import type { HeaderUserProfileDropDownProps } from '~/components/header';
 import { Sidebar } from '~/components/sidebar';
+
+import type { OrganizationsSwitcherComponentProps } from './organizations-switcher-component';
+import { OrganizationsSwitcherComponent } from './organizations-switcher-component';
 
 type AppData = {
   headerTitle?: string;
@@ -32,10 +35,11 @@ export const findRenderStaticSidebar = (matches: RouteMatch[]) =>
 
 export type OrganizationsSideBarComponentProps = {
   organizationSlug: string;
-  userNavigation: SidebarUserNavigation;
-};
+  userNavigation: HeaderUserProfileDropDownProps;
+} & Pick<OrganizationsSwitcherComponentProps, 'organizations'>;
 
 export function OrganizationsSidebarComponent({
+  organizations,
   organizationSlug,
   userNavigation,
 }: OrganizationsSideBarComponentProps) {
@@ -50,8 +54,12 @@ export function OrganizationsSidebarComponent({
 
   return (
     <Sidebar
-      sidebarTitle={t('common:app-name')}
-      headerTitle={<span className="line-clamp-2">{headerTitle}</span>}
+      sidebarTitle={
+        <div className="flex h-13 items-center border-b pl-2 pr-12 lg:pr-2">
+          <OrganizationsSwitcherComponent organizations={organizations} />
+        </div>
+      }
+      headerTitle={headerTitle}
       navigation={[
         {
           id: 'app',

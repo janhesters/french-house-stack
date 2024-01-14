@@ -10,9 +10,9 @@ import {
   useNavigation,
   useSubmit,
 } from '@remix-run/react';
-import { Loader2 } from 'lucide-react';
+import { Loader2Icon } from 'lucide-react';
 import { Magic } from 'magic-sdk';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans } from 'react-i18next';
 import type { z } from 'zod';
@@ -56,12 +56,7 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function Register() {
   const { t } = useTranslation('register');
   const navigation = useNavigation();
-  const isRegisteringViaEmail =
-    navigation.formData?.get('intent') === 'emailRegistration' ||
-    navigation.formData?.get('intent') === 'magicEmailRegistration';
-
   const actionData = useActionData<RegisterActionData>();
-
   const form = useForm<z.infer<typeof registrationFormSchema>>({
     resolver: zodResolver(registrationFormSchema),
     defaultValues: { acceptedTerms: false, email: '' },
@@ -70,11 +65,11 @@ export default function Register() {
   });
 
   const submit = useSubmit();
-
   const onSubmit = form.handleSubmit(async data => {
     submit(data, { method: 'post', replace: true });
   });
 
+  const [isRegisteringWithMagic, setIsRegisteringWithMagic] = useState(false);
   const [magicReady, setMagicReady] = usePromise<{ magic: Magic }>();
 
   async function downloadMagicStaticAssets() {
@@ -98,6 +93,7 @@ export default function Register() {
     if (typeof actionData?.email === 'string' && actionData?.email.length > 0) {
       async function registerWithMagic() {
         try {
+          setIsRegisteringWithMagic(true);
           const { magic } = await magicReady;
           const didToken = await magic.auth.loginWithMagicLink({
             email: actionData!.email!,
@@ -112,12 +108,20 @@ export default function Register() {
           }
         } catch {
           form.setError('email', { message: 'register:registration-failed' });
+        } finally {
+          setIsRegisteringWithMagic(false);
         }
       }
 
       registerWithMagic();
     }
-  }, [actionData, form, t, actionData?.email, magicReady, submit]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actionData?.email]);
+
+  const isRegisteringViaEmail =
+    navigation.formData?.get('intent') === 'emailRegistration' ||
+    navigation.formData?.get('intent') === 'magicEmailRegistration' ||
+    isRegisteringWithMagic;
 
   return (
     <main className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -203,7 +207,7 @@ export default function Register() {
               >
                 {isRegisteringViaEmail ? (
                   <>
-                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    <Loader2Icon className="mr-2 size-4 animate-spin" />
                     {t('registering')}
                   </>
                 ) : (

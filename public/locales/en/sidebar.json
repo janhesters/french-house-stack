@@ -1,12 +1,5 @@
 {
   "close-sidebar": "Close sidebar",
-  "go-back": "Go back",
-  "log-out": "Log out",
   "open-sidebar": "Open sidebar",
-  "open-user-menu": "Open user menu",
-  "search": "Search",
-  "search-placeholder": "Search ...",
-  "sidebar": "Sidebar",
-  "view-n-new-notifications": "View {{count}} new notifications",
-  "view-notifications": "View notifications"
+  "sidebar": "Sidebar"
 }

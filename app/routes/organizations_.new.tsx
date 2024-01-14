@@ -6,15 +6,21 @@ import type {
 } from '@remix-run/node';
 import {
   Form,
-  useActionData,
+  useLoaderData,
   useNavigation,
   useSubmit,
 } from '@remix-run/react';
 import { Loader2Icon } from 'lucide-react';
-import type { FieldErrors } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
+import {
+  Header,
+  HeaderBackButton,
+  HeaderSeperator,
+  HeaderTitle,
+  HeaderUserProfileDropdown,
+} from '~/components/header';
 import { Button } from '~/components/ui/button';
 import {
   Card,
@@ -35,39 +41,34 @@ import {
 } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import { useTranslation } from '~/features/localization/use-translation';
-import { onboardingOrganizationAction } from '~/features/onboarding/onboarding-actions.server';
-import { onboardingOrganizationSchema } from '~/features/onboarding/onboarding-client-schemas';
-import { onboardingOrganizationLoader } from '~/features/onboarding/onboarding-loaders.server';
-import { StepsPanelsComponent } from '~/features/onboarding/steps-panels-component';
+import { newOrganizationAction } from '~/features/organizations/organizations-actions.server';
+import { newOrganizationSchema } from '~/features/organizations/organizations-client-schemas';
+import { newOrganizationLoader } from '~/features/organizations/organizations-loaders.server';
 
-export const handle = { i18n: 'onboarding-organization' };
+export const handle = { i18n: ['organizations-new', 'header'] };
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  return await onboardingOrganizationLoader({ request });
+export async function loader({ request, params }: LoaderFunctionArgs) {
+  return await newOrganizationLoader({ request, params });
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
-  { title: data?.pageTitle || 'Onboading Organization' },
+  { title: data?.pageTitle || 'New Organization' },
 ];
 
-export async function action({ request }: ActionFunctionArgs) {
-  return await onboardingOrganizationAction({ request });
+export function action({ request, params }: ActionFunctionArgs) {
+  return newOrganizationAction({ request, params });
 }
 
-export default function OnboardingOrganization() {
-  const { t } = useTranslation('onboarding-organization');
+export default function OrganizationsNew() {
+  const { t } = useTranslation('organizations-new');
+  const { userNavigation } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const isCreatingOrganization =
     navigation.formData?.get('intent') === 'create';
 
-  const actionData = useActionData<{
-    errors: FieldErrors<z.infer<typeof onboardingOrganizationSchema>>;
-  }>();
-  const form = useForm<z.infer<typeof onboardingOrganizationSchema>>({
-    resolver: zodResolver(onboardingOrganizationSchema),
+  const form = useForm<z.infer<typeof newOrganizationSchema>>({
+    resolver: zodResolver(newOrganizationSchema),
     defaultValues: { name: '' },
-    // @ts-expect-error JsonifyObject causes trouble here.
-    errors: actionData?.errors,
   });
   const submit = useSubmit();
   const onSubmit = form.handleSubmit(data => {
@@ -75,34 +76,23 @@ export default function OnboardingOrganization() {
   });
 
   return (
-    <>
-      <header className="sr-only">
-        <h1>{t('onboarding')}</h1>
-      </header>
+    <div className="flex h-full flex-col">
+      <Header>
+        <HeaderBackButton />
 
-      <main className="mx-auto flex max-w-7xl flex-col space-y-4 py-4 sm:px-6 md:h-full md:space-y-0 md:px-8">
-        <div className="px-4 sm:px-0">
-          <StepsPanelsComponent
-            label={t('onboarding-progress')}
-            steps={[
-              {
-                name: t('user-profile'),
-                href: '/onboarding/user-profile',
-                status: 'complete',
-                disabled: true,
-              },
-              {
-                name: t('organization'),
-                href: '/onboarding/organization',
-                status: 'current',
-              },
-            ]}
-          />
-        </div>
+        <HeaderSeperator className="lg:hidden" />
 
-        <div className="flex h-full flex-col py-4">
-          <h2 className="sr-only">{t('onboarding-organization')}</h2>
+        <HeaderTitle>{t('organizations')}</HeaderTitle>
 
+        <HeaderSeperator className="hidden lg:block" />
+
+        <HeaderUserProfileDropdown {...userNavigation} />
+      </Header>
+
+      <main className="mx-auto flex h-full w-full max-w-7xl flex-col sm:px-6 md:px-8">
+        <h2 className="sr-only">{t('create-new-organization')}</h2>
+
+        <div className="flex h-full flex-col p-2">
           <Card className="m-auto w-full max-w-md">
             <CardHeader>
               <CardTitle>{t('organization-card-title')}</CardTitle>
@@ -162,6 +152,6 @@ export default function OnboardingOrganization() {
           </Card>
         </div>
       </main>
-    </>
+    </div>
   );
 }
