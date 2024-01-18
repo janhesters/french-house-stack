@@ -25,9 +25,14 @@ import darkStyles from '~/styles/dark.css';
 import styles from '~/styles/tailwind.css';
 
 import { GeneralErrorBoundary } from './components/general-error-boundary';
+import { Toaster } from './components/ui/sonner';
 import type { EnvironmentVariables } from './entry.client';
 import { i18next } from './features/localization/i18next.server';
 import { NotFoundComponent } from './features/not-found/not-found-component';
+import { useToast } from './hooks/use-toast';
+import { combineHeaders } from './utils/combine-headers.server';
+import type { Toast } from './utils/toast.server';
+import { getToast } from './utils/toast.server';
 
 export const handle = { i18n: 'common' };
 
@@ -58,6 +63,7 @@ type LoaderData = {
   ENV: EnvironmentVariables;
   locale: string;
   title: string;
+  toast: Toast | null;
 };
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -68,12 +74,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   const t = await i18next.getFixedT(request);
   const title = t('app-name');
+  const { toast, headers: toastHeaders } = await getToast(request);
 
-  return json<LoaderData>({
-    ENV: { MAGIC_PUBLISHABLE_KEY, ENVIRONMENT: NODE_ENV, SENTRY_DSN },
-    locale,
-    title,
-  });
+  return json<LoaderData>(
+    {
+      ENV: { MAGIC_PUBLISHABLE_KEY, ENVIRONMENT: NODE_ENV, SENTRY_DSN },
+      locale,
+      title,
+      toast,
+    },
+    { headers: combineHeaders(toastHeaders) },
+  );
 };
 
 export const meta: MetaFunction<typeof loader> = ({
@@ -89,9 +100,10 @@ function useChangeLanguage(locale: string) {
 }
 
 function App() {
-  const { locale, ENV } = useLoaderData<typeof loader>();
+  const { ENV, locale, toast } = useLoaderData<typeof loader>();
   const { i18n } = useTranslation();
   useChangeLanguage(locale);
+  useToast(toast);
 
   return (
     <html lang={locale} className="h-full" dir={i18n.dir()}>
@@ -104,6 +116,7 @@ function App() {
 
       <body className="h-full overscroll-none">
         <Outlet />
+        <Toaster position="bottom-right" />
         <ScrollRestoration />
         <script
           dangerouslySetInnerHTML={{

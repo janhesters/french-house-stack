@@ -134,7 +134,7 @@ export default function Login() {
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <FormProvider {...form}>
-          <Form onSubmit={onSubmit}>
+          <Form method="POST" onSubmit={onSubmit}>
             <fieldset className="space-y-6" disabled={isLoggingInViaEmail}>
               <FormField
                 control={form.control}

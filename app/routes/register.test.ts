@@ -142,8 +142,7 @@ describe('/register route action', () => {
       });
 
       try {
-        const response = await sendRequest({ formData });
-        console.log('response', await response.json());
+        await sendRequest({ formData });
       } catch (error) {
         if (error instanceof Response) {
           expect(error.status).toEqual(400);

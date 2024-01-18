@@ -1,6 +1,7 @@
 import type { SeparatorProps } from '@radix-ui/react-separator';
 import {
   Form,
+  Link,
   useLocation,
   useNavigate,
   useSearchParams,
@@ -188,7 +189,9 @@ export function HeaderUserProfileDropdown(
           <>
             <DropdownMenuGroup>
               {props.items.map(item => (
-                <DropdownMenuItem key={item.name}>{item.name}</DropdownMenuItem>
+                <Link key={item.name} to={item.href}>
+                  <DropdownMenuItem>{t(item.name)}</DropdownMenuItem>
+                </Link>
               ))}
             </DropdownMenuGroup>
 
@@ -196,11 +199,11 @@ export function HeaderUserProfileDropdown(
           </>
         )}
 
-        <DropdownMenuItem>
-          <form method="POST" action="/logout">
-            <button type="submit">{t('log-out')}</button>
-          </form>
-        </DropdownMenuItem>
+        <form className="w-full" method="POST" action="/logout">
+          <button className="w-full" type="submit">
+            <DropdownMenuItem>{t('log-out')}</DropdownMenuItem>
+          </button>
+        </form>
       </DropdownMenuContent>
     </DropdownMenu>
   );

@@ -1,12 +1,10 @@
 import { faker } from '@faker-js/faker';
 import { describe, expect, test } from 'vitest';
 
-import { ORGANIZATION_MEMBERSHIP_ROLES } from '~/features/organizations/organizations-constants';
-import { createPopulatedOrganization } from '~/features/organizations/organizations-factories.server';
-import { retrieveOrganizationWithMembersFromDatabaseBySlug } from '~/features/organizations/organizations-model.server';
 import { createPopulatedUserProfile } from '~/features/user-profile/user-profile-factories.server';
 import {
   deleteUserProfileFromDatabaseById,
+  retrieveUserProfileFromDatabaseById,
   saveUserProfileToDatabase,
 } from '~/features/user-profile/user-profile-model.server';
 import {
@@ -15,14 +13,15 @@ import {
   teardownOrganizationAndMember,
 } from '~/test/test-utils';
 import { toFormData } from '~/utils/to-form-data';
+import { getToast } from '~/utils/toast.server';
 
-import { action } from './onboarding.organization';
+import { action } from './settings.profile';
 
-const url = 'http://localhost:3000/onboarding/organization';
+const url = 'http://localhost:3000/settings/profile';
 
 const createBody = ({
-  intent = 'create',
-  name = createPopulatedOrganization().name,
+  intent = 'update',
+  name = createPopulatedUserProfile().name,
 } = {}) => ({ intent, name });
 
 async function sendAuthenticatedRequest({
@@ -36,13 +35,7 @@ async function sendAuthenticatedRequest({
   return action({ request, context: {}, params: {} });
 }
 
-async function setup() {
-  const user = createPopulatedUserProfile();
-  await saveUserProfileToDatabase(user);
-  return { user };
-}
-
-describe('/onboarding/organization route action', () => {
+describe('/settings/profile route action', () => {
   test('given an unauthenticated request: should throw a redirect response to the login page', async () => {
     expect.assertions(2);
 
@@ -54,69 +47,68 @@ describe('/onboarding/organization route action', () => {
       if (error instanceof Response) {
         expect(error.status).toEqual(302);
         expect(error.headers.get('Location')).toEqual(
-          '/login?redirectTo=%2Fonboarding%2Forganization',
+          `/login?redirectTo=%2Fsettings%2Fprofile`,
         );
       }
     }
   });
 
-  describe('create intent', () => {
-    const intent = 'create';
+  describe('update intent', () => {
+    const intent = 'update';
 
-    test("given a valid name for the organization: creates an organization with the name, adds the user as the owner and redirects to the organization's page", async () => {
-      const { user } = await setup();
-      const organization = createPopulatedOrganization();
-      const body = createBody({ intent, name: organization.name });
+    test("given a valid name: updates the user's name and shows a toast", async () => {
+      const { organization, user } = await setupUserWithOrgAndAddAsMember();
+      const body = createBody({ intent });
 
       const response = await sendAuthenticatedRequest({
         userId: user.id,
         formData: toFormData(body),
       });
 
-      expect(response.status).toEqual(302);
-      expect(response.headers.get('Location')).toEqual(
-        `/organizations/${organization.slug}`,
-      );
+      expect(response.status).toEqual(200);
+      expect(await response.json()).toEqual({ success: true });
 
-      // It creates a new organization with the given name.
-      const createdOrganization =
-        await retrieveOrganizationWithMembersFromDatabaseBySlug(
-          faker.helpers.slugify(body.name).toLowerCase(),
-        );
-      expect(createdOrganization).toMatchObject({
-        name: body.name,
+      // It updates the user's name.
+      const updatedUser = await retrieveUserProfileFromDatabaseById(user.id);
+      expect(updatedUser?.name).toEqual(body.name);
+
+      // It shows a toast.
+      const maybeHeaders = response.headers.get('Set-Cookie');
+      const { toast } = await getToast(
+        new Request(url, { headers: { cookie: maybeHeaders ?? '' } }),
+      );
+      expect(toast).toMatchObject({
+        id: expect.any(String),
+        title: 'Profile has been updated',
+        type: 'message',
       });
-      expect(createdOrganization!.memberships[0].member.id).toEqual(user.id);
-      expect(createdOrganization!.memberships[0].role).toEqual(
-        ORGANIZATION_MEMBERSHIP_ROLES.OWNER,
-      );
 
-      await deleteUserProfileFromDatabaseById(user.id);
+      await teardownOrganizationAndMember({ organization, user });
     });
 
     test.each([
       {
-        name: faker.string.alpha({ length: 2 }),
-        reason: "the organization's name is too short",
-        expectedError: 'onboarding-organization:name-min-length',
+        name: faker.string.alpha({ length: 1 }),
+        reason: 'the name is too short',
+        expectedError: 'settings-user-profile:name-min-length',
       },
       {
         name: '   .   ',
         reason:
           'the name is technically long enough, but contains empty spaces',
-        expectedError: 'onboarding-organization:name-min-length',
+        expectedError: 'settings-user-profile:name-min-length',
       },
       {
-        name: faker.string.alpha({ length: 256 }),
-        reason: "the organization's name is too long",
-        expectedError: 'onboarding-organization:name-max-length',
+        name: faker.string.alpha({ length: 129 }),
+        reason: 'the name is too long',
+        expectedError: 'settings-user-profile:name-max-length',
       },
     ])(
       'given invalid form data, e.g. $reason: returns a 400',
       async ({ name, expectedError }) => {
         expect.assertions(2);
 
-        const { user } = await setup();
+        const { organization, user } = await setupUserWithOrgAndAddAsMember();
 
         try {
           await sendAuthenticatedRequest({
@@ -133,7 +125,7 @@ describe('/onboarding/organization route action', () => {
           }
         }
 
-        await deleteUserProfileFromDatabaseById(user.id);
+        await teardownOrganizationAndMember({ organization, user });
       },
     );
 
@@ -153,35 +145,33 @@ describe('/onboarding/organization route action', () => {
       } catch (error) {
         if (error instanceof Response) {
           expect(error.status).toEqual(302);
-          expect(error.headers.get('Location')).toEqual(
-            '/onboarding/user-profile',
-          );
+          expect(error.headers.get('Location')).toEqual('/onboarding');
         }
       }
 
       await teardownOrganizationAndMember({ user, organization });
     });
 
-    test("given the user has a name and is a member of an organization: redirects the user to their first organization's page", async () => {
+    test('given a user who has a name but lacks organizations: redirects the user to the organization onboarding page', async () => {
       expect.assertions(2);
 
-      const { user, organization } = await setupUserWithOrgAndAddAsMember();
+      const user = createPopulatedUserProfile();
+      await saveUserProfileToDatabase(user);
+      const body = createBody({ intent });
 
       try {
         await sendAuthenticatedRequest({
           userId: user.id,
-          formData: toFormData(createBody({ intent })),
+          formData: toFormData(body),
         });
       } catch (error) {
         if (error instanceof Response) {
           expect(error.status).toEqual(302);
-          expect(error.headers.get('Location')).toEqual(
-            `/organizations/${organization.slug}`,
-          );
+          expect(error.headers.get('Location')).toEqual('/onboarding');
         }
       }
 
-      await teardownOrganizationAndMember({ user, organization });
+      await deleteUserProfileFromDatabaseById(user.id);
     });
   });
 });

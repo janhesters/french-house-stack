@@ -6,6 +6,6 @@ export function loader() {
   return redirect('/');
 }
 
-export function action({ request }: ActionFunctionArgs) {
-  return logout(request);
+export async function action({ request }: ActionFunctionArgs) {
+  return await logout(request);
 }

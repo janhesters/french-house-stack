@@ -4,6 +4,7 @@
   "open-user-menu": "Open user menu",
   "search": "Search",
   "search-placeholder": "Search ...",
+  "settings": "Settings",
   "view-n-new-notifications": "View {{count}} new notifications",
   "view-notifications": "View notifications"
 }

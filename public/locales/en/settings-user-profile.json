@@ -1,0 +1,14 @@
+{
+  "description": "This is how others will see you in this app.",
+  "name-max-length": "Your name must be at most 128 characters long.",
+  "name-min-length": "Your name must be at least 2 characters long.",
+  "name-must-be-string": "Your public name must be a string.",
+  "save": "Save",
+  "saving": "Saving ...",
+  "title": "Profile",
+  "user-name-description": "Please enter your full name for public display within your organizations.",
+  "user-name-label": "Name",
+  "user-name-placeholder": "Your full name ...",
+  "user-profile": "User profile",
+  "user-profile-updated": "Profile has been updated"
+}

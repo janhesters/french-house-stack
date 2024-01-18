@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { faker } from '@faker-js/faker';
 import { describe, expect, test } from 'vitest';
 
@@ -133,7 +132,7 @@ describe('/onboarding/user-profile route action', () => {
         try {
           await sendAuthenticatedRequest({
             userId: user.id,
-            formData: toFormData(createBody({ name })),
+            formData: toFormData(createBody({ intent, name })),
           });
         } catch (error) {
           if (error instanceof Response) {
@@ -157,7 +156,7 @@ describe('/onboarding/user-profile route action', () => {
       try {
         await sendAuthenticatedRequest({
           userId: user.id,
-          formData: toFormData(createBody()),
+          formData: toFormData(createBody({ intent })),
         });
       } catch (error) {
         if (error instanceof Response) {
@@ -179,7 +178,7 @@ describe('/onboarding/user-profile route action', () => {
       try {
         await sendAuthenticatedRequest({
           userId: user.id,
-          formData: toFormData(createBody()),
+          formData: toFormData(createBody({ intent })),
         });
       } catch (error) {
         if (error instanceof Response) {

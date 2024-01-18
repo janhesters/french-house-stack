@@ -1,0 +1,19 @@
+{
+  "cancel": "Cancel",
+  "current-owned-organizations_one": "Your account is currently an owner in this organization: <1>{{organizations}}</1>.",
+  "current-owned-organizations_other": "Your account is currently an owner in these organizations: <1>{{organizations}}</1>.",
+  "delete-account": "Delete account",
+  "delete-warning": "Once you delete your account, there is no going back. Please be certain.",
+  "delete-your-account": "Delete your account",
+  "deleting": "Deleting ...",
+  "description": "Manage your account settings.",
+  "dialog-description": "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+  "dialog-title": "Are you absolutely sure?",
+  "email-address": "Email address",
+  "email-description": "You can't change your email address. If you need to change it, please contact support.",
+  "email-placeholder": "Your email address ...",
+  "still-an-owner": "You are still an owner of at least one organization and cannot delete your account.",
+  "title": "Account",
+  "unlock-deletion-description_one": "You must remove yourself, transfer ownership, or delete this organization before you can delete your user.",
+  "unlock-deletion-description_other": "You must remove yourself, transfer ownership, or delete these organizations before you can delete your user."
+}

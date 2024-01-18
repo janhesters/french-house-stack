@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { describe, expect, test } from 'vitest';
 
 import { createPopulatedOrganization } from '~/features/organizations/organizations-factories.server';

@@ -86,14 +86,14 @@ export default function OnboardingOrganization() {
             label={t('onboarding-progress')}
             steps={[
               {
-                name: t('user-profile'),
-                href: '/onboarding/user-profile',
-                status: 'complete',
                 disabled: true,
+                href: '/onboarding/user-profile',
+                name: t('user-profile'),
+                status: 'complete',
               },
               {
-                name: t('organization'),
                 href: '/onboarding/organization',
+                name: t('organization'),
                 status: 'current',
               },
             ]}
@@ -113,7 +113,7 @@ export default function OnboardingOrganization() {
             </CardHeader>
 
             <FormProvider {...form}>
-              <Form onSubmit={onSubmit}>
+              <Form method="POST" onSubmit={onSubmit}>
                 <fieldset disabled={isCreatingOrganization}>
                   <CardContent>
                     <FormField

@@ -135,7 +135,7 @@ export default function Register() {
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
         <FormProvider {...form}>
-          <Form onSubmit={onSubmit}>
+          <Form method="POST" onSubmit={onSubmit}>
             <fieldset className="space-y-6" disabled={isRegisteringViaEmail}>
               <FormField
                 control={form.control}

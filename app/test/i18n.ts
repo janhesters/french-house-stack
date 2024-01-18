@@ -10,6 +10,9 @@ import onboardingUserProfile from '../../public/locales/en/onboarding-user-profi
 import organizations from '../../public/locales/en/organizations.json';
 import organizationsNew from '../../public/locales/en/organizations-new.json';
 import register from '../../public/locales/en/register.json';
+import settings from '../../public/locales/en/settings.json';
+import settingsAccount from '../../public/locales/en/settings-account.json';
+import settingsUserProfile from '../../public/locales/en/settings-user-profile.json';
 import sidebar from '../../public/locales/en/sidebar.json';
 import userProfile from '../../public/locales/en/user-profile.json';
 
@@ -27,6 +30,9 @@ i18next.use(initReactI18next).init({
     'organizations',
     'organizations-new',
     'register',
+    'settings',
+    'settings-account',
+    'settings-user-profile',
     'sidebar',
     'user-profile',
   ],
@@ -41,6 +47,9 @@ i18next.use(initReactI18next).init({
       organizations,
       'organizations-new': organizationsNew,
       register,
+      settings,
+      'settings-account': settingsAccount,
+      'settings-user-profile': settingsUserProfile,
       sidebar,
       'user-profile': userProfile,
     },

@@ -8,8 +8,8 @@ import { createPopulatedOrganization } from './organizations-factories.server';
 import {
   getOrganizationIsInUserMembershipList,
   getOrganizationSlug,
-  mapOrganizationAndUserDataToNewOrganizationProps,
   mapOrganizationAndUserDataToSidebarProps,
+  mapUserDataToNewOrganizationProps,
 } from './organizations-helpers.server';
 
 const createUserWithOrganizations: Factory<OnboardingUser> = ({
@@ -133,7 +133,7 @@ describe('mapOrganizationAndUserDataToSidebarProps()', () => {
         abbreviation: 'JC',
         email: user.email,
         name: user.name,
-        items: [],
+        items: [{ name: 'header:settings', href: '/settings' }],
       },
     };
 
@@ -141,17 +141,17 @@ describe('mapOrganizationAndUserDataToSidebarProps()', () => {
   });
 });
 
-describe('mapOrganizationAndUserDataToNewOrganizationProps()', () => {
+describe('mapUserDataToNewOrganizationProps()', () => {
   test('given a user: returns the correct new organization props', async () => {
     const user = createUserWithOrganizations({ name: 'Jordan Carter' });
 
-    const actual = mapOrganizationAndUserDataToNewOrganizationProps({ user });
+    const actual = mapUserDataToNewOrganizationProps({ user });
     const expected = {
       userNavigation: {
         abbreviation: 'JC',
         email: user.email,
         name: user.name,
-        items: [],
+        items: [{ name: 'header:settings', href: '/settings' }],
       },
       user,
     };

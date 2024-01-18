@@ -74,7 +74,7 @@ export const mapOrganizationAndUserDataToSidebarProps = <
     abbreviation: getNameAbbreviation(user.name),
     email: user.email,
     name: user.name,
-    items: [],
+    items: [{ name: 'header:settings', href: '/settings' }],
   },
 });
 
@@ -85,7 +85,7 @@ export const mapOrganizationAndUserDataToSidebarProps = <
  * @param data.user - The user object to map to the sidebar props.
  * @returns The props needed for the new organization page.
  */
-export const mapOrganizationAndUserDataToNewOrganizationProps = <
+export const mapUserDataToNewOrganizationProps = <
   Data extends {
     user: OnboardingUser;
   },
@@ -97,7 +97,9 @@ export const mapOrganizationAndUserDataToNewOrganizationProps = <
     abbreviation: getNameAbbreviation(user.name),
     email: user.email,
     name: user.name,
-    items: [] as HeaderUserProfileDropDownProps['items'],
+    items: [
+      { name: 'header:settings', href: '/settings' },
+    ] as HeaderUserProfileDropDownProps['items'],
   },
   user,
   ...rest,
