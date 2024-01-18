@@ -5,7 +5,7 @@ import * as React from 'react';
 import { cn } from '~/utils/shadcn-ui';
 
 const labelVariants = cva(
-  'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+  'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-read-only:cursor-not-allowed peer-read-only:opacity-70 peer-disabled:opacity-70',
 );
 
 const Label = React.forwardRef<

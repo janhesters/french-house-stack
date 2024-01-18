@@ -155,7 +155,7 @@ test.describe('onboarding user profile page', () => {
     const saveButton = page.getByRole('button', { name: /save/i });
     await saveButton.click();
 
-    // The organization name input shows the correct error messages.
+    // The user profile name input shows the correct error messages.
     await expect(
       page.getByText(/your name must be at least 2 characters long./i),
     ).toBeVisible();

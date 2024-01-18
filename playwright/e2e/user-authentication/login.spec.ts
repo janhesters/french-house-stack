@@ -64,7 +64,7 @@ test.describe('login page', () => {
       // eslint-disable-next-line playwright/no-skipped-test
       test.skip(
         browserName === 'webkit',
-        'Safari (Desktop & Mobile) fails in CI. Locally it works ...',
+        'Safari (Desktop & Mobile) fails in CI.',
       );
 
       const userAuthSession = createPopulatedUserAuthSession({

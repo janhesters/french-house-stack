@@ -30,6 +30,7 @@ async function seed() {
       email: userEmail,
       id: createId(),
       name: faker.person.fullName(),
+      acceptedTermsAndConditions: true,
     },
   });
 

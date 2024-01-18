@@ -103,7 +103,7 @@ export default function OrganizationsNew() {
             </CardHeader>
 
             <FormProvider {...form}>
-              <Form onSubmit={onSubmit}>
+              <Form method="POST" onSubmit={onSubmit}>
                 <fieldset disabled={isCreatingOrganization}>
                   <CardContent>
                     <FormField

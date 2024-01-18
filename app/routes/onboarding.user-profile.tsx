@@ -12,7 +12,7 @@ import {
 } from '@remix-run/react';
 import { Loader2Icon } from 'lucide-react';
 import type { FieldErrors } from 'react-hook-form';
-import { FormProvider, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 
 import { Button } from '~/components/ui/button';
@@ -31,6 +31,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormProvider,
 } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import { useTranslation } from '~/features/localization/use-translation';
@@ -109,7 +110,7 @@ export default function OnboardingUserProfile() {
             </CardHeader>
 
             <FormProvider {...form}>
-              <Form onSubmit={onSubmit}>
+              <Form method="POST" onSubmit={onSubmit}>
                 <fieldset disabled={isCreatingUserProfile}>
                   <CardContent>
                     <FormField
@@ -121,6 +122,7 @@ export default function OnboardingUserProfile() {
 
                           <FormControl>
                             <Input
+                              autoComplete="name"
                               placeholder={t('user-name-placeholder')}
                               {...field}
                             />
