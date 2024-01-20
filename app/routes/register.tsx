@@ -55,7 +55,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Register() {
   const { t } = useTranslation('register');
-  const navigation = useNavigation();
   const actionData = useActionData<RegisterActionData>();
   const form = useForm<z.infer<typeof registrationFormSchema>>({
     resolver: zodResolver(registrationFormSchema),
@@ -118,6 +117,7 @@ export default function Register() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionData?.email]);
 
+  const navigation = useNavigation();
   const isRegisteringViaEmail =
     navigation.formData?.get('intent') === 'emailRegistration' ||
     navigation.formData?.get('intent') === 'magicEmailRegistration' ||

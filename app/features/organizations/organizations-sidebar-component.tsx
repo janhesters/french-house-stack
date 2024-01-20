@@ -1,6 +1,6 @@
 import type { UIMatch } from '@remix-run/react';
 import { useMatches } from '@remix-run/react';
-import { HomeIcon } from 'lucide-react';
+import { HomeIcon, SettingsIcon } from 'lucide-react';
 import { findLast, has, pipe, prop } from 'ramda';
 import { useTranslation } from 'react-i18next';
 
@@ -68,6 +68,11 @@ export function OrganizationsSidebarComponent({
               name: t('home'),
               href: `/organizations/${organizationSlug}/home`,
               icon: HomeIcon,
+            },
+            {
+              name: t('settings'),
+              href: `/organizations/${organizationSlug}/settings`,
+              icon: SettingsIcon,
             },
           ],
         },

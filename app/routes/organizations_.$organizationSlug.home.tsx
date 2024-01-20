@@ -8,7 +8,7 @@ export function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function OrganizationsHome() {
-  return <div>Organizations Home</div>;
+  return <main>Organizations Home</main>;
 }
 
 export function ErrorBoundary() {

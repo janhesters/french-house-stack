@@ -18,7 +18,7 @@ const url = 'http://localhost:3000/login';
 async function sendRequest({ formData }: { formData: FormData }) {
   const request = new Request(url, { method: 'POST', body: formData });
 
-  return action({ request, context: {}, params: {} });
+  return await action({ request, context: {}, params: {} });
 }
 
 describe('/login route action', () => {

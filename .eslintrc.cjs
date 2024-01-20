@@ -54,6 +54,7 @@ module.exports = {
       extends: ['plugin:playwright/recommended'],
       rules: {
         'playwright/require-top-level-describe': 'error',
+        'unicorn/no-null': 'off',
       },
     },
     {

@@ -78,7 +78,7 @@ export default function SettingsAccount() {
   });
 
   return (
-    <main className="mx-auto w-full max-w-lg space-y-6 px-4 pb-8 pt-[8.5rem]">
+    <main className="mx-auto w-full max-w-xl space-y-6 px-4 pb-8 pt-[8.5rem]">
       <div>
         <TypographyH2 className="border-none pb-0 text-lg font-medium">
           {t('title')}
@@ -114,7 +114,7 @@ export default function SettingsAccount() {
             </div>
 
             <div className="space-y-2">
-              <TypographyH3 className="text-lg font-medium text-destructive">
+              <TypographyH3 className="mt-0 text-lg font-medium text-destructive">
                 {t('delete-account')}
               </TypographyH3>
 
@@ -169,6 +169,7 @@ export default function SettingsAccount() {
           <DialogFooter className="sm:justify-end">
             <DialogClose asChild>
               <Button
+                className="mt-2 sm:mt-0"
                 disabled={isDeletingAccount}
                 type="button"
                 variant="secondary"
@@ -182,6 +183,7 @@ export default function SettingsAccount() {
                 <fieldset disabled={isDeletingAccount}>
                   <Button
                     {...form.register('intent', { value: 'delete' })}
+                    className="w-full"
                     type="submit"
                     variant="destructive"
                   >

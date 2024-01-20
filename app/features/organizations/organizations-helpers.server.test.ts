@@ -1,37 +1,16 @@
+import { faker } from '@faker-js/faker';
 import { describe, expect, test } from 'vitest';
 
-import type { Factory } from '~/utils/types';
+import { createUserWithOrganizations } from '~/test/test-utils';
 
-import type { OnboardingUser } from '../onboarding/onboarding-helpers.server';
-import { createPopulatedUserProfile } from '../user-profile/user-profile-factories.server';
+import { ORGANIZATION_MEMBERSHIP_ROLES } from './organizations-constants';
 import { createPopulatedOrganization } from './organizations-factories.server';
 import {
-  getOrganizationIsInUserMembershipList,
   getOrganizationSlug,
+  getUsersRoleForOrganizationBySlug,
   mapOrganizationAndUserDataToSidebarProps,
   mapUserDataToNewOrganizationProps,
 } from './organizations-helpers.server';
-
-const createUserWithOrganizations: Factory<OnboardingUser> = ({
-  memberships = [
-    {
-      role: 'member',
-      organization: createPopulatedOrganization(),
-      deactivatedAt: null,
-    },
-    {
-      role: 'member',
-      organization: createPopulatedOrganization(),
-      deactivatedAt: null,
-    },
-    {
-      role: 'member',
-      organization: createPopulatedOrganization(),
-      deactivatedAt: null,
-    },
-  ],
-  ...props
-} = {}) => ({ ...createPopulatedUserProfile(), ...props, memberships });
 
 describe('getOrganizationSlug()', () => {
   test('given params with an organization slug: returns the organization slug', () => {
@@ -54,48 +33,8 @@ describe('getOrganizationSlug()', () => {
   });
 });
 
-describe('getOrganizationIsInUserMembershipList()', () => {
-  test('given a user and an organization ID they are an active member of: returns true', async () => {
-    const organizationId = createPopulatedOrganization().id;
-    const user = createUserWithOrganizations({
-      memberships: [
-        {
-          organization: createPopulatedOrganization(),
-          role: 'member',
-          deactivatedAt: null,
-        },
-        {
-          organization: createPopulatedOrganization({ id: organizationId }),
-          role: 'member',
-          deactivatedAt: null,
-        },
-        {
-          organization: createPopulatedOrganization(),
-          role: 'member',
-          deactivatedAt: null,
-        },
-      ],
-    });
-
-    const actual = getOrganizationIsInUserMembershipList(organizationId, user);
-    const expected = true;
-
-    expect(actual).toEqual(expected);
-  });
-
-  test('given a user and an organization ID they are not member of: returns false', async () => {
-    const organizationId = 'not-included';
-    const user = createUserWithOrganizations();
-
-    const actual = getOrganizationIsInUserMembershipList(organizationId, user);
-    const expected = false;
-
-    expect(actual).toEqual(expected);
-  });
-});
-
 describe('mapOrganizationAndUserDataToSidebarProps()', () => {
-  test('given a user and an organization slug: returns the correct sidebar props', async () => {
+  test('given a user and an organization slug: returns the correct sidebar props', () => {
     const organizationSlug = 'tesla';
     const user = createUserWithOrganizations({
       name: 'Jordan Carter',
@@ -142,7 +81,7 @@ describe('mapOrganizationAndUserDataToSidebarProps()', () => {
 });
 
 describe('mapUserDataToNewOrganizationProps()', () => {
-  test('given a user: returns the correct new organization props', async () => {
+  test('given a user: returns the correct new organization props', () => {
     const user = createUserWithOrganizations({ name: 'Jordan Carter' });
 
     const actual = mapUserDataToNewOrganizationProps({ user });
@@ -157,5 +96,56 @@ describe('mapUserDataToNewOrganizationProps()', () => {
     };
 
     expect(actual).toEqual(expected);
+  });
+});
+
+describe('getUsersRoleForOrganizationBySlug()', () => {
+  const availableRoles = Object.values(ORGANIZATION_MEMBERSHIP_ROLES);
+
+  test.each(availableRoles)(
+    'given an onboarding user and an organization slug: returns the users role for the organization',
+    role => {
+      const organization = createPopulatedOrganization();
+
+      const user = createUserWithOrganizations({
+        memberships: [
+          {
+            role,
+            organization,
+            deactivatedAt: null,
+          },
+          {
+            role: faker.helpers.arrayElement(availableRoles),
+            organization: createPopulatedOrganization(),
+            deactivatedAt: null,
+          },
+          {
+            role: faker.helpers.arrayElement(availableRoles),
+            organization: createPopulatedOrganization(),
+            deactivatedAt: null,
+          },
+        ],
+      });
+
+      const actual = getUsersRoleForOrganizationBySlug(user, organization.slug);
+      const expected = role;
+
+      expect(actual).toEqual(expected);
+    },
+  );
+
+  test('given the user is NOT a member of the organization: throws a 404 error', () => {
+    expect.assertions(1);
+
+    const user = createUserWithOrganizations();
+    const { slug } = createPopulatedOrganization();
+
+    try {
+      getUsersRoleForOrganizationBySlug(user, slug);
+    } catch (error) {
+      if (error instanceof Response) {
+        expect(error.status).toEqual(404);
+      }
+    }
   });
 });

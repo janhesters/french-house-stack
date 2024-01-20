@@ -1,33 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-import type { Factory } from '~/utils/types';
+import { createUserWithOrganizations } from '~/test/test-utils';
 
-import type { OnboardingUser } from '../onboarding/onboarding-helpers.server';
 import { ORGANIZATION_MEMBERSHIP_ROLES } from '../organizations/organizations-constants';
 import { createPopulatedOrganization } from '../organizations/organizations-factories.server';
-import { createPopulatedUserProfile } from '../user-profile/user-profile-factories.server';
 import { withUsersOwnedOrganizations } from './settings-middleware.server';
-
-const createUserWithOrganizations: Factory<OnboardingUser> = ({
-  memberships = [
-    {
-      role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
-      organization: createPopulatedOrganization(),
-      deactivatedAt: null,
-    },
-    {
-      role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
-      organization: createPopulatedOrganization(),
-      deactivatedAt: null,
-    },
-    {
-      role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
-      organization: createPopulatedOrganization(),
-      deactivatedAt: null,
-    },
-  ],
-  ...props
-} = {}) => ({ ...createPopulatedUserProfile(), ...props, memberships });
 
 describe('withUsersOwnedOrganizations()', () => {
   test('given a middleware with a user that is an owner of an organization: adds a usersOwnedOrganizations [] to the middleware', () => {

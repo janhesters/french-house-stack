@@ -25,7 +25,7 @@ const invalidMagicEmail = 'test+fail@magic.link';
 const validMagicEmail = 'test+success@magic.link';
 
 test.describe('login page', () => {
-  test("given a logged in user that is onboarded: redirects to the user's first organization's home page", async ({
+  test("given an onboarded user: redirects to the user's first organization's home page", async ({
     page,
   }) => {
     const { organization, user } = await setupOrganizationAndLoginAsMember({

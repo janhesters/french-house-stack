@@ -70,7 +70,7 @@ export default function SettingsProfile() {
   });
 
   return (
-    <main className="mx-auto w-full max-w-lg space-y-6 px-4 pb-8 pt-[8.5rem]">
+    <main className="mx-auto w-full max-w-xl space-y-6 px-4 pb-8 pt-[8.5rem]">
       <div>
         <TypographyH2 className="border-none pb-0 text-lg font-medium">
           {t('title')}

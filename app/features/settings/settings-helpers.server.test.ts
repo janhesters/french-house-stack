@@ -1,36 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
-import type { Factory } from '~/utils/types';
+import { createUserWithOrganizations } from '~/test/test-utils';
 
 import type { OnboardingUser } from '../onboarding/onboarding-helpers.server';
 import { ORGANIZATION_MEMBERSHIP_ROLES } from '../organizations/organizations-constants';
 import { createPopulatedOrganization } from '../organizations/organizations-factories.server';
-import { createPopulatedUserProfile } from '../user-profile/user-profile-factories.server';
 import {
   getUsersOwnedOrganizations,
   mapUserDataToSettingsProps,
 } from './settings-helpers.server';
-
-const createUserWithOrganizations: Factory<OnboardingUser> = ({
-  memberships = [
-    {
-      role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
-      organization: createPopulatedOrganization(),
-      deactivatedAt: null,
-    },
-    {
-      role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
-      organization: createPopulatedOrganization(),
-      deactivatedAt: null,
-    },
-    {
-      role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
-      organization: createPopulatedOrganization(),
-      deactivatedAt: null,
-    },
-  ],
-  ...props
-} = {}) => ({ ...createPopulatedUserProfile(), ...props, memberships });
 
 describe('mapUserDataToSettingsProps()', () => {
   test('given a user: returns the correct new organization props', async () => {

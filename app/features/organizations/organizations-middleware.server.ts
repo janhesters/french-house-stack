@@ -1,14 +1,14 @@
 import type { Organization } from '@prisma/client';
+import type { TFunction } from 'i18next';
 
 import { asyncPipe } from '~/utils/async-pipe';
-import { notFound } from '~/utils/http-responses.server';
 
 import type { OnboardingUser } from '../onboarding/onboarding-helpers.server';
 import { withOnbaordedUser } from '../onboarding/onboarding-middleware.server';
 import type { Params } from './organizations-helpers.server';
 import {
-  getOrganizationIsInUserMembershipList,
   getOrganizationSlug,
+  getUsersRoleForOrganizationBySlug,
   requireOrganizationBySlugExists,
 } from './organizations-helpers.server';
 
@@ -64,13 +64,12 @@ export const withUserIsMemberOfOrganization = <
   user,
   organization,
   ...rest
-}: T) => {
-  if (!getOrganizationIsInUserMembershipList(organization.id, user)) {
-    throw notFound();
-  }
-
-  return { user, organization, ...rest };
-};
+}: T) => ({
+  user,
+  organization,
+  role: getUsersRoleForOrganizationBySlug(user, organization.slug),
+  ...rest,
+});
 
 /**
  * A middleware for ensuring the request contains an authenticated and onboarded
@@ -93,3 +92,27 @@ export const withOrganizationMembership = asyncPipe(
   withOrganizationBySlug,
   withUserIsMemberOfOrganization,
 );
+
+/**
+ * A middleware for adding the header title props for the organization sidebar.
+ *
+ * @param headerTitleKey - The key for the header title.
+ * @param renderBackButton - Whether to render the back button.
+ * @param middleware - An object that contains the `t` function from
+ * React-i18next.
+ * @returns A new middleware object with the header title props.
+ */
+export const withHeaderProps =
+  ({
+    headerTitleKey,
+    renderBackButton = false,
+  }: {
+    headerTitleKey: string;
+    renderBackButton?: boolean;
+  }) =>
+  <T extends { t: TFunction }>({ t, ...rest }: T) => ({
+    t,
+    ...rest,
+    headerTitle: t(headerTitleKey),
+    renderBackButton,
+  });
