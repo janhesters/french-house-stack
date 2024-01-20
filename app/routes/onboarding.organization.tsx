@@ -125,6 +125,7 @@ export default function OnboardingOrganization() {
 
                           <FormControl>
                             <Input
+                              autoComplete="organization"
                               placeholder={t('organization-name-placeholder')}
                               {...field}
                             />

@@ -70,10 +70,9 @@ test.describe('new organization page', () => {
 
     // The page has the correct user navigation links (open & close click).
     await page.getByRole('button', { name: /open user menu/i }).click();
-    await expect(page.getByRole('link', { name: /settings/i })).toHaveAttribute(
-      'href',
-      '/settings',
-    );
+    await expect(
+      page.getByRole('link', { name: /your settings/i }),
+    ).toHaveAttribute('href', '/settings');
     await expect(
       page.getByRole('menuitem', { name: /log out/i }),
     ).toBeVisible();
@@ -139,7 +138,7 @@ test.describe('new organization page', () => {
     await teardownOrganizationAndMember({ organization, user });
   });
 
-  test('given a logged in user that is onboarded: page should lack any automatically detectable accessibility issues', async ({
+  test('given an onboarded user: page should lack any automatically detectable accessibility issues', async ({
     page,
   }) => {
     const { organization, user } = await setupOrganizationAndLoginAsMember({

@@ -32,6 +32,7 @@ export type NavigationItemWithChildrenProps = {
   name: string;
   icon: Icon;
   children: Array<{ name: string; href: string; count?: number }>;
+  closeSidebar?: () => void;
 };
 
 function NavigationItemWithChildren(item: NavigationItemWithChildrenProps) {
@@ -71,6 +72,7 @@ function NavigationItemWithChildren(item: NavigationItemWithChildrenProps) {
                       matchedPaths[index] && 'bg-accent text-accent-foreground',
                     )}
                     to={subItem.href}
+                    onClick={item.closeSidebar}
                   >
                     {subItem.name}
                   </Link>
@@ -100,6 +102,7 @@ type NavigationItemGroup = {
 };
 
 export type SidebarProps = {
+  closeSidebar?: () => void;
   headerTitle?: ReactNode;
   navigation: NavigationItemGroup[];
   notifications?: number;
@@ -111,9 +114,10 @@ export type SidebarProps = {
 };
 
 function SidebarContent({
+  closeSidebar,
   navigation,
   sidebarTitle,
-}: Pick<SidebarProps, 'navigation' | 'sidebarTitle'>) {
+}: Pick<SidebarProps, 'closeSidebar' | 'navigation' | 'sidebarTitle'>) {
   return (
     <>
       {/* Little "header area" of the side bar. */}
@@ -142,7 +146,11 @@ function SidebarContent({
                 {group.items.map(item => {
                   if ('children' in item) {
                     return (
-                      <NavigationItemWithChildren key={item.name} {...item} />
+                      <NavigationItemWithChildren
+                        closeSidebar={closeSidebar}
+                        key={item.name}
+                        {...item}
+                      />
                     );
                   }
 
@@ -156,6 +164,7 @@ function SidebarContent({
                             isActive && 'bg-accent text-accent-foreground',
                           )
                         }
+                        onClick={closeSidebar}
                         to={item.href}
                       >
                         <>
@@ -193,6 +202,10 @@ export function Sidebar({
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  function closeSidebar() {
+    setSidebarOpen(false);
+  }
+
   return (
     <div>
       {/* Burger menu sidebar for mobile */}
@@ -204,6 +217,7 @@ export function Sidebar({
         >
           <nav aria-label={t('sidebar')} className="flex h-dvh flex-col">
             <SidebarContent
+              closeSidebar={closeSidebar}
               navigation={navigation}
               sidebarTitle={sidebarTitle}
             />
@@ -268,9 +282,7 @@ export function Sidebar({
           </div>
         </Header>
 
-        <main>
-          <Outlet />
-        </main>
+        <Outlet />
       </div>
     </div>
   );

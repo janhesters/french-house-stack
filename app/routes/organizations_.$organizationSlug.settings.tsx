@@ -1,55 +1,40 @@
 import type { LoaderFunctionArgs, MetaFunction } from '@remix-run/node';
 import { NavLink, Outlet, useLoaderData } from '@remix-run/react';
 
-import {
-  Header,
-  HeaderBackButton,
-  HeaderSeperator,
-  HeaderTitle,
-  HeaderUserProfileDropdown,
-} from '~/components/header';
+import { GeneralErrorBoundary } from '~/components/general-error-boundary';
 import { buttonVariants } from '~/components/ui/button';
 import { useTranslation } from '~/features/localization/use-translation';
-import { settingsLoader } from '~/features/settings/settings-loaders.server';
+import { organizationSettingsLoader } from '~/features/organizations/organizations-loaders.server';
 import { cn } from '~/utils/shadcn-ui';
 
-export const handle = { i18n: ['header', 'settings'] };
+export const handle = { i18n: ['organizations', 'organization-settings'] };
 
 export async function loader({ request, params }: LoaderFunctionArgs) {
-  return await settingsLoader({ request, params });
+  return await organizationSettingsLoader({ request, params });
 }
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
-  { title: data?.pageTitle || 'New Organization' },
+  { title: data?.pageTitle || 'Settings' },
 ];
 
-export default function Settings() {
-  const { t } = useTranslation('settings');
+export default function OrganizationsSettings() {
+  const { t } = useTranslation('organization-settings');
+  const { organizationSlug } = useLoaderData<typeof loader>();
+
   const settingsNavItems = [
-    { name: t('profile'), href: '/settings/profile' },
-    { name: t('account'), href: '/settings/account' },
+    {
+      name: t('general'),
+      href: `/organizations/${organizationSlug}/settings/profile`,
+    },
   ];
-  const { userNavigation } = useLoaderData<typeof loader>();
 
   return (
-    <div className="relative h-full">
-      <Header className="absolute w-full">
-        <HeaderBackButton />
-
-        <HeaderSeperator className="lg:hidden" />
-
-        <HeaderTitle>{t('settings')}</HeaderTitle>
-
-        <HeaderSeperator className="hidden lg:block" />
-
-        <HeaderUserProfileDropdown {...userNavigation} />
-      </Header>
-
+    <>
       <nav
         aria-label={t('settings-navigation')}
-        className="absolute mt-13 h-13 w-full border-b p-2"
+        className="h-13 w-full border-b p-2"
       >
-        <ul className="mx-auto flex max-w-xl space-x-2">
+        <ul className="mx-auto flex max-w-xl space-x-2 lg:max-w-none">
           {settingsNavItems.map(({ name, href }) => (
             <li key={href}>
               <NavLink
@@ -71,6 +56,10 @@ export default function Settings() {
       </nav>
 
       <Outlet />
-    </div>
+    </>
   );
+}
+
+export function ErrorBoundary() {
+  return <GeneralErrorBoundary />;
 }

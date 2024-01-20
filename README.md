@@ -345,7 +345,7 @@ The French House Stack includes utilities for toast notifications based on flash
     { success: true },
     {
       headers: combineHeaders(
-        await createToastHeaders({ toast: { title: 'Profile updated' } }),
+        await createToastHeaders({ title: 'Profile updated' }),
         { 'x-foo': 'bar' },
       ),
     },

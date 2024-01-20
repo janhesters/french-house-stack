@@ -118,7 +118,7 @@ test.describe('settings profile page', () => {
     await teardownOrganizationAndMember({ organization, user });
   });
 
-  test('given a logged in user that is onboarded: page should lack any automatically detectable accessibility issues', async ({
+  test('given an onboarded user: page should lack any automatically detectable accessibility issues', async ({
     page,
   }) => {
     const { organization, user } = await setupOrganizationAndLoginAsMember({

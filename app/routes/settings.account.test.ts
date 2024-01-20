@@ -23,7 +23,7 @@ async function sendAuthenticatedRequest({
   formData?: FormData;
 }) {
   const request = await createAuthenticatedRequest({ url, userId, formData });
-  return action({ request, context: {}, params: {} });
+  return await action({ request, context: {}, params: {} });
 }
 
 describe('/settings/account route action', () => {

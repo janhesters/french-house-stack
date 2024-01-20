@@ -53,7 +53,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Login() {
   const { t } = useTranslation('login');
-  const navigation = useNavigation();
   const actionData = useActionData<LoginActionData>();
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -117,6 +116,7 @@ export default function Login() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionData?.email]);
 
+  const navigation = useNavigation();
   const isLoggingInViaEmail =
     navigation.formData?.get('intent') === 'emailLogin' ||
     navigation.formData?.get('intent') === 'magicEmailLogin' ||

@@ -1,6 +1,8 @@
+/* eslint-disable unicorn/no-null */
 import { createId } from '@paralleldrive/cuid2';
 import type { Organization, UserProfile } from '@prisma/client';
 
+import type { OnboardingUser } from '~/features/onboarding/onboarding-helpers.server';
 import type { OrganizationMembershipRole } from '~/features/organizations/organizations-constants';
 import { ORGANIZATION_MEMBERSHIP_ROLES } from '~/features/organizations/organizations-constants';
 import { createPopulatedOrganization } from '~/features/organizations/organizations-factories.server';
@@ -16,6 +18,7 @@ import {
   deleteUserProfileFromDatabaseById,
   saveUserProfileToDatabase,
 } from '~/features/user-profile/user-profile-model.server';
+import type { Factory } from '~/utils/types';
 
 export { generateRandomDid } from './generate-random-did.server';
 export { toFormData } from '~/utils/to-form-data';
@@ -129,3 +132,30 @@ export function clearCookieAttributes(request: Request): Request {
 
   return newRequest;
 }
+
+/**
+ * A factory function for creating an onboarded user with their memberships.
+ *
+ * @param props - The properties of the onboarding user.
+ * @returns An onboarding user.
+ */
+export const createUserWithOrganizations: Factory<OnboardingUser> = ({
+  memberships = [
+    {
+      role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
+      organization: createPopulatedOrganization(),
+      deactivatedAt: null,
+    },
+    {
+      role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
+      organization: createPopulatedOrganization(),
+      deactivatedAt: null,
+    },
+    {
+      role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
+      organization: createPopulatedOrganization(),
+      deactivatedAt: null,
+    },
+  ],
+  ...props
+} = {}) => ({ ...createPopulatedUserProfile(), ...props, memberships });

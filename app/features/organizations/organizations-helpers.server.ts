@@ -2,10 +2,12 @@ import type { LoaderFunctionArgs } from '@remix-run/node';
 
 import type { HeaderUserProfileDropDownProps } from '~/components/header';
 import { asyncPipe } from '~/utils/async-pipe';
+import { notFound } from '~/utils/http-responses.server';
 import { throwIfEntityIsMissing } from '~/utils/throw-if-entity-is-missing.server';
 
 import type { OnboardingUser } from '../onboarding/onboarding-helpers.server';
 import { getNameAbbreviation } from '../user-profile/user-profile-helpers.server';
+import type { OrganizationMembershipRole } from './organizations-constants';
 import { retrieveOrganizationFromDatabaseBySlug } from './organizations-model.server';
 import type { OrganizationsSideBarComponentProps } from './organizations-sidebar-component';
 
@@ -32,19 +34,6 @@ export const requireOrganizationBySlugExists = asyncPipe(
   retrieveOrganizationFromDatabaseBySlug,
   throwIfEntityIsMissing,
 );
-
-/**
- * Checks if a user is a member of an organization by checking if an
- * organization's id is in a user's list of organizations he is a member of.
- *
- * @param organizationId - The ID of the organization to check.
- * @param user - The user object to check within.
- * @returns True if the user is a member of the organization, false otherwise.
- */
-export const getOrganizationIsInUserMembershipList = (
-  organizationId: string,
-  user: OnboardingUser,
-) => user.memberships.some(({ organization: { id } }) => id === organizationId);
 
 /**
  * Maps the organization slug and user data to the props needed for the
@@ -104,3 +93,29 @@ export const mapUserDataToNewOrganizationProps = <
   user,
   ...rest,
 });
+
+/**
+ * Gets the role of a user within the given organization by slug.
+ * Throws a 404 Not Found response if the user is NOT a member of the
+ * organization.
+ *
+ * @param user - The user to check.
+ * @param organizationSlug - The slug of the organization to check.
+ * @returns The role of the user within the organization.
+ * @throws A '404 not found' HTTP response if the user is NOT a member of the
+ * organization.
+ */
+export const getUsersRoleForOrganizationBySlug = (
+  user: OnboardingUser,
+  organizationSlug: string,
+) => {
+  const membership = user.memberships.find(
+    ({ organization: { slug } }) => slug === organizationSlug,
+  );
+
+  if (!membership) {
+    throw notFound();
+  }
+
+  return membership.role as OrganizationMembershipRole;
+};

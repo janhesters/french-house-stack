@@ -35,7 +35,7 @@ test.describe('landing page', () => {
     await deleteUserProfileFromDatabaseById(id);
   });
 
-  test("given a logged in user that is onboarded: redirects the user to their first organization's page", async ({
+  test("given an onboarded user: redirects the user to their first organization's page", async ({
     page,
   }) => {
     const { user, organization } = await setupOrganizationAndLoginAsMember({
