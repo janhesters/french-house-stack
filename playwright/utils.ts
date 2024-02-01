@@ -67,7 +67,7 @@ export async function loginByCookie({
   ]);
 }
 
-const ONE_YEAR_IN_MILLISECONDS = 1000 * 60 * 60 * 24 * 365;
+export const ONE_YEAR_IN_MILLISECONDS = 1000 * 60 * 60 * 24 * 365;
 
 /**
  * Creates and logs in a user with a user auth session via cookie for the given

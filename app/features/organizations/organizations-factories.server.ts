@@ -1,13 +1,12 @@
 import { faker } from '@faker-js/faker';
 import { createId } from '@paralleldrive/cuid2';
 import type {
-  InviteLinkUses,
+  InviteLinkUse,
   Organization,
   OrganizationInviteLink,
 } from '@prisma/client';
 import { addDays } from 'date-fns';
 
-import { generateRandomDid } from '~/test/generate-random-did.server';
 import type { Factory } from '~/utils/types';
 
 /**
@@ -79,13 +78,13 @@ export const createOrganizationInviteLink: Factory<OrganizationInviteLink> = ({
  * @returns A populated organization invite link with given params.
  */
 export const createPopulatedOrganizationInviteLink: Factory<
-  OrganizationInviteLink
+  Omit<OrganizationInviteLink, 'creatorId'> & { creatorId: string }
 > = ({
   updatedAt = faker.date.recent({ days: 1 }),
   createdAt = faker.date.recent({ days: 1, refDate: updatedAt }),
   id = createId(),
   organizationId = createId(),
-  creatorId = generateRandomDid(),
+  creatorId = createId(),
   expiresAt = faker.date.soon({ days: 3, refDate: addDays(updatedAt, 2) }),
   token = createId(),
   // eslint-disable-next-line unicorn/no-null
@@ -103,12 +102,12 @@ export const createPopulatedOrganizationInviteLink: Factory<
 
 /**
  * Creates an invite link usage _**without**_ any values. If you want to create an
- * invite link usage with values, use `createPopulatedInviteLinkUses` instead.
+ * invite link usage with values, use `createPopulatedinviteLinkUse` instead.
  *
- * @param usageParams - InviteLinkUses params to create invite link usage with.
- * @returns InviteLinkUses with given params.
+ * @param usageParams - inviteLinkUse params to create invite link usage with.
+ * @returns inviteLinkUse with given params.
  */
-export const createInviteLinkUses: Factory<InviteLinkUses> = ({
+export const createinviteLinkUse: Factory<InviteLinkUse> = ({
   createdAt = new Date(),
   id = '',
   inviteLinkId = '',
@@ -119,10 +118,10 @@ export const createInviteLinkUses: Factory<InviteLinkUses> = ({
 /**
  * Creates an invite link usage with populated values.
  *
- * @param usageParams - InviteLinkUses params to create invite link usage with.
+ * @param usageParams - inviteLinkUse params to create invite link usage with.
  * @returns A populated invite link usage with given params.
  */
-export const createPopulatedInviteLinkUses: Factory<InviteLinkUses> = ({
+export const createPopulatedinviteLinkUse: Factory<InviteLinkUse> = ({
   updatedAt = faker.date.recent({ days: 1 }),
   createdAt = faker.date.recent({ days: 1, refDate: updatedAt }),
   id = createId(),

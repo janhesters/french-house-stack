@@ -34,17 +34,6 @@ export async function retrieveUserProfileFromDatabaseById(
 ) {
   return prisma.userProfile.findUnique({ where: { id } });
 }
-/**
- * Retrieves a user profile from the database based on their decentralized id.
- *
- * @param did - The `did` of the user profile to retrieve.
- * @returns The user profile with the given `did`, or null if it wasn't found.
- */
-export async function retrieveUserProfileFromDatabaseByDid(
-  did: UserProfile['did'],
-) {
-  return prisma.userProfile.findUnique({ where: { did } });
-}
 
 /**
  * Returns the first user profile that exists in the database with the given
@@ -73,6 +62,36 @@ export async function retrieveUserProfileWithMembershipsFromDatabaseById(
 ) {
   return prisma.userProfile.findUnique({
     where: { id },
+    include: {
+      memberships: {
+        where: {
+          // eslint-disable-next-line unicorn/no-null
+          OR: [{ deactivatedAt: null }, { deactivatedAt: { gt: new Date() } }],
+        },
+        select: {
+          organization: { select: { id: true, name: true, slug: true } },
+          role: true,
+          deactivatedAt: true,
+        },
+      },
+    },
+  });
+}
+
+/**
+ * Retrieves a user profile record from the database based on its did and
+ * includes the active memberships for the organizations the user is a member
+ * of.
+ *
+ * @param did - The did of the user profile to get.
+ * @returns The user profile with their active memberships for the organizations
+ * of which they are a member of for the given id or null if it wasn't found.
+ */
+export async function retrieveUserProfileWithMembershipsFromDatabaseByDid(
+  did: UserProfile['did'],
+) {
+  return prisma.userProfile.findUnique({
+    where: { did },
     include: {
       memberships: {
         where: {

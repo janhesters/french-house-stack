@@ -28,6 +28,7 @@
     "class-variance-authority": "0.7.0",
     "clsx": "2.1.0",
     "cmdk": "0.2.0",
+    "copy-to-clipboard": "3.3.3",
     "date-fns": "3.3.0",
     "i18next": "23.7.17",
     "i18next-browser-languagedetector": "7.2.0",

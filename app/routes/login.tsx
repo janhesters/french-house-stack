@@ -7,6 +7,7 @@ import type {
 import {
   Form,
   useActionData,
+  useLoaderData,
   useNavigation,
   useSubmit,
 } from '@remix-run/react';
@@ -53,6 +54,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function Login() {
   const { t } = useTranslation('login');
+  const loaderData = useLoaderData<typeof loader>();
   const actionData = useActionData<LoginActionData>();
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -176,7 +178,11 @@ export default function Login() {
 
         <Text>
           {t('not-a-member')}{' '}
-          <TextLink to="/register">{t('create-your-account')}</TextLink>
+          <TextLink
+            to={`/register${loaderData.token ? `?token=${loaderData.token}` : ''}`}
+          >
+            {t('create-your-account')}
+          </TextLink>
         </Text>
       </div>
     </main>

@@ -24,7 +24,7 @@ model UserProfile {
   authSession                UserAuthSession[]
   notes                      Note[]
   createdInviteLinks         OrganizationInviteLink[]
-  inviteLinkUses             InviteLinkUses[]
+  inviteLinkUse              InviteLinkUse[]
 }
 
 model UserAuthSession {
@@ -76,25 +76,25 @@ model Note {
 }
 
 model OrganizationInviteLink {
-  id             String           @id @default(cuid())
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  id             String          @id @default(cuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String
   // The user who created the invite link.
-  creator        UserProfile      @relation(fields: [creatorId], references: [id])
-  creatorId      String
+  creator        UserProfile?    @relation(fields: [creatorId], references: [id], onDelete: SetNull)
+  creatorId      String?
   // Users who used the invite link.
-  linkUsages     InviteLinkUses[]
+  linkUsages     InviteLinkUse[]
   // The date when the invite link expires.
   expiresAt      DateTime
   // The token that is used to authenticate the invite link.
-  token          String           @unique
+  token          String          @unique
   // The date when the link was manually deactivated.
   deactivatedAt  DateTime?
 }
 
-model InviteLinkUses {
+model InviteLinkUse {
   id           String                 @id @default(cuid())
   createdAt    DateTime               @default(now())
   updatedAt    DateTime               @updatedAt
@@ -102,8 +102,8 @@ model InviteLinkUses {
   inviteLink   OrganizationInviteLink @relation(fields: [inviteLinkId], references: [id], onDelete: Cascade)
   inviteLinkId String
   // The user who used the invite link.
-  user         UserProfile            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
+  user         UserProfile?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId       String?
 
   @@unique([inviteLinkId, userId])
 }

@@ -1,7 +1,7 @@
 export const ORGANIZATION_MEMBERSHIP_ROLES = {
-  OWNER: 'owner',
-  ADMIN: 'admin',
   MEMBER: 'member',
+  ADMIN: 'admin',
+  OWNER: 'owner',
 } as const;
 
 export type OrganizationMembershipRole =

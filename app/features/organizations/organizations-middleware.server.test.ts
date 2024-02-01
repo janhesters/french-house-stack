@@ -5,9 +5,13 @@ import { describe, expect, test } from 'vitest';
 import { createUserWithOrganizations } from '~/test/test-utils';
 
 import { ORGANIZATION_MEMBERSHIP_ROLES } from './organizations-constants';
-import { createPopulatedOrganization } from './organizations-factories.server';
+import {
+  createPopulatedOrganization,
+  createPopulatedOrganizationInviteLink,
+} from './organizations-factories.server';
 import {
   withHeaderProps,
+  withInviteLinkToken,
   withOrganizationSlug,
   withUserIsMemberOfOrganization,
 } from './organizations-middleware.server';
@@ -38,9 +42,9 @@ describe('withOrganizationSlug()', () => {
 });
 
 describe('withUserIsMemberOfOrganization()', () => {
-  test("given a user who is an active member of the organization: returns the input and the user's role", () => {
+  test("given a user who is an active member of the organization: returns the input and the current user's role", () => {
     const organization = createPopulatedOrganization();
-    const role = faker.helpers.arrayElement(
+    const currentUsersRole = faker.helpers.arrayElement(
       Object.values(ORGANIZATION_MEMBERSHIP_ROLES),
     );
     const user = createUserWithOrganizations({
@@ -57,12 +61,12 @@ describe('withUserIsMemberOfOrganization()', () => {
         },
         {
           organization: organization,
-          role,
+          role: currentUsersRole,
           deactivatedAt: null,
         },
       ],
     });
-    const input = { user, organization, role, otherData: 'data' };
+    const input = { user, organization, currentUsersRole, otherData: 'data' };
 
     const actual = withUserIsMemberOfOrganization(input);
     const expected = input;
@@ -126,6 +130,30 @@ describe('withHeaderProps()', () => {
       headerTitle: expectedTranslation,
       renderBackButton,
     };
+
+    expect(actual).toEqual(expected);
+  });
+});
+
+describe('withInviteLinkToken()', () => {
+  test('given a request with token query param: adds the token to the middleware', () => {
+    const token = createPopulatedOrganizationInviteLink().token;
+    const request = new Request(`http://example.com/?token=${token}`);
+    const middleware = { request, otherData: 'data' };
+
+    const actual = withInviteLinkToken(middleware);
+    const expected = { request, otherData: 'data', token };
+
+    expect(actual).toEqual(expected);
+  });
+
+  test('given a request without a token query param: adds an empty token to the middleware', () => {
+    const request = new Request('http://example.com');
+
+    const middleware = { request, otherData: 'data' };
+
+    const actual = withInviteLinkToken(middleware);
+    const expected = { request, otherData: 'data', token: '' };
 
     expect(actual).toEqual(expected);
   });

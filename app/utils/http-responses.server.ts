@@ -19,13 +19,15 @@ export function created(): TypedResponse<{ message: string }>;
  */
 export function created<T extends NestedJSON>(
   data: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } & T>;
 export function created<T extends NestedJSON>(
   data?: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } | ({ message: string } & T)> {
   return data
-    ? json({ message: 'Created', ...data }, { status: 201 })
-    : json({ message: 'Created' }, { status: 201 });
+    ? json({ message: 'Created', ...data }, { ...init, status: 201 })
+    : json({ message: 'Created' }, { ...init, status: 201 });
 }
 
 /**
@@ -42,12 +44,14 @@ export function badRequest(): TypedResponse<{ message: string }>;
  */
 export function badRequest<T extends NestedJSON>(
   errors: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } & T>;
 export function badRequest<T extends NestedJSON>(
   errors?: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } | ({ message: string } & T)> {
   return errors
-    ? json({ message: 'Bad Request', ...errors }, { status: 400 })
+    ? json({ message: 'Bad Request', ...errors }, { ...init, status: 400 })
     : json({ message: 'Bad Request' }, { status: 400 });
 }
 
@@ -65,12 +69,14 @@ export function forbidden(): TypedResponse<{ message: string }>;
  */
 export function forbidden<T extends NestedJSON>(
   errors: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } & T>;
 export function forbidden<T extends NestedJSON>(
   errors?: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } | ({ message: string } & T)> {
   return errors
-    ? json({ message: 'Forbidden', ...errors }, { status: 403 })
+    ? json({ message: 'Forbidden', ...errors }, { ...init, status: 403 })
     : json({ message: 'Forbidden' }, { status: 403 });
 }
 
@@ -88,12 +94,14 @@ export function notFound(): TypedResponse<{ message: string }>;
  */
 export function notFound<T extends NestedJSON>(
   errors: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } & T>;
 export function notFound<T extends NestedJSON>(
   errors?: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } | ({ message: string } & T)> {
   return errors
-    ? json({ message: 'Not Found', ...errors }, { status: 404 })
+    ? json({ message: 'Not Found', ...errors }, { ...init, status: 404 })
     : json({ message: 'Not Found' }, { status: 404 });
 }
 
@@ -111,12 +119,17 @@ export function notAllowed(): TypedResponse<{ message: string }>;
  */
 export function notAllowed<T extends NestedJSON>(
   errors: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } & T>;
 export function notAllowed<T extends NestedJSON>(
   errors?: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } | ({ message: string } & T)> {
   return errors
-    ? json({ message: 'Method Not Allowed', ...errors }, { status: 405 })
+    ? json(
+        { message: 'Method Not Allowed', ...errors },
+        { ...init, status: 405 },
+      )
     : json({ message: 'Method Not Allowed' }, { status: 405 });
 }
 
@@ -134,12 +147,14 @@ export function conflict(): TypedResponse<{ message: string }>;
  */
 export function conflict<T extends NestedJSON>(
   errors: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } & T>;
 export function conflict<T extends NestedJSON>(
   errors?: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } | ({ message: string } & T)> {
   return errors
-    ? json({ message: 'Conflict', ...errors }, { status: 409 })
+    ? json({ message: 'Conflict', ...errors }, { ...init, status: 409 })
     : json({ message: 'Conflict' }, { status: 409 });
 }
 
@@ -157,12 +172,17 @@ export function unprocessableEntity(): TypedResponse<{ message: string }>;
  */
 export function unprocessableEntity<T extends NestedJSON>(
   errors: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } & T>;
 export function unprocessableEntity<T extends NestedJSON>(
   errors?: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } | ({ message: string } & T)> {
   return errors
-    ? json({ message: 'Unprocessable Entity', ...errors }, { status: 422 })
+    ? json(
+        { message: 'Unprocessable Entity', ...errors },
+        { ...init, status: 422 },
+      )
     : json({ message: 'Unprocessable Entity' }, { status: 422 });
 }
 
@@ -180,12 +200,17 @@ export function internalServerError(): TypedResponse<{ message: string }>;
  */
 export function internalServerError<T extends NestedJSON>(
   errors: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } & T>;
 export function internalServerError<T extends NestedJSON>(
   errors?: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } | ({ message: string } & T)> {
   return errors
-    ? json({ message: 'Internal Server Error', ...errors }, { status: 500 })
+    ? json(
+        { message: 'Internal Server Error', ...errors },
+        { ...init, status: 500 },
+      )
     : json({ message: 'Internal Server Error' }, { status: 500 });
 }
 
@@ -203,11 +228,13 @@ export function badGateway(): TypedResponse<{ message: string }>;
  */
 export function badGateway<T extends NestedJSON>(
   errors: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } & T>;
 export function badGateway<T extends NestedJSON>(
   errors?: T,
+  init?: Omit<ResponseInit, 'status'>,
 ): TypedResponse<{ message: string } | ({ message: string } & T)> {
   return errors
-    ? json({ message: 'Bad Gateway', ...errors }, { status: 502 })
+    ? json({ message: 'Bad Gateway', ...errors }, { ...init, status: 502 })
     : json({ message: 'Bad Gateway' }, { status: 502 });
 }

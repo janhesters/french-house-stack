@@ -1,5 +1,6 @@
 import type { Organization } from '@prisma/client';
 import type { TFunction } from 'i18next';
+import { promiseHash } from 'remix-utils/promise';
 
 import { asyncPipe } from '~/utils/async-pipe';
 
@@ -7,10 +8,17 @@ import type { OnboardingUser } from '../onboarding/onboarding-helpers.server';
 import { withOnbaordedUser } from '../onboarding/onboarding-middleware.server';
 import type { Params } from './organizations-helpers.server';
 import {
+  getInviteLinkToken,
   getOrganizationSlug,
   getUsersRoleForOrganizationBySlug,
+  requireCreatorAndOrganizationByTokenExists,
   requireOrganizationBySlugExists,
 } from './organizations-helpers.server';
+import {
+  retrieveLatestInviteLinkFromDatabaseByOrganizationId,
+  retrieveOrganizationMembersFromDatabaseByOrganizationIdForPage,
+  retrieveTotalOrganizationMembersCountFromDatabaseByOrganizationId,
+} from './organizations-model.server';
 
 /**
  * Enriches an existing middleware object with an organization slug.
@@ -67,7 +75,7 @@ export const withUserIsMemberOfOrganization = <
 }: T) => ({
   user,
   organization,
-  role: getUsersRoleForOrganizationBySlug(user, organization.slug),
+  currentUsersRole: getUsersRoleForOrganizationBySlug(user, organization.slug),
   ...rest,
 });
 
@@ -116,3 +124,86 @@ export const withHeaderProps =
     headerTitle: t(headerTitleKey),
     renderBackButton,
   });
+
+/**
+ * A middleware for retrieving the total number of members in an organization.
+ *
+ * @param middleware - An object that contains the organization for which to
+ * count the members.
+ * @returns A new middleware object with the total number of members in the
+ * organization.
+ */
+export const withTotalMemberCount = async <
+  T extends { organization: Organization },
+>({
+  organization,
+  ...rest
+}: T) => ({
+  ...rest,
+  organization,
+  totalItemCount:
+    await retrieveTotalOrganizationMembersCountFromDatabaseByOrganizationId(
+      organization.id,
+    ),
+});
+
+/**
+ * A middleware for retrieving the latest invite link and the members for the
+ * current page for an organization.
+ *
+ * @param middleware - An object that contains the organization and the current
+ * page number.
+ * @returns A new middleware object with the latest invite link and the members
+ * for the current page for the organization.
+ */
+export const withMembersAndLatestInviteLink = async <
+  T extends { organization: Organization; currentPage: number },
+>({
+  organization,
+  currentPage,
+  ...rest
+}: T) => ({
+  ...rest,
+  organization,
+  currentPage,
+  ...(await promiseHash({
+    latestOrganizationInviteLink:
+      retrieveLatestInviteLinkFromDatabaseByOrganizationId(organization.id),
+    members: retrieveOrganizationMembersFromDatabaseByOrganizationIdForPage({
+      organizationId: organization.id,
+      page: currentPage,
+    }),
+  })),
+});
+
+/**
+ * Enriches an existing middleware object with an invite link token from the
+ * query parmas.
+ *
+ * @param middleware - A middleware object that contains the request.
+ * @returns A new middleware object with token from the request search
+ * parameters.
+ */
+export const withInviteLinkToken = <T extends { request: Request }>({
+  request,
+  ...rest
+}: T) => ({ ...rest, request, token: getInviteLinkToken(request) || '' });
+
+/**
+ * Enriches an existing middleware object with creator and organization data
+ * retrieved by a token.
+ *
+ * @param object - A middleware object that contains the token.
+ * @returns A new middleware object with the same properties as the input
+ * object,  plus the creator and organization data associated with the token.
+ * @throws A '404 not found' HTTP response if the invite link identified by the
+ * token doesn't exist.
+ */
+export const withCreatorAndOrganization = async <T extends { token: string }>({
+  token,
+  ...rest
+}: T) => ({
+  token,
+  ...rest,
+  ...(await requireCreatorAndOrganizationByTokenExists(token)),
+});
