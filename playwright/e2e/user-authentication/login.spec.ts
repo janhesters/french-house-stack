@@ -149,6 +149,23 @@ test.describe('login page', () => {
         /user with given email doesn't exist. did you mean to create a new account instead?/i,
       ),
     ).toBeVisible();
+
+    // The register button has the correct link.
+    await expect(
+      page.getByRole('link', { name: /create your account/i }),
+    ).toHaveAttribute('href', '/register');
+  });
+
+  test('given a logged out user and an invite link token in the url: changes the register redirect button to also include the token', async ({
+    page,
+  }) => {
+    // Navigate to the login page with a token.
+    await page.goto(`/login?token=1234`);
+
+    // The register button has the correct link.
+    await expect(
+      page.getByRole('link', { name: /create your account/i }),
+    ).toHaveAttribute('href', '/register?token=1234');
   });
 
   test('page should lack any automatically detectable accessibility issues', async ({

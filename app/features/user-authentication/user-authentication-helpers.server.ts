@@ -2,6 +2,12 @@ import { createId } from '@paralleldrive/cuid2';
 import { redirect } from '@remix-run/node';
 import { safeRedirect } from 'remix-utils/safe-redirect';
 
+import { combineHeaders } from '~/utils/combine-headers.server';
+
+import {
+  getUserIsOnboarded,
+  type OnboardingUser,
+} from '../onboarding/onboarding-helpers.server';
 import { magicAdmin } from './magic-admin.server';
 import {
   deleteUserAuthSessionsFromDatabaseByUserId,
@@ -14,6 +20,18 @@ import {
   getUserAuthSessionId,
   userAuthenticationSessionStorage,
 } from './user-authentication-session.server';
+
+/**
+ * Returns the URL to redirect the user to after a successful login.
+ *
+ * @param user - The user with its memberships to get the redirect URL for.
+ * @returns The url to the user's first organization's home page if the user is
+ * onboarded, otherwise the onboarding page url.
+ */
+export const getLoginRedirectUrl = (user: OnboardingUser) =>
+  getUserIsOnboarded(user)
+    ? `/organizations/${user.memberships[0].organization.slug}/home`
+    : '/onboarding';
 
 const ONE_YEAR_IN_MILLISECONDS = 1000 * 60 * 60 * 24 * 365;
 
@@ -28,6 +46,8 @@ const ONE_YEAR_IN_MILLISECONDS = 1000 * 60 * 60 * 24 * 365;
  * @param params.userId - The unique identifier of the user who is logging in.
  * @param params.redirectTo - (Optional) The URL to redirect the user to after a
  * successful login. Defaults to '/organizations'.
+ * @param params.init - (Optional) The options for setting headers, status code,
+ * etc. on the response.
  * @returns A Promise that resolves to a response object that redirects the user
  * and sets the necessary cookie.
  */
@@ -35,10 +55,12 @@ export async function login({
   request,
   userId,
   redirectTo = '/organizations',
+  init,
 }: {
   request: Request;
   userId: string;
   redirectTo?: string;
+  init?: ResponseInit;
 }) {
   const userAuthSession = await saveUserAuthSessionToDatabase({
     expirationDate: new Date(Date.now() + ONE_YEAR_IN_MILLISECONDS),
@@ -47,13 +69,36 @@ export async function login({
   });
 
   return redirect(safeRedirect(redirectTo), {
-    headers: {
+    headers: combineHeaders(init?.headers, {
       'Set-Cookie': await createCookieForUserAuthSession({
         request,
         userAuthSessionId: userAuthSession.id,
       }),
-    },
+    }),
   });
+}
+
+/**
+ * Retrieves the user authentication session from the database and returns it
+ * along with the session object from the request.
+ *
+ * @param request - The request object.
+ * @returns An object containing the user authentication session and the session
+ * object from the request.
+ */
+export async function getUserAuthSession(request: Request) {
+  const session = await getSession(request);
+  const userAuthSessionId = getUserAuthSessionId(session);
+
+  if (userAuthSessionId) {
+    const userAuthSession =
+      await retrieveUserAuthSessionFromDatabaseById(userAuthSessionId);
+
+    return { session, userAuthSession };
+  }
+
+  // eslint-disable-next-line unicorn/no-null
+  return { session, userAuthSession: null };
 }
 
 /**
@@ -64,19 +109,13 @@ export async function login({
  * @returns A redirect response to the login page.
  */
 export async function logout(request: Request, redirectTo: string = '/') {
-  const session = await getSession(request);
-  const userAuthSessionId = getUserAuthSessionId(session);
+  const { session, userAuthSession } = await getUserAuthSession(request);
 
-  if (userAuthSessionId) {
-    const userAuthSession =
-      await retrieveUserAuthSessionFromDatabaseById(userAuthSessionId);
-
-    if (userAuthSession) {
-      await Promise.allSettled([
-        magicAdmin.users.logoutByIssuer(userAuthSession.user.did),
-        deleteUserAuthSessionsFromDatabaseByUserId(userAuthSession.user.id),
-      ]);
-    }
+  if (userAuthSession) {
+    await Promise.allSettled([
+      magicAdmin.users.logoutByIssuer(userAuthSession.user.did),
+      deleteUserAuthSessionsFromDatabaseByUserId(userAuthSession.user.id),
+    ]);
   }
 
   return redirect(safeRedirect(redirectTo), {
@@ -95,10 +134,9 @@ export async function logout(request: Request, redirectTo: string = '/') {
  * in.
  */
 export async function requireAnonymous(request: Request) {
-  const session = await getSession(request);
-  const userAuthSessionId = getUserAuthSessionId(session);
+  const { userAuthSession } = await getUserAuthSession(request);
 
-  if (userAuthSessionId) {
+  if (userAuthSession) {
     throw redirect('/organizations');
   }
 
@@ -117,16 +155,10 @@ export async function requireUserIsAuthenticated(
   request: Request,
   redirectTo: string = new URL(request.url).pathname,
 ) {
-  const session = await getSession(request);
-  const userAuthSessionId = getUserAuthSessionId(session);
+  const { userAuthSession } = await getUserAuthSession(request);
 
-  if (userAuthSessionId) {
-    const userAuthSession =
-      await retrieveUserAuthSessionFromDatabaseById(userAuthSessionId);
-
-    if (userAuthSession) {
-      return userAuthSession.user.id;
-    }
+  if (userAuthSession) {
+    return userAuthSession.user.id;
   }
 
   const searchParameters = new URLSearchParams([['redirectTo', redirectTo]]);

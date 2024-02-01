@@ -67,8 +67,25 @@ test.describe('register page', () => {
       ),
     ).toBeVisible();
 
+    // The login button has the correct link.
+    await expect(
+      page.getByRole('link', { name: /log in to your account/i }),
+    ).toHaveAttribute('href', '/login');
+
     await page.close();
     await deleteUserProfileFromDatabaseById(user.id);
+  });
+
+  test('given a logged out user and an invite link token in the url: changes the login redirect button to also include the token', async ({
+    page,
+  }) => {
+    // Navigate to the register page with a token.
+    await page.goto(`/register?token=1234`);
+
+    // The login button has the correct link.
+    await expect(
+      page.getByRole('link', { name: /log in to your account/i }),
+    ).toHaveAttribute('href', '/login?token=1234');
   });
 
   test('page should lack any automatically detectable accessibility issues', async ({

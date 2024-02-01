@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-import { render, screen } from '~/test/test-utils';
+import { render, screen } from '~/test/react-test-utils';
 import type { Factory } from '~/utils/types';
 
 import type { {{pascalCase name}}ComponentProps } from './{{kebabCase name}}-component';
-import { {{pascalCase name}} } from './{{kebabCase name}}-component';
+import { {{pascalCase name}}Component } from './{{kebabCase name}}-component';
 
 const createProps: Factory<{{pascalCase name}}ComponentProps> = ({ ...props } = {}) => ({
   ...props,
@@ -14,7 +14,7 @@ describe('{{pascalCase name}} component', () => {
   test('renders correctly', () => {
     const props = createProps();
 
-    render(<{{pascalCase name}} {...props} />);
+    render(<{{pascalCase name}}Component {...props} />);
 
     expect(
       screen.getByRole('heading', { name: /{{name}}/i, level: 1 }),

@@ -260,7 +260,12 @@ export function Sidebar({
 
           {/* Header page title */}
           {headerTitle ? (
-            <HeaderTitle className={cn(renderSearchBar && 'sr-only')}>
+            <HeaderTitle
+              className={cn(
+                renderSearchBar && 'sr-only',
+                !renderBackButton && 'lg:ml-2',
+              )}
+            >
               {headerTitle}
             </HeaderTitle>
           ) : (

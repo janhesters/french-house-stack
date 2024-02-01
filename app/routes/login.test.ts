@@ -1,6 +1,11 @@
 import { faker } from '@faker-js/faker';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
+import { retrieveinviteLinkUseFromDatabaseByUserIdAndLinkId } from '~/features/organizations/invite-link-uses-model.server';
+import { ORGANIZATION_MEMBERSHIP_ROLES } from '~/features/organizations/organizations-constants';
+import { createPopulatedOrganizationInviteLink } from '~/features/organizations/organizations-factories.server';
+import { saveOrganizationInviteLinkToDatabase } from '~/features/organizations/organizations-invite-link-model.server';
+import { retrieveOrganizationMembershipFromDatabaseByUserIdAndOrganizationId } from '~/features/organizations/organizations-model.server';
 import { magicAdmin } from '~/features/user-authentication/magic-admin.server';
 import { retrieveActiveUserAuthSessionFromDatabaseByUserProfileId } from '~/features/user-authentication/user-auth-session-model.server';
 import { createPopulatedUserProfile } from '~/features/user-profile/user-profile-factories.server';
@@ -8,15 +13,30 @@ import {
   deleteUserProfileFromDatabaseById,
   saveUserProfileToDatabase,
 } from '~/features/user-profile/user-profile-model.server';
-import { createAuthenticatedRequest } from '~/test/test-utils';
+import {
+  createAuthenticatedRequest,
+  setupUserWithOrgAndAddAsMember,
+  teardownOrganizationAndMember,
+} from '~/test/test-utils';
 import { toFormData } from '~/utils/to-form-data';
+import { getToast } from '~/utils/toast.server';
 
 import { action } from './login';
 
-const url = 'http://localhost:3000/login';
+const createUrl = (token?: string) =>
+  `http://localhost:3000/login${token ? `?token=${token}` : ''}`;
 
-async function sendRequest({ formData }: { formData: FormData }) {
-  const request = new Request(url, { method: 'POST', body: formData });
+async function sendRequest({
+  formData,
+  token,
+}: {
+  formData: FormData;
+  token?: string;
+}) {
+  const request = new Request(createUrl(token), {
+    method: 'POST',
+    body: formData,
+  });
 
   return await action({ request, context: {}, params: {} });
 }
@@ -28,7 +48,7 @@ describe('/login route action', () => {
     const userProfile = createPopulatedUserProfile();
     await saveUserProfileToDatabase(userProfile);
     const request = await createAuthenticatedRequest({
-      url,
+      url: createUrl(),
       userId: userProfile.id,
       method: 'POST',
       formData: toFormData({}),
@@ -155,36 +175,65 @@ describe('/login route action', () => {
 
     const intent = 'magicEmailLogin';
 
-    test('given a valid DID token: redirects to the organizations page and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
-      const userProfile = createPopulatedUserProfile();
-      await saveUserProfileToDatabase(userProfile);
+    test("given a valid DID token and the user is a member of an organization: redirects to the user's first organization's page and logs the user in by creating a session and attaching an authentication cookie to the request", async () => {
+      const { organization, user } = await setupUserWithOrgAndAddAsMember();
 
       vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: userProfile.email,
-        issuer: userProfile.did,
+        email: user.email,
+        issuer: user.did,
         phoneNumber: faker.phone.number(),
         publicAddress: faker.finance.ethereumAddress(),
         oauthProvider: faker.internet.domainName(),
         wallets: [],
       });
 
-      const formData = toFormData({ didToken: userProfile.did, intent });
+      const formData = toFormData({ didToken: user.did, intent });
 
       const response = await sendRequest({ formData });
 
       expect(response.status).toEqual(302);
-      expect(response.headers.get('location')).toEqual('/organizations');
+      expect(response.headers.get('location')).toEqual(
+        `/organizations/${organization.slug}/home`,
+      );
       expect(response.headers.get('Set-Cookie')).toMatch(
         '__user-authentication-session=ey',
       );
 
       const userAuthenticationSession =
-        await retrieveActiveUserAuthSessionFromDatabaseByUserProfileId(
-          userProfile.id,
-        );
+        await retrieveActiveUserAuthSessionFromDatabaseByUserProfileId(user.id);
       expect(userAuthenticationSession).toBeDefined();
 
-      await deleteUserProfileFromDatabaseById(userProfile.id);
+      await teardownOrganizationAndMember({ organization, user });
+    });
+
+    test('given a valid DID token and the user is NOT a member of any organization: redirects to the onboarding page and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
+      const user = createPopulatedUserProfile();
+      await saveUserProfileToDatabase(user);
+
+      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
+        email: user.email,
+        issuer: user.did,
+        phoneNumber: faker.phone.number(),
+        publicAddress: faker.finance.ethereumAddress(),
+        oauthProvider: faker.internet.domainName(),
+        wallets: [],
+      });
+
+      const formData = toFormData({ didToken: user.did, intent });
+
+      const response = await sendRequest({ formData });
+
+      expect(response.status).toEqual(302);
+      expect(response.headers.get('location')).toEqual('/onboarding');
+      expect(response.headers.get('Set-Cookie')).toMatch(
+        '__user-authentication-session=ey',
+      );
+
+      const userAuthenticationSession =
+        await retrieveActiveUserAuthSessionFromDatabaseByUserProfileId(user.id);
+      expect(userAuthenticationSession).toBeDefined();
+
+      await deleteUserProfileFromDatabaseById(user.id);
     });
 
     test('given no DID token: returns a response with a 400 status code and an error message about the missing DID token', async () => {
@@ -233,6 +282,183 @@ describe('/login route action', () => {
         },
         message: 'Bad Request',
       });
+    });
+
+    test("given a valid DID token, and a valid invite token in the query string for an organization that the user is NOT yet a member of: redirects to the organizations page, displays a toast that the user successfully joined the organization, adds the user to the invite link's organization and logs the user in by creating a session and attaching an authentication cookie to the request", async () => {
+      const userProfile = createPopulatedUserProfile();
+      await saveUserProfileToDatabase(userProfile);
+
+      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
+        email: userProfile.email,
+        issuer: userProfile.did,
+        phoneNumber: faker.phone.number(),
+        publicAddress: faker.finance.ethereumAddress(),
+        oauthProvider: faker.internet.domainName(),
+        wallets: [],
+      });
+
+      const { organization, user } = await setupUserWithOrgAndAddAsMember();
+      const inviteLink = createPopulatedOrganizationInviteLink({
+        creatorId: user.id,
+        organizationId: organization.id,
+      });
+      await saveOrganizationInviteLinkToDatabase(inviteLink);
+      const formData = toFormData({ didToken: userProfile.did, intent });
+
+      const response = await sendRequest({ formData, token: inviteLink.token });
+
+      expect(response.status).toEqual(302);
+      expect(response.headers.get('location')).toEqual(
+        `/organizations/${organization.slug}/home`,
+      );
+      expect(response.headers.get('Set-Cookie')).toMatch(
+        '__user-authentication-session=ey',
+      );
+
+      // It shows a toast.
+      const maybeHeaders = response.headers.get('Set-Cookie');
+      const { toast } = await getToast(
+        new Request(createUrl(inviteLink.token), {
+          headers: { cookie: maybeHeaders ?? '' },
+        }),
+      );
+      expect(toast).toMatchObject({
+        id: expect.any(String),
+        title: 'Successfully joined organization',
+        description: `You are now a member of ${organization.name}`,
+        type: 'success',
+      });
+
+      // It adds the user to the organization from the invite link.
+      const updatedOrganization =
+        await retrieveOrganizationMembershipFromDatabaseByUserIdAndOrganizationId(
+          { userId: userProfile.id, organizationId: organization.id },
+        );
+      expect(updatedOrganization).toMatchObject({
+        deactivatedAt: null,
+        role: ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
+      });
+
+      // It creates an invite link use for the invite link.
+      const inviteLinkUse =
+        await retrieveinviteLinkUseFromDatabaseByUserIdAndLinkId({
+          inviteLinkId: inviteLink.id,
+          userId: userProfile.id,
+        });
+      expect(inviteLinkUse).toMatchObject({
+        inviteLinkId: inviteLink.id,
+        userId: userProfile.id,
+      });
+
+      // It logs the user in via cookie.
+      const userAuthenticationSession =
+        await retrieveActiveUserAuthSessionFromDatabaseByUserProfileId(
+          userProfile.id,
+        );
+      expect(userAuthenticationSession).toBeDefined();
+
+      await deleteUserProfileFromDatabaseById(userProfile.id);
+      await teardownOrganizationAndMember({ organization, user });
+    });
+
+    test('given a valid did token and a valid invite token in the query string for an organization that the user is already a member of: redirects to the organizations page, displays a toast that the user is already a member of the organization and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
+      const { organization, user } = await setupUserWithOrgAndAddAsMember();
+
+      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
+        email: user.email,
+        issuer: user.did,
+        phoneNumber: faker.phone.number(),
+        publicAddress: faker.finance.ethereumAddress(),
+        oauthProvider: faker.internet.domainName(),
+        wallets: [],
+      });
+
+      const inviteLink = createPopulatedOrganizationInviteLink({
+        creatorId: user.id,
+        organizationId: organization.id,
+      });
+      await saveOrganizationInviteLinkToDatabase(inviteLink);
+      const formData = toFormData({ didToken: user.did, intent });
+
+      const response = await sendRequest({ formData, token: inviteLink.token });
+
+      expect(response.status).toEqual(302);
+      expect(response.headers.get('location')).toEqual(
+        `/organizations/${organization.slug}/home`,
+      );
+      expect(response.headers.get('Set-Cookie')).toMatch(
+        '__user-authentication-session=ey',
+      );
+
+      // It shows a toast.
+      const maybeHeaders = response.headers.get('Set-Cookie');
+      const { toast } = await getToast(
+        new Request(createUrl(inviteLink.token), {
+          headers: { cookie: maybeHeaders ?? '' },
+        }),
+      );
+      expect(toast).toMatchObject({
+        id: expect.any(String),
+        title: 'Already a member',
+        description: `You are already a member of ${organization.name}`,
+        type: 'info',
+      });
+
+      // It logs the user in via cookie.
+      const userAuthenticationSession =
+        await retrieveActiveUserAuthSessionFromDatabaseByUserProfileId(user.id);
+      expect(userAuthenticationSession).toBeDefined();
+
+      await teardownOrganizationAndMember({ organization, user });
+    });
+
+    test("given a valid did token and an invalid invite token: redirects to the user's first organization's page, shows a toast message about the invalid token and logs the user in by creating a session and attaching an authentication cookie to the request", async () => {
+      const { organization, user } = await setupUserWithOrgAndAddAsMember();
+
+      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
+        email: user.email,
+        issuer: user.did,
+        phoneNumber: faker.phone.number(),
+        publicAddress: faker.finance.ethereumAddress(),
+        oauthProvider: faker.internet.domainName(),
+        wallets: [],
+      });
+
+      const formData = toFormData({ didToken: user.did, intent });
+
+      const response = await sendRequest({
+        formData,
+        token: 'invalid-token',
+      });
+
+      expect(response.status).toEqual(302);
+      expect(response.headers.get('location')).toEqual(
+        `/organizations/${organization.slug}/home`,
+      );
+      expect(response.headers.get('Set-Cookie')).toMatch(
+        '__user-authentication-session=ey',
+      );
+
+      // It shows a toast.
+      const maybeHeaders = response.headers.get('Set-Cookie');
+      const { toast } = await getToast(
+        new Request(createUrl('invalid-token'), {
+          headers: { cookie: maybeHeaders ?? '' },
+        }),
+      );
+      expect(toast).toMatchObject({
+        id: expect.any(String),
+        title: 'Failed to accept invite',
+        description: 'The invite link is invalid or has expired',
+        type: 'error',
+      });
+
+      // It logs the user in via cookie.
+      const userAuthenticationSession =
+        await retrieveActiveUserAuthSessionFromDatabaseByUserProfileId(user.id);
+      expect(userAuthenticationSession).toBeDefined();
+
+      await teardownOrganizationAndMember({ organization, user });
     });
   });
 });

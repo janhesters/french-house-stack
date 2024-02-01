@@ -1,4 +1,9 @@
-import type { Membership, Organization, UserProfile } from '@prisma/client';
+import type {
+  Membership,
+  Organization,
+  OrganizationInviteLink,
+  UserProfile,
+} from '@prisma/client';
 
 import { prisma } from '~/database.server';
 
@@ -81,13 +86,13 @@ export function retrieveTotalOrganizationMembersCountFromDatabaseByOrganizationI
 
 /**
  * Retrieves organization members from the database by organization ID and
- * paginates the results.
+ * paginates the results. The members are sorted aplhabetically by name.
  *
  * @param organizationId - The ID of the organization.
  * @param page - The current page number.
  * @param perPage - The number of items to be displayed per page (default: 10).
  * @returns A promise that resolves to an array of members for the given
- * organization.
+ * organization sorted alphabetically by name.
  */
 export async function retrieveOrganizationMembersFromDatabaseByOrganizationIdForPage({
   organizationId,
@@ -102,9 +107,10 @@ export async function retrieveOrganizationMembersFromDatabaseByOrganizationIdFor
     where: { organizationId },
     select: {
       deactivatedAt: true,
-      member: { select: { name: true, email: true } },
+      member: { select: { id: true, name: true, email: true } },
       role: true,
     },
+    orderBy: { member: { name: 'asc' } },
     skip: (page - 1) * perPage,
     take: perPage,
   });
@@ -157,6 +163,64 @@ export async function retrieveOrganizationMembershipFromDatabaseByUserIdAndOrgan
   return prisma.membership.findUnique({
     where: { memberId_organizationId: { memberId: userId, organizationId } },
     select: { deactivatedAt: true, role: true },
+  });
+}
+
+/**
+ * Retrieves the latest active OrganizationInviteLink record from the database
+ * based on the organization id.
+ * @param id - The id of the OrganizationInviteLink to get.
+ * @returns The OrganizationInviteLink with a given id or null if it wasn't
+ */
+export async function retrieveLatestInviteLinkFromDatabaseByOrganizationId(
+  id: Organization['id'],
+) {
+  const now = new Date();
+  return prisma.organizationInviteLink.findFirst({
+    where: {
+      organizationId: id,
+      // eslint-disable-next-line unicorn/no-null
+      deactivatedAt: null,
+      expiresAt: { gt: now },
+    },
+    orderBy: { createdAt: 'desc' },
+    select: {
+      creatorId: true,
+      deactivatedAt: true,
+      expiresAt: true,
+      id: true,
+      token: true,
+    },
+  });
+}
+
+/**
+ * Retrieves an active OrganizationInviteLink record from the database based on
+ * its token.
+ *
+ * @param token - The token of the OrganizationInviteLink to get.
+ * @returns The OrganizationInviteLink with a given token or null if it wasn't
+ * found or its deactivated or expired.
+ */
+export async function retrieveActiveInviteLinkFromDatabaseByToken(
+  token: OrganizationInviteLink['token'],
+) {
+  const now = new Date();
+  return prisma.organizationInviteLink.findFirst({
+    where: {
+      token,
+      // eslint-disable-next-line unicorn/no-null
+      deactivatedAt: null,
+      expiresAt: { gt: now },
+    },
+    select: {
+      creatorId: true,
+      deactivatedAt: true,
+      expiresAt: true,
+      id: true,
+      organization: { select: { id: true, name: true, slug: true } },
+      token: true,
+    },
   });
 }
 

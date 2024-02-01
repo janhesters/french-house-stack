@@ -1,0 +1,15 @@
+{
+  "accept-invite": "Accept invite",
+  "accept-invite-instructions": "Click the button below to sign up. By using this link you will automatically join the correct organization.",
+  "already-member-toast-description": "You are already a member of {{organizationName}}",
+  "already-member-toast-title": "Already a member",
+  "invite-link-invalid-toast-description": "The invite link is invalid or has expired",
+  "invite-link-invalid-toast-title": "Failed to accept invite",
+  "invite-link-valid-toast-description": "Please register or log in to accept the invitation",
+  "invite-link-valid-toast-title": "Invitation link is valid",
+  "invite-you-to-join": "{{inviterName}} invites you to join {{organizationName}}",
+  "join-success-toast-description": "You are now a member of {{organizationName}}",
+  "join-success-toast-title": "Successfully joined organization",
+  "page-title": "Invitation",
+  "welcome-to-app-name": "Welcome to {{appName}}"
+}

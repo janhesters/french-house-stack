@@ -65,9 +65,9 @@ export async function action({ request, params }: ActionFunctionArgs) {
 export default function OrganizationSettingsProfile() {
   const { t } = useTranslation('organization-profile');
 
-  const { organization, role } = useLoaderData<typeof loader>();
-  const isAdmin = role === ORGANIZATION_MEMBERSHIP_ROLES.ADMIN;
-  const isOwner = role === ORGANIZATION_MEMBERSHIP_ROLES.OWNER;
+  const { currentUsersRole, organization } = useLoaderData<typeof loader>();
+  const isAdmin = currentUsersRole === ORGANIZATION_MEMBERSHIP_ROLES.ADMIN;
+  const isOwner = currentUsersRole === ORGANIZATION_MEMBERSHIP_ROLES.OWNER;
   const canEdit = isAdmin || isOwner;
 
   const navigation = useNavigation();

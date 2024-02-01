@@ -56,6 +56,25 @@ export function asyncPipe<A, B, C, D, E, F>(
   // eslint-disable-next-line unicorn/prevent-abbreviations
   ef: (e: E) => MaybePromise<F>,
 ): (a: A) => Promise<F>;
+export function asyncPipe<A, B, C, D, E, F, G>(
+  ab: (a: A) => MaybePromise<B>,
+  bc: (b: B) => MaybePromise<C>,
+  cd: (c: C) => MaybePromise<D>,
+  de: (d: D) => MaybePromise<E>,
+  // eslint-disable-next-line unicorn/prevent-abbreviations
+  ef: (e: E) => MaybePromise<F>,
+  fg: (f: F) => MaybePromise<G>,
+): (a: A) => Promise<G>;
+export function asyncPipe<A, B, C, D, E, F, G, H>(
+  ab: (a: A) => MaybePromise<B>,
+  bc: (b: B) => MaybePromise<C>,
+  cd: (c: C) => MaybePromise<D>,
+  de: (d: D) => MaybePromise<E>,
+  // eslint-disable-next-line unicorn/prevent-abbreviations
+  ef: (e: E) => MaybePromise<F>,
+  fg: (f: F) => MaybePromise<G>,
+  gh: (g: G) => MaybePromise<H>,
+): (a: A) => Promise<H>;
 
 /**
  * Composes functions which can, but don't have to, return promises.

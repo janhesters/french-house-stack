@@ -23,11 +23,29 @@ async function seed() {
     throw new Error('Please provide a userEmail to seed.ts');
   }
 
-  console.log('👤 Creating user profile ...');
+  console.log('👤 Creating user profiles ...');
   const user = await prisma.userProfile.create({
     data: {
       did: userDid,
       email: userEmail,
+      id: createId(),
+      name: faker.person.fullName(),
+      acceptedTermsAndConditions: true,
+    },
+  });
+  const memberUser = await prisma.userProfile.create({
+    data: {
+      did: createId(),
+      email: faker.internet.email(),
+      id: createId(),
+      name: faker.person.fullName(),
+      acceptedTermsAndConditions: true,
+    },
+  });
+  const adminUser = await prisma.userProfile.create({
+    data: {
+      did: createId(),
+      email: faker.internet.email(),
       id: createId(),
       name: faker.person.fullName(),
       acceptedTermsAndConditions: true,
@@ -43,18 +61,22 @@ async function seed() {
     },
   });
 
-  console.log('👥 Adding user to organization ...');
+  console.log('👥 Adding users to organization ...');
   await prisma.organization.update({
     where: { id: organization.id },
     data: {
       memberships: {
-        create: [{ member: { connect: { id: user.id } }, role: 'owner' }],
+        create: [
+          { member: { connect: { id: user.id } }, role: 'owner' },
+          { member: { connect: { id: memberUser.id } }, role: 'member' },
+          { member: { connect: { id: adminUser.id } }, role: 'admin' },
+        ],
       },
     },
   });
 
   console.log('========= 🌱 result of seed: =========');
-  prettyPrint({ user, organization });
+  prettyPrint({ user, organization, memberUser, adminUser });
 }
 
 seed()

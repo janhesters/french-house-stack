@@ -67,6 +67,9 @@ const config = {
           to: { height: '0' },
         },
       },
+      screens: {
+        xs: '400px',
+      },
       width: {
         '66': '16.5rem',
         '68': '17rem',

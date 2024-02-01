@@ -1,6 +1,7 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import acceptMembershipInvite from '../../public/locales/en/accept-membership-invite.json';
 import common from '../../public/locales/en/common.json';
 import dragAndDrop from '../../public/locales/en/drag-and-drop.json';
 import header from '../../public/locales/en/header.json';
@@ -9,8 +10,10 @@ import onboardingOrganization from '../../public/locales/en/onboarding-organizat
 import onboardingUserProfile from '../../public/locales/en/onboarding-user-profile.json';
 import organizationProfile from '../../public/locales/en/organization-profile.json';
 import organizationSettings from '../../public/locales/en/organization-settings.json';
+import organizationTeamMembers from '../../public/locales/en/organization-team-members.json';
 import organizations from '../../public/locales/en/organizations.json';
 import organizationsNew from '../../public/locales/en/organizations-new.json';
+import pagination from '../../public/locales/en/pagination.json';
 import register from '../../public/locales/en/register.json';
 import settings from '../../public/locales/en/settings.json';
 import settingsAccount from '../../public/locales/en/settings-account.json';
@@ -23,6 +26,7 @@ i18next.use(initReactI18next).init({
   lng: 'en',
   ns: [
     'common',
+    'accept-membership-invite',
     'drag-and-drop',
     'header',
     'landing',
@@ -31,8 +35,10 @@ i18next.use(initReactI18next).init({
     'onboarding-user-profile',
     'organization-profile',
     'organization-settings',
+    'organization-team-members',
     'organizations',
     'organizations-new',
+    'pagination',
     'register',
     'settings',
     'settings-account',
@@ -43,6 +49,7 @@ i18next.use(initReactI18next).init({
   resources: {
     en: {
       common,
+      'accept-membership-invite': acceptMembershipInvite,
       'drag-and-drop': dragAndDrop,
       header,
       login,
@@ -50,8 +57,10 @@ i18next.use(initReactI18next).init({
       'onboarding-user-profile': onboardingUserProfile,
       'organization-profile': organizationProfile,
       'organization-settings': organizationSettings,
+      'organization-team-members': organizationTeamMembers,
       organizations,
       'organizations-new': organizationsNew,
+      pagination,
       register,
       settings,
       'settings-account': settingsAccount,
