@@ -7,7 +7,7 @@
   "dependencies": {
     "@faker-js/faker": "8.4.0",
     "@hookform/resolvers": "3.3.4",
-    "@magic-sdk/admin": "2.0.1",
+    "@magic-sdk/admin": "2.1.0",
     "@prisma/client": "5.9.1",
     "@radix-ui/react-accordion": "1.1.2",
     "@radix-ui/react-avatar": "1.0.4",
