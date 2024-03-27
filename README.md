@@ -103,7 +103,7 @@ to check for updates and install the latest versions.
   ```ts
   const { email, issuer: did } =
     await magicAdmin.users.getMetadataByToken(didToken);
-  cosole.warn('did', did);
+  console.warn('did', did);
   ```
 
 - Set up the database:
@@ -240,22 +240,30 @@ You can
 
 ### How authentication works 🛡️
 
-The French House Stack uses [Magic](https://magic.link/) for authentication with a custom session
-cookie. You can find the implementation in `app/features/user-authentication`.
+The French House Stack uses [Magic](https://magic.link/) for authentication with
+a custom session cookie. You can find the implementation in
+`app/features/user-authentication`.
 
 Magic keeps track of the user's session in a cookie, but the FHS ignores Magic's
-session and uses a session cookie instead. This is because Magic's sessions
-only last 2 weeks, while the cookie lasts a year. Additionally, it makes E2E tests
+session and uses a session cookie instead. This is because Magic's sessions only
+last 2 weeks, while the cookie lasts a year. Additionally, it makes E2E tests
 easier because you can fully control the auth flow.
 
-After a user successfully authenticates via Magic, you create a unique session in your system, tracked by `UserAuthSession`. This session ID is then securely stored in our session cookie, which we manage using [Remix's session utils](https://remix.run/docs/en/v1/utils/sessions#using-sessions). The code for managing these sessions is located in `app/features/user-authentication/user-authentication-session.server.ts`.
+After a user successfully authenticates via Magic, you create a unique session
+in your system, tracked by `UserAuthSession`. This session ID is then securely
+stored in our session cookie, which we manage using
+[Remix's session utils](https://remix.run/docs/en/v1/utils/sessions#using-sessions).
+The code for managing these sessions is located in
+`app/features/user-authentication/user-authentication-session.server.ts`.
 
-The use of custom auth sessions enables you to to proactively invalidate sessions is necessary.
+The use of custom auth sessions enables you to to proactively invalidate
+sessions is necessary.
 
 If the user is signing up, you also create a user profile for them using their
 email, which you can grab from Magic during the sign up flow.
 
-When a user signs out, you delete the `UserAuthSession` and clear the session cookie.
+When a user signs out, you delete the `UserAuthSession` and clear the session
+cookie.
 
 ### ShadcnUI & Custom Components
 
@@ -304,11 +312,14 @@ If you want to configure source maps, look up how to do that in the
 
 ### Toasts
 
-The French House Stack includes utilities for toast notifications based on flash sessions.
+The French House Stack includes utilities for toast notifications based on flash
+sessions.
 
-**Flash Data:** Temporary session values, ideal for transferring data to the next request without persisting in the session.
+**Flash Data:** Temporary session values, ideal for transferring data to the
+next request without persisting in the session.
 
 **Redirect with Toast:**
+
 - Utility: `redirectWithToast` (Path: `app/utils/toast.server.ts`)
 - Use for redirecting with toast notifications.
 - Example:
@@ -321,6 +332,7 @@ The French House Stack includes utilities for toast notifications based on flash
 - Accepts extra arguments for `ResponseInit` to set headers.
 
 **Direct Toast Headers:**
+
 - Utility: `createToastHeaders` (Path: `app/utils/toast.server.ts`)
 - Use for non-redirect scenarios.
 - Example:
@@ -337,6 +349,7 @@ The French House Stack includes utilities for toast notifications based on flash
   ```
 
 **Combining Multiple Headers:**
+
 - Utility: `combineHeaders` (Path: `app/utils/toast.server.tsx`)
 - Combine toast headers with additional headers.
 - Example:

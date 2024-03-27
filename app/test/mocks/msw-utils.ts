@@ -1,4 +1,3 @@
-import { http, passthrough } from 'msw';
 import type { UnhandledRequestCallback } from 'node_modules/msw/lib/core/utils/request/onUnhandledRequest';
 
 /**
@@ -19,19 +18,3 @@ export const onUnhandledRequest: UnhandledRequestCallback = request => {
     'Read more: https://mswjs.io/docs/getting-started/mocks',
   );
 };
-
-const REMIX_DEV_PING = new URL(
-  process.env.REMIX_DEV_ORIGIN || 'http://test-origin',
-);
-REMIX_DEV_PING.pathname = '/ping';
-
-/**
- * Lets MSW forward internal "dev ready" messages on `/ping`.
- *
- * @see https://remix.run/docs/en/main/other-api/dev#how-to-set-up-msw
- *
- * @returns A response object for the remix ping request.
- */
-export const remixPingHandler = http.post(REMIX_DEV_PING.href, () =>
-  passthrough(),
-);

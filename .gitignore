@@ -6,6 +6,7 @@ coverage
 /build
 /public/build
 .env
+.cache
 
 /prisma/data.db
 /prisma/data.db-journal

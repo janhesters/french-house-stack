@@ -102,6 +102,7 @@ test.describe('settings profile page', () => {
 
     // The name input shows the correct error messages.
     const nameInput = page.getByLabel(/name/i);
+    await nameInput.clear();
     await nameInput.fill('   a   ');
     const saveButton = page.getByRole('button', { name: /save/i });
     await saveButton.click();

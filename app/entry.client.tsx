@@ -5,7 +5,7 @@ import Backend from 'i18next-http-backend';
 import { startTransition, StrictMode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { I18nextProvider, initReactI18next } from 'react-i18next';
-import { getInitialNamespaces } from 'remix-i18next';
+import { getInitialNamespaces } from 'remix-i18next/client';
 
 import { i18n } from './features/localization/i18n';
 import { onUnhandledRequest } from './test/mocks/msw-utils';
@@ -26,10 +26,10 @@ declare global {
 }
 
 if (ENV.ENVIRONMENT === 'production' && ENV.SENTRY_DSN) {
-  const { initializeClientMonitoring } = await import(
-    './features/monitoring/monitoring-helpers.client'
+  // eslint-disable-next-line unicorn/prefer-top-level-await
+  import('./features/monitoring/monitoring-helpers.client').then(
+    ({ initializeClientMonitoring }) => initializeClientMonitoring(),
   );
-  initializeClientMonitoring();
 }
 
 async function activateMsw() {

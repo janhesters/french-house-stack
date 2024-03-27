@@ -1,4 +1,3 @@
-import { cssBundleHref } from '@remix-run/css-bundle';
 import type {
   LinksFunction,
   LoaderFunctionArgs,
@@ -8,21 +7,21 @@ import { json } from '@remix-run/node';
 import {
   isRouteErrorResponse as getIsRouteErrorResponse,
   Links,
-  LiveReload,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
   useRouteError,
+  useRouteLoaderData,
 } from '@remix-run/react';
 import { withSentry } from '@sentry/remix';
+import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
-import darkStyles from '~/styles/dark.css';
-import styles from '~/styles/tailwind.css';
+import darkStyles from '~/styles/dark.css?url';
+import styles from '~/styles/tailwind.css?url';
 
 import { GeneralErrorBoundary } from './components/general-error-boundary';
 import { Toaster } from './components/ui/sonner';
@@ -37,7 +36,6 @@ import { getToast } from './utils/toast.server';
 export const handle = { i18n: 'common' };
 
 export const links: LinksFunction = () => [
-  ...(cssBundleHref ? [{ rel: 'stylesheet', href: cssBundleHref }] : []),
   { rel: 'stylesheet', href: styles },
   {
     rel: 'stylesheet',
@@ -100,31 +98,44 @@ function useChangeLanguage(locale: string) {
 }
 
 function App() {
-  const { ENV, locale, toast } = useLoaderData<typeof loader>();
+  return <Outlet />;
+}
+
+export function Layout({ children }: { children: ReactNode }) {
+  const data = useRouteLoaderData<typeof loader>('root');
   const { i18n } = useTranslation();
+  const locale = data?.locale || 'en';
   useChangeLanguage(locale);
-  useToast(toast);
+  useToast(data?.toast);
+
+  const error = useRouteError();
+  const isRouteErrorResponse = getIsRouteErrorResponse(error);
+  const title = `${
+    isRouteErrorResponse ? `${error.status} ${error.statusText}` : 'Oh no!'
+  } | French House Stack`;
 
   return (
     <html lang={locale} className="h-full" dir={i18n.dir()}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {!!error && <title>{title}</title>}
         <Meta />
         <Links />
       </head>
 
       <body className="h-full overscroll-none">
-        <Outlet />
+        {children}
         <Toaster position="bottom-right" />
-        <ScrollRestoration />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.ENV = ${JSON.stringify(ENV)}`,
-          }}
-        />
         <Scripts />
-        <LiveReload />
+        <ScrollRestoration />
+        {data?.ENV && (
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `window.ENV = ${JSON.stringify(data?.ENV)}`,
+            }}
+          />
+        )}
       </body>
     </html>
   );
@@ -135,27 +146,10 @@ export default withSentry(App);
 export function ErrorBoundary() {
   const error = useRouteError();
   const isRouteErrorResponse = getIsRouteErrorResponse(error);
-  const title = `${
-    isRouteErrorResponse ? `${error.status} ${error.statusText}` : 'Oh no!'
-  } | French House Stack`;
 
-  return (
-    <html className="h-full" lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>{title}</title>
-        <Meta />
-        <Links />
-      </head>
-      <body className="h-full overscroll-none">
-        {isRouteErrorResponse && error.status === 404 ? (
-          <NotFoundComponent />
-        ) : (
-          <GeneralErrorBoundary />
-        )}
-        <Scripts />
-      </body>
-    </html>
+  return isRouteErrorResponse && error.status === 404 ? (
+    <NotFoundComponent />
+  ) : (
+    <GeneralErrorBoundary />
   );
 }

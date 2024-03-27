@@ -16,7 +16,7 @@ export type Partial{{pascalCase name}}Parameters = Pick<
  * @returns The newly created {{name}}.
  */
 export async function save{{pascalCase name}}ToDatabase({{camelCase name}}: Partial{{pascalCase name}}Parameters) {
-  return prisma.{{camelCase name}}.create({ data: {{camelCase name}} });
+  return await prisma.{{camelCase name}}.create({ data: {{camelCase name}} });
 }
 
 // READ
@@ -28,7 +28,7 @@ export async function save{{pascalCase name}}ToDatabase({{camelCase name}}: Part
  * @returns The {{name}} with a given id or null if it wasn't found.
  */
 export async function retrieve{{pascalCase name}}FromDatabaseById(id: {{pascalCase name}}['id']) {
-  return prisma.{{camelCase name}}.findUnique({ where: { id } });
+  return await prisma.{{camelCase name}}.findUnique({ where: { id } });
 }
 
 // UPDATE
@@ -52,7 +52,7 @@ export async function update{{pascalCase name}}InDatabaseById({
    */
   {{camelCase name}}: Partial<Omit<Parameters<typeof prisma.{{camelCase name}}.update>[0]['data'], 'id'>>;
 }) {
-  return prisma.{{camelCase name}}.update({ where: { id }, data: {{camelCase name}} });
+  return await prisma.{{camelCase name}}.update({ where: { id }, data: {{camelCase name}} });
 }
 
 // DELETE
@@ -64,5 +64,5 @@ export async function update{{pascalCase name}}InDatabaseById({
  * @returns The {{name}} that was deleted.
  */
 export async function delete{{pascalCase name}}FromDatabaseById(id: {{pascalCase name}}['id']) {
-  return prisma.{{camelCase name}}.delete({ where: { id } });
+  return await prisma.{{camelCase name}}.delete({ where: { id } });
 }

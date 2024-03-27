@@ -229,13 +229,11 @@ test.describe('organizations settings team members page', () => {
   test('given an onboarded member or admin user: shows the members of the organization, and hides the invite link creation UI', async ({
     page,
   }) => {
-    const data = await setup({
-      page,
-      role: faker.helpers.arrayElement([
-        ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
-        ORGANIZATION_MEMBERSHIP_ROLES.ADMIN,
-      ]),
-    });
+    const role = faker.helpers.arrayElement([
+      ORGANIZATION_MEMBERSHIP_ROLES.MEMBER,
+      ORGANIZATION_MEMBERSHIP_ROLES.ADMIN,
+    ]);
+    const data = await setup({ page, role });
     const { organization, sortedUsers } = data;
 
     await page.goto(
@@ -257,7 +255,12 @@ test.describe('organizations settings team members page', () => {
       const memberListItem = memberListItems.nth(index);
       await expect(memberListItem.getByText(otherUser.name)).toBeVisible();
       await expect(memberListItem.getByText(otherUser.email)).toBeVisible();
-      await expect(memberListItem.getByText(/member/i)).toBeVisible();
+      // eslint-disable-next-line playwright/no-conditional-in-test
+      otherUser.id === data.user.id
+        ? await expect(
+            memberListItem.getByText(new RegExp(role, 'i')),
+          ).toBeVisible()
+        : await expect(memberListItem.getByText(/member/i)).toBeVisible();
     }
 
     // It hides the invite link creation UI.

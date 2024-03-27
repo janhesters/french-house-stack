@@ -15,8 +15,9 @@
       "~/*": ["./app/*"]
     },
     "resolveJsonModule": true,
+    "skipLibCheck": true,
     "strict": true,
     "target": "ES2022"
   },
-  "include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx"]
+  "include": ["env.d.ts", "**/*.ts", "**/*.tsx"]
 }
