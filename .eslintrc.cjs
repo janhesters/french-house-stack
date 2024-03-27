@@ -24,6 +24,7 @@ module.exports = {
           'remix.env.d': true,
         },
         replacements: {
+          env: false,
           props: false,
           ref: false,
           params: false,
@@ -55,6 +56,7 @@ module.exports = {
       rules: {
         'playwright/require-top-level-describe': 'error',
         'unicorn/no-null': 'off',
+        'playwright/no-conditional-expect': 'off',
       },
     },
     {

@@ -17,8 +17,9 @@ import { i18next } from './features/localization/i18next.server';
 if (process.env.SERVER_MOCKS === 'true') {
   // @ts-expect-error - global is readonly and for some reason MSW accesses it.
   global.location = { protocol: 'http', host: 'localhost' };
-  const { magicHandlers } = require('./test/mocks/handlers/magic');
-  require('./test/mocks/server').startMockServer([...magicHandlers]);
+  const { magicHandlers } = await import('./test/mocks/handlers/magic');
+  const { startMockServer } = await import('./test/mocks/server');
+  startMockServer([...magicHandlers]);
 }
 
 if (process.env.NODE_ENV === 'production' && process.env.SENTRY_DSN) {

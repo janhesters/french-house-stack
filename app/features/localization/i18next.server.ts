@@ -1,9 +1,29 @@
-import { resolve } from 'node:path';
+import fs from 'node:fs';
+import { basename, dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import Backend from 'i18next-fs-backend';
-import { RemixI18Next } from 'remix-i18next';
+import { RemixI18Next } from 'remix-i18next/server';
+
+import { getRootDirectory } from '~/utils/get-root-directory';
 
 import { i18n } from './i18n';
+
+const currentDirectory = dirname(fileURLToPath(import.meta.url));
+
+const localesDirectory = join(
+  getRootDirectory(currentDirectory),
+  'public',
+  'locales',
+  'en',
+);
+
+const ns: string[] = [];
+
+fs.readdirSync(localesDirectory).forEach(file => {
+  const nsName = basename(file, '.json');
+  ns.push(nsName);
+});
 
 export const i18next = new RemixI18Next({
   detection: {
@@ -15,27 +35,7 @@ export const i18next = new RemixI18Next({
     backend: {
       loadPath: resolve('./public/locales/{{lng}}/{{ns}}.json'),
     },
-    ns: [
-      'common',
-      'accept-membership-invite',
-      'drag-and-drop',
-      'header',
-      'login',
-      'onboarding-organization',
-      'onboarding-user-profile',
-      'organization-profile',
-      'organization-team-members',
-      'organization-settings',
-      'organizations-new',
-      'organizations',
-      'pagination',
-      'register',
-      'settings',
-      'settings-account',
-      'settings-user-profile',
-      'sidebar',
-      'user-profile',
-    ],
+    ns,
   },
   plugins: [Backend],
 });

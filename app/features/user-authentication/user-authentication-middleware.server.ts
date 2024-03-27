@@ -15,8 +15,7 @@ export const withAnonymousUser = async <T extends { request: Request }>({
   request,
   ...rest
 }: T) => ({
-  request,
-  user: await requireAnonymous(request),
+  request: await requireAnonymous(request),
   ...rest,
 });
 

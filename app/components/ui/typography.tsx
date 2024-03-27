@@ -53,7 +53,7 @@ export function TypographyP({
 }: ComponentPropsWithoutRef<'p'>) {
   return (
     <p
-      className={cn(className, 'leading-7 [&:not(:first-child)]:mt-6')}
+      className={cn('leading-7 [&:not(:first-child)]:mt-6', className)}
       {...props}
     />
   );

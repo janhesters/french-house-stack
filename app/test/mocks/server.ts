@@ -1,7 +1,8 @@
 import { type RequestHandler } from 'msw';
 import { type SetupServer, setupServer } from 'msw/node';
 
-import { onUnhandledRequest, remixPingHandler } from './msw-utils';
+import { onUnhandledRequest } from './msw-utils';
+import { remixPingHandler } from './msw-utils.server';
 
 /**
  * During development, we need to save the instance of our MSW server in a

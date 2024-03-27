@@ -49,7 +49,7 @@ export function OrganizationsSwitcherComponent({
         </Button>
       </PopoverTrigger>
 
-      <PopoverContent className="ml-0.5 w-66 p-0 sm:w-82 lg:ml-0 lg:w-68">
+      <PopoverContent className="popover-content-width-same-as-its-trigger p-0">
         <Command>
           <CommandList>
             <CommandGroup heading={t('organizations')}>
