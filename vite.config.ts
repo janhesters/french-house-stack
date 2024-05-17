@@ -30,7 +30,6 @@ export default defineConfig(({ isSsrBuild }) => ({
     ],
     globals: true,
     setupFiles: ['./app/test/setup-test-environment.ts'],
-    include: ['./app/**/*.{spec,test}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     watchExclude: [
       '.*\\/node_modules\\/.*',
       '.*\\/build\\/.*',
