@@ -32,9 +32,9 @@ export default defineConfig(({ isSsrBuild }) => ({
     setupFiles: ['./app/test/setup-test-environment.ts'],
     include: ['./app/**/*.{spec,test}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     watchExclude: [
-      '.*\\/node_modules\\/.*',
-      '.*\\/build\\/.*',
-      '.*\\/postgres-data\\/.*',
+      String.raw`.*\/node_modules\/.*`,
+      String.raw`.*\/build\/.*`,
+      String.raw`.*\/postgres-data\/.*`,
     ],
     coverage: {
       reporter: ['text', 'json', 'html'],

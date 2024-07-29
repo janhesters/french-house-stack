@@ -1,7 +1,5 @@
 import * as Sentry from '@sentry/remix';
 
-import { prisma } from '~/database.server';
-
 export function initializeServerMonitoring() {
   Sentry.init({
     beforeSendTransaction(event) {
@@ -26,7 +24,7 @@ export function initializeServerMonitoring() {
     ],
     dsn: process.env.SENTRY_DSN,
     environment: process.env.NODE_ENV,
-    integrations: [new Sentry.Integrations.Prisma({ client: prisma })],
+    integrations: [Sentry.prismaIntegration()],
     tracesSampler(samplingContext) {
       // ignore healthcheck transactions by other services (consul, etc.)
       if (samplingContext.request?.url?.includes('/healthcheck')) {

@@ -7,14 +7,12 @@ export function initializeClientMonitoring() {
     dsn: ENV.SENTRY_DSN,
     environment: ENV.ENVIRONMENT,
     integrations: [
-      new Sentry.BrowserTracing({
-        routingInstrumentation: Sentry.remixRouterInstrumentation(
-          useEffect,
-          useLocation,
-          useMatches,
-        ),
+      Sentry.browserTracingIntegration({
+        useEffect,
+        useLocation,
+        useMatches,
       }),
-      new Sentry.Replay(), // Replay is only available in the client.
+      Sentry.replayIntegration(), // Replay is only available in the client.
     ],
 
     // Set tracesSampleRate to 1.0 to capture 100% of transactions for
