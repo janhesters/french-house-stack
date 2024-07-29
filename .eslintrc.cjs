@@ -31,6 +31,7 @@ module.exports = {
         },
       },
     ],
+    'unicorn/import-style': 'off',
     'unicorn/filename-case': [
       'error',
       {
