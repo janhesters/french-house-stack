@@ -1,11 +1,9 @@
 import { faker } from '@faker-js/faker';
 import { createId } from '@paralleldrive/cuid2';
-import type { UserProfile } from '@prisma/client';
+import type { ActionFunctionArgs } from '@remix-run/node';
 import { redirect } from '@remix-run/node';
-import type { z } from 'zod';
 
-import { asyncPipe } from '~/utils/async-pipe';
-import { withValidatedFormData } from '~/utils/parse-form-data.server';
+import { parseFormData } from '~/utils/parse-form-data.server';
 
 import { ORGANIZATION_MEMBERSHIP_ROLES } from '../organizations/organizations-constants';
 import {
@@ -17,35 +15,27 @@ import {
   onboardingOrganizationSchema,
   onboardingUserProfileSchema,
 } from './onboarding-client-schemas';
-import { withUserRequiringOnboarding } from './onboarding-middleware.server';
+import { requireUserNeedsOnboarding } from './onboarding-helpers.server';
 
-async function onboardingUserProfileHandler({
-  data,
-  user,
-}: {
-  data: z.infer<typeof onboardingUserProfileSchema>;
-  user: UserProfile;
-}) {
+export const onboardingUserProfileAction = async ({
+  request,
+}: Pick<ActionFunctionArgs, 'request'>) => {
+  const user = await requireUserNeedsOnboarding(request);
+  const data = await parseFormData(onboardingUserProfileSchema, request);
+
   await updateUserProfileInDatabaseById({
     id: user.id,
     userProfile: { name: data.name },
   });
   return redirect('/onboarding/organization');
-}
+};
 
-export const onboardingUserProfileAction = asyncPipe(
-  withUserRequiringOnboarding,
-  withValidatedFormData(onboardingUserProfileSchema),
-  onboardingUserProfileHandler,
-);
+export const onboardingOrganizationAction = async ({
+  request,
+}: Pick<ActionFunctionArgs, 'request'>) => {
+  const user = await requireUserNeedsOnboarding(request);
+  const data = await parseFormData(onboardingOrganizationSchema, request);
 
-async function onboardingOrganizationHandler({
-  data,
-  user,
-}: {
-  data: z.infer<typeof onboardingOrganizationSchema>;
-  user: UserProfile;
-}) {
   const organization = await saveOrganizationToDatabase({
     id: createId(),
     name: data.name,
@@ -57,10 +47,4 @@ async function onboardingOrganizationHandler({
     role: ORGANIZATION_MEMBERSHIP_ROLES.OWNER,
   });
   return redirect(`/organizations/${organization.slug}`);
-}
-
-export const onboardingOrganizationAction = asyncPipe(
-  withUserRequiringOnboarding,
-  withValidatedFormData(onboardingOrganizationSchema),
-  onboardingOrganizationHandler,
-);
+};
