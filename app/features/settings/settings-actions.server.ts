@@ -1,15 +1,13 @@
-import type { Organization, UserProfile } from '@prisma/client';
+import type { ActionFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import type { TFunction } from 'i18next';
-import type { z } from 'zod';
+import { promiseHash } from 'remix-utils/promise';
 
-import { asyncPipe } from '~/utils/async-pipe';
 import { badRequest } from '~/utils/http-responses.server';
-import { withValidatedFormData } from '~/utils/parse-form-data.server';
+import { parseFormData } from '~/utils/parse-form-data.server';
 import { createToastHeaders } from '~/utils/toast.server';
 
-import { withTFunction } from '../localization/localization-middleware.server';
-import { withOnbaordedUser } from '../onboarding/onboarding-middleware.server';
+import { i18next } from '../localization/i18next.server';
+import { requireOnboardedUserProfileExists } from '../onboarding/onboarding-helpers.server';
 import { logout } from '../user-authentication/user-authentication-helpers.server';
 import {
   deleteUserProfileFromDatabaseById,
@@ -19,45 +17,39 @@ import {
   settingsAccountSchema,
   settingsUserProfileSchema,
 } from './settings-client-schemas';
-import { withUsersOwnedOrganizations } from './settings-middleware.server';
+import { getUsersOwnedOrganizations } from './settings-helpers.server';
 
-async function settingsUserProfileHandler({
-  data,
-  t,
-  user,
-}: {
-  data: z.infer<typeof settingsUserProfileSchema>;
-  t: TFunction;
-  user: UserProfile;
-}) {
+export const settingsUserProfileAction = async ({
+  request,
+}: Pick<ActionFunctionArgs, 'request' | 'params'>) => {
+  const user = await requireOnboardedUserProfileExists(request);
+  const { data, t } = await promiseHash({
+    data: parseFormData(settingsUserProfileSchema, request),
+    t: i18next.getFixedT(request),
+  });
+
   if (user.name !== data.name) {
     await updateUserProfileInDatabaseById({
       id: user.id,
       userProfile: { name: data.name },
     });
   }
+
   const headers = await createToastHeaders({
     title: t('settings-user-profile:user-profile-updated'),
   });
+
   return json({ success: true }, { headers });
-}
+};
 
-export const settingsUserProfileAction = asyncPipe(
-  withOnbaordedUser,
-  withValidatedFormData(settingsUserProfileSchema),
-  withTFunction,
-  settingsUserProfileHandler,
-);
-
-async function settingsAccountHandler({
+export const settingsAccountAction = async ({
   request,
-  user,
-  usersOwnedOrganizations,
-}: {
-  request: Request;
-  user: UserProfile;
-  usersOwnedOrganizations: Pick<Organization, 'name' | 'id' | 'slug'>[];
-}) {
+}: Pick<ActionFunctionArgs, 'request' | 'params'>) => {
+  const user = await requireOnboardedUserProfileExists(request);
+  await parseFormData(settingsAccountSchema, request);
+
+  const usersOwnedOrganizations = getUsersOwnedOrganizations(user);
+
   if (usersOwnedOrganizations.length > 0) {
     return badRequest({ error: 'settings-account:still-an-owner' });
   }
@@ -65,11 +57,4 @@ async function settingsAccountHandler({
   await deleteUserProfileFromDatabaseById(user.id);
 
   return await logout(request);
-}
-
-export const settingsAccountAction = asyncPipe(
-  withOnbaordedUser,
-  withUsersOwnedOrganizations,
-  withValidatedFormData(settingsAccountSchema),
-  settingsAccountHandler,
-);
+};

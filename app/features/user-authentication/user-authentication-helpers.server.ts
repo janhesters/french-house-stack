@@ -162,5 +162,6 @@ export async function requireUserIsAuthenticated(
   }
 
   const searchParameters = new URLSearchParams([['redirectTo', redirectTo]]);
+
   throw await logout(request, `/login?${searchParameters.toString()}`);
 }
