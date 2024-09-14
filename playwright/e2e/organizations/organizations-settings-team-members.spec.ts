@@ -335,11 +335,14 @@ test.describe('organizations settings team members page', () => {
         // It lets the owner user change the role of the other users.
         await memberListItem.getByRole('button', { name: /member/i }).click();
         const role = roleIterator.next().value!;
+
         await page
           .getByRole('option', { name: role })
           .getByRole('button')
           .click();
-        await page.keyboard.press('Escape');
+        await page.keyboard.down('Escape');
+        await page.waitForTimeout(1000);
+
         const membership =
           await retrieveOrganizationMembershipFromDatabaseByUserIdAndOrganizationId(
             {
