@@ -1,7 +1,8 @@
 import { createId } from '@paralleldrive/cuid2';
+import type { ActionFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import type { TFunction } from 'i18next';
 import type { FieldErrors } from 'react-hook-form';
+import { promiseHash } from 'remix-utils/promise';
 import { z } from 'zod';
 
 import { magicAdmin } from '~/features/user-authentication/magic-admin.server';
@@ -13,13 +14,12 @@ import {
   retrieveUserProfileWithMembershipsFromDatabaseByDid,
   saveUserProfileToDatabase,
 } from '~/features/user-profile/user-profile-model.server';
-import { asyncPipe } from '~/utils/async-pipe';
 import { getErrorMessage } from '~/utils/get-error-message';
 import { badRequest, conflict } from '~/utils/http-responses.server';
-import { withValidatedFormData } from '~/utils/parse-form-data.server';
+import { parseFormData } from '~/utils/parse-form-data.server';
 import { createToastHeaders } from '~/utils/toast.server';
 
-import { withTFunction } from '../localization/localization-middleware.server';
+import { i18next } from '../localization/i18next.server';
 import { saveInviteLinkUseToDatabase } from '../organizations/invite-link-uses-model.server';
 import { ORGANIZATION_MEMBERSHIP_ROLES } from '../organizations/organizations-constants';
 import { getInviteLinkToken } from '../organizations/organizations-helpers.server';
@@ -34,8 +34,8 @@ import {
 import {
   getLoginRedirectUrl,
   login,
+  requireAnonymous,
 } from './user-authentication-helpers.server';
-import { withAnonymousUser } from './user-authentication-middleware.server';
 
 const loginSchema = z.discriminatedUnion('intent', [
   loginFormSchema,
@@ -53,15 +53,16 @@ export type LoginActionData = {
   errors?: FieldErrors<z.infer<typeof loginFormSchema>>;
 };
 
-async function loginHandler({
-  data,
+export const loginAction = async ({
   request,
-  t,
-}: {
-  data: z.infer<typeof loginSchema>;
-  request: Request;
-  t: TFunction;
-}) {
+}: Pick<ActionFunctionArgs, 'request'>) => {
+  await requireAnonymous(request);
+
+  const { data, t } = await promiseHash({
+    data: parseFormData(loginSchema, request),
+    t: i18next.getFixedT(request),
+  });
+
   switch (data.intent) {
     case 'emailLogin': {
       const { email } = data;
@@ -187,14 +188,7 @@ async function loginHandler({
       });
     }
   }
-}
-
-export const loginAction = asyncPipe(
-  withAnonymousUser,
-  withValidatedFormData(loginSchema),
-  withTFunction,
-  loginHandler,
-);
+};
 
 const registerSchema = z.discriminatedUnion('intent', [
   registrationFormSchema,
@@ -212,15 +206,16 @@ export type RegisterActionData = {
   errors?: FieldErrors<z.infer<typeof registrationFormSchema>>;
 };
 
-async function registerHandler({
-  data,
+export const registerAction = async ({
   request,
-  t,
-}: {
-  data: z.infer<typeof registerSchema>;
-  request: Request;
-  t: TFunction;
-}) {
+}: Pick<ActionFunctionArgs, 'request'>) => {
+  await requireAnonymous(request);
+
+  const { data, t } = await promiseHash({
+    data: parseFormData(registerSchema, request),
+    t: i18next.getFixedT(request),
+  });
+
   switch (data.intent) {
     case 'emailRegistration': {
       const userProfileExists = await getDoesUserProfileExistByEmail(
@@ -334,11 +329,4 @@ async function registerHandler({
       }
     }
   }
-}
-
-export const registerAction = asyncPipe(
-  withAnonymousUser,
-  withValidatedFormData(registerSchema),
-  withTFunction,
-  registerHandler,
-);
+};
