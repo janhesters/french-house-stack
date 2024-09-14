@@ -66,10 +66,12 @@ export const throwIfUserProfileIsMissing = async <T extends UserProfile>(
 export async function requireUserExists(request: Request) {
   const userId = await requireUserIsAuthenticated(request);
   const user = await retrieveUserProfileWithMembershipsFromDatabaseById(userId);
+
   return throwIfUserProfileIsMissing(request, user);
 }
 
 type getNameAbbreviation = (userProfile: UserProfile['name']) => string;
+
 /**
  * Generates an uppercased abbreviation of a user's name.
  *
