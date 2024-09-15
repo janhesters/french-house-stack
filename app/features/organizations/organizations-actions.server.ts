@@ -1,19 +1,17 @@
 import { faker } from '@faker-js/faker';
 import { createId } from '@paralleldrive/cuid2';
-import type { Organization, UserProfile } from '@prisma/client';
+import type { ActionFunctionArgs } from '@remix-run/node';
 import { json, redirect } from '@remix-run/node';
-import type { TFunction } from 'i18next';
+import { promiseHash } from 'remix-utils/promise';
 import { z } from 'zod';
 
-import { asyncPipe } from '~/utils/async-pipe';
 import { getErrorMessage } from '~/utils/get-error-message';
 import { badRequest, created, forbidden } from '~/utils/http-responses.server';
-import { withValidatedFormData } from '~/utils/parse-form-data.server';
+import { parseFormData } from '~/utils/parse-form-data.server';
 import { createToastHeaders, redirectWithToast } from '~/utils/toast.server';
 
-import { withTFunction } from '../localization/localization-middleware.server';
-import type { OnboardingUser } from '../onboarding/onboarding-helpers.server';
-import { withOnbaordedUser } from '../onboarding/onboarding-middleware.server';
+import { i18next } from '../localization/i18next.server';
+import { requireOnboardedUserProfileExists } from '../onboarding/onboarding-helpers.server';
 import { getUserAuthSession } from '../user-authentication/user-authentication-helpers.server';
 import { retrieveUserProfileWithMembershipsFromDatabaseById } from '../user-profile/user-profile-model.server';
 import { saveInviteLinkUseToDatabase } from './invite-link-uses-model.server';
@@ -21,14 +19,17 @@ import {
   newOrganizationSchema,
   organizationProfileSchema,
 } from './organizations-client-schemas';
-import type { OrganizationMembershipRole } from './organizations-constants';
 import { ORGANIZATION_MEMBERSHIP_ROLES } from './organizations-constants';
-import { getInviteLinkToken } from './organizations-helpers.server';
+import {
+  getInviteLinkToken,
+  getOrganizationSlug,
+  getUsersRoleForOrganizationBySlug,
+  requireOrganizationBySlugExists,
+} from './organizations-helpers.server';
 import {
   saveOrganizationInviteLinkToDatabase,
   updateOrganizationInviteLinkInDatabaseById,
 } from './organizations-invite-link-model.server';
-import { withOrganizationMembership } from './organizations-middleware.server';
 import {
   addMembersToOrganizationInDatabaseById,
   deleteOrganizationFromDatabaseById,
@@ -39,13 +40,12 @@ import {
   updateOrganizationInDatabaseById,
 } from './organizations-model.server';
 
-async function newOrganizationHandler({
-  data,
-  user,
-}: {
-  data: z.infer<typeof newOrganizationSchema>;
-  user: UserProfile;
-}) {
+export const newOrganizationAction = async ({
+  request,
+}: Pick<ActionFunctionArgs, 'request' | 'params'>) => {
+  const user = await requireOnboardedUserProfileExists(request);
+  const data = await parseFormData(newOrganizationSchema, request);
+
   const organization = await saveOrganizationToDatabase({
     id: createId(),
     name: data.name,
@@ -57,13 +57,7 @@ async function newOrganizationHandler({
     role: ORGANIZATION_MEMBERSHIP_ROLES.OWNER,
   });
   return redirect(`/organizations/${organization.slug}`);
-}
-
-export const newOrganizationAction = asyncPipe(
-  withOnbaordedUser,
-  withValidatedFormData(newOrganizationSchema),
-  newOrganizationHandler,
-);
+};
 
 const organizationProfileServerSchema = z.discriminatedUnion('intent', [
   organizationProfileSchema,
@@ -72,19 +66,23 @@ const organizationProfileServerSchema = z.discriminatedUnion('intent', [
   }),
 ]);
 
-async function organizationProfileHandler({
-  data,
-  organization,
-  currentUsersRole,
-  t,
-  user,
-}: {
-  data: z.infer<typeof organizationProfileServerSchema>;
-  organization: Organization;
-  currentUsersRole: OrganizationMembershipRole;
-  t: TFunction;
-  user: OnboardingUser;
-}) {
+export const organizationProfileAction = async ({
+  request,
+  params,
+}: Pick<ActionFunctionArgs, 'request' | 'params'>) => {
+  const user = await requireOnboardedUserProfileExists(request);
+  const organizationSlug = getOrganizationSlug(params);
+  const currentUsersRole = getUsersRoleForOrganizationBySlug(
+    user,
+    organizationSlug,
+  );
+
+  const { data, t, organization } = await promiseHash({
+    t: i18next.getFixedT(request),
+    data: parseFormData(organizationProfileServerSchema, request),
+    organization: requireOrganizationBySlugExists(organizationSlug),
+  });
+
   switch (data.intent) {
     case 'update': {
       if (
@@ -130,14 +128,7 @@ async function organizationProfileHandler({
       });
     }
   }
-}
-
-export const organizationProfileAction = asyncPipe(
-  withOrganizationMembership,
-  withValidatedFormData(organizationProfileServerSchema),
-  withTFunction,
-  organizationProfileHandler,
-);
+};
 
 export const teamMembersSchema = z.discriminatedUnion('intent', [
   z.object({ intent: z.literal('createNewInviteLink') }),
@@ -156,17 +147,22 @@ export const teamMembersSchema = z.discriminatedUnion('intent', [
 
 const TWO_DAYS_IN_MILLISECONDS = 2 * 24 * 60 * 60 * 1000;
 
-async function organzitionTeamMembersHandler({
-  currentUsersRole,
-  data,
-  organization,
-  user,
-}: {
-  currentUsersRole: OrganizationMembershipRole;
-  data: z.infer<typeof teamMembersSchema>;
-  organization: Organization;
-  user: OnboardingUser;
-}) {
+export const organizationTeamMembersAction = async ({
+  request,
+  params,
+}: Pick<ActionFunctionArgs, 'request' | 'params'>) => {
+  const user = await requireOnboardedUserProfileExists(request);
+  const organizationSlug = getOrganizationSlug(params);
+  const currentUsersRole = getUsersRoleForOrganizationBySlug(
+    user,
+    organizationSlug,
+  );
+
+  const { organization, data } = await promiseHash({
+    organization: requireOrganizationBySlugExists(organizationSlug),
+    data: parseFormData(teamMembersSchema, request),
+  });
+
   if (currentUsersRole !== ORGANIZATION_MEMBERSHIP_ROLES.OWNER) {
     return forbidden({ errors: { form: 'you-must-be-an-owner' } });
   }
@@ -238,30 +234,19 @@ async function organzitionTeamMembersHandler({
       return json({ message: 'Ok' });
     }
   }
-}
-
-export const organizationTeamMembersAction = asyncPipe(
-  withOrganizationMembership,
-  withValidatedFormData(teamMembersSchema),
-  organzitionTeamMembersHandler,
-);
+};
 
 const organizationsAcceptInviteSchema = z.object({
   intent: z.literal('acceptInvite'),
 });
 
-async function acceptInviteLinkHandler({
-  data,
+export const organizationsAcceptInviteAction = async ({
   request,
-  t,
-}: {
-  data: z.infer<typeof organizationsAcceptInviteSchema>;
-  request: Request;
-  t: TFunction;
-}) {
-  const { intent } = data;
+}: Pick<ActionFunctionArgs, 'request'>) => {
+  const t = await i18next.getFixedT(request);
+  const data = await parseFormData(organizationsAcceptInviteSchema, request);
 
-  switch (intent) {
+  switch (data.intent) {
     case 'acceptInvite': {
       const { userAuthSession } = await getUserAuthSession(request);
       const token = getInviteLinkToken(request) || '';
@@ -336,10 +321,4 @@ async function acceptInviteLinkHandler({
       });
     }
   }
-}
-
-export const organizationsAcceptInviteAction = asyncPipe(
-  withTFunction,
-  withValidatedFormData(organizationsAcceptInviteSchema),
-  acceptInviteLinkHandler,
-);
+};
