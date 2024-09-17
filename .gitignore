@@ -7,6 +7,7 @@ coverage
 /public/build
 .env
 .cache
+tsconfig.tsbuildinfo
 
 /prisma/data.db
 /prisma/data.db-journal
@@ -16,3 +17,6 @@ coverage
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+.zed/
+yarn.lock
+package-lock.json
