@@ -77,7 +77,7 @@ const createProps: Factory<SidebarProps> = ({
   renderSearchBar = faker.datatype.boolean(),
   sidebarTitle = faker.company.name(),
   userNavigation = {
-    avatar: faker.internet.avatar(),
+    avatar: faker.image.avatar(),
     abbreviation: getNameAbbreviation(faker.person.fullName()),
     email: faker.internet.email(),
     items: [

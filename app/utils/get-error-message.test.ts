@@ -13,7 +13,7 @@ describe('getErrorMessage()', () => {
   test('given a string is thrown: returns the string', () => {
     expect.assertions(1);
 
-    const someString = faker.random.words();
+    const someString = faker.lorem.words();
 
     try {
       throw someString;
