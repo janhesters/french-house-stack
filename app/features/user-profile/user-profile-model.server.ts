@@ -134,6 +134,33 @@ export async function updateUserProfileInDatabaseById({
   return prisma.userProfile.update({ where: { id }, data: userProfile });
 }
 
+/**
+ *  Updates a user profile in the database.
+ *
+ * @param options - A an object with the user profile's email and the new values.
+ * @returns The updated user profile.
+ */
+export async function updateUserProfileInDatabaseByEmail({
+  email,
+  userProfile,
+}: {
+  /**
+   * The email of the user profile you want to update.
+   */
+  email: UserProfile['id'];
+  /**
+   * The values of the user profile you want to change.
+   */
+  userProfile: Partial<
+    Pick<
+      Parameters<typeof prisma.userProfile.update>[0]['data'],
+      'acceptedTermsAndConditions' | 'name' | 'stripeCustomerId'
+    >
+  >;
+}) {
+  return prisma.userProfile.update({ where: { email }, data: userProfile });
+}
+
 // DELETE
 
 /**

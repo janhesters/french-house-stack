@@ -30,6 +30,10 @@ export default function OrganizationsSettings() {
       name: t('team-members'),
       href: `/organizations/${organizationSlug}/settings/team-members`,
     },
+    {
+      name: t('billing'),
+      href: `/organizations/${organizationSlug}/settings/billing`,
+    },
   ];
 
   return (

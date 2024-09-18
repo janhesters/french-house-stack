@@ -4,14 +4,16 @@ import { Link } from '@remix-run/react';
 import { GithubIcon } from 'lucide-react';
 import { Trans } from 'react-i18next';
 
+// Vite knows where these images are.
+// eslint-disable-next-line import/no-unresolved
+import tenXDevelopmentAvatar from '/avatar.png';
+// eslint-disable-next-line import/no-unresolved
+import magicLogo from '/magic-icon.png';
 import { Code, Text, TextLink } from '~/components/text';
 import { buttonVariants } from '~/components/ui/button';
 import { TypographyH1 } from '~/components/ui/typography';
 import { useTranslation } from '~/features/localization/use-translation';
 import { requireAnonymous } from '~/features/user-authentication/user-authentication-helpers.server';
-
-import tenXDevelopmentAvatar from '../../public/avatar.png';
-import magicLogo from '../../public/magic-icon.png';
 
 export const handle = { i18n: ['common', 'landing'] };
 

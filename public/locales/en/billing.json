@@ -1,0 +1,16 @@
+{
+  "description": "Manage your subscription and billing details. View and download invoices, upgrade or downgrade your plan, cancel your subscription, and track your usage.",
+  "manage-subscription": "Manage subscription",
+  "next-billing-date": "Your next billing date is: <1>{{currentPeriodEnd}}</1>.",
+  "seats": "Seats",
+  "seats-max": "Max: {{maxSeats}}",
+  "seats-taken": "Taken: {{currentSeats}}",
+  "subscription": "Subscription",
+  "subscription-has-ended": "Your last subscription has ended on: <1>{{currentPeriodEnd}}</1>.",
+  "subscription-will-run-out": "Your subscription is cancelled. Your current subscription will end on: <1>{{currentPeriodEnd}}</1>.",
+  "title": "Billing",
+  "usage": "Usage",
+  "usage-limit-reached": "Usage limit reached",
+  "usage-limit-reached-description": "You have reached your usage limit. Please upgrade your plan to continue using the service.",
+  "your-subscription": "Your organization is currently on the <1>{{currentTierName}}</1> plan."
+}

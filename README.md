@@ -24,6 +24,7 @@ However, Magic is perfectly suited for a regular Web2 app, too.
   production and staging environments
 - Styling with [Tailwind](https://tailwindcss.com/).
   - Includes [dark mode](https://tailwindcss.com/docs/dark-mode).
+- Payments with [Stripe](https://docs.stripe.com/).
 - Components by [ShadcnUI](https://ui.shadcn.com/) (plus a handful of unique
   custom components.)
 - End-to-end testing with [Playwright](https://playwright.dev)
@@ -134,6 +135,11 @@ to check for updates and install the latest versions.
   - `SEED_SEED_USER_EMAIL` - The email of the user that will be seeded in the
     database. This value is required for the `"prisma:seed"` script.
   - `SENTRY_DSN` - The DSN for your Sentry project. This value is optional.
+  - `STRIPE_SECRET_KEY` - The secret key for your Stripe account. This value is
+    optional. **Note:** All billing related functionality will throw an error
+    if this value is missing.
+  - `STRIPE_WEBHOOK_SECRET` - The webhook secret for your Stripe account. This
+    value is optional. **Note:** All billing related functionality will simply break if this value is missing, but `STRIPE_SECRET_KEY` is present.
 
 - Lastly, stop your `npm run dev` script and run
 
@@ -265,6 +271,15 @@ email, which you can grab from Magic during the sign up flow.
 When a user signs out, you delete the `UserAuthSession` and clear the session
 cookie.
 
+### Payments with Stripe
+
+The French House Stack comes with a basic Stripe integration. You can find the
+implementation in `app/features/billing`.
+
+You'll need to configure your Stripe account by setting the `STRIPE_SECRET_KEY`
+environment variable and your webhook secret. You can find these values in your
+Stripe dashboard.
+
 ### ShadcnUI & Custom Components
 
 ShadcnUI is configured in the "New York" setting, but it uses icons from
@@ -309,6 +324,12 @@ this value from your Sentry project.
 
 If you want to configure source maps, look up how to do that in the
 [Sentry docs](https://docs.sentry.io/platforms/javascript/guides/remix/sourcemaps/).
+
+### Billing
+
+The French House Stack comes with billing support through Stripe. You can
+configure your Stripe account by setting the `STRIPE_SECRET_KEY` environment
+variable.
 
 ### Toasts
 

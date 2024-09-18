@@ -182,6 +182,29 @@ test.describe('organization profile settings page', () => {
     ).toBeVisible();
     await page.keyboard.press('Escape');
 
+    // The page shows a nav bar.
+    const navBar = page.getByRole('navigation', {
+      name: /settings navigation/i,
+    });
+    await expect(
+      navBar.getByRole('link', { name: /general/i }),
+    ).toHaveAttribute(
+      'href',
+      `/organizations/${organization.slug}/settings/profile`,
+    );
+    await expect(
+      navBar.getByRole('link', { name: /team members/i }),
+    ).toHaveAttribute(
+      'href',
+      `/organizations/${organization.slug}/settings/team-members`,
+    );
+    await expect(
+      navBar.getByRole('link', { name: /billing/i }),
+    ).toHaveAttribute(
+      'href',
+      `/organizations/${organization.slug}/settings/billing`,
+    );
+
     await page.close();
     await teardownOrganizationAndMember({ organization, user });
   });

@@ -1,0 +1,36 @@
+{
+  "annually": "Annually",
+  "choose-your-plan": "Choose your plan",
+  "enterprise-plan-cta": "Contact sales",
+  "enterprise-plan-description": "For large organizations who need custom solutions.",
+  "enterprise-plan-features": [
+    "Unlimited public and private projects",
+    "Dedicated support",
+    "Custom branding"
+  ],
+  "enterprise-plan-name": "Enterprise",
+  "monthly": "Monthly",
+  "most-popular": "Most popular",
+  "price-custom": "Custom",
+  "price-free": "Free",
+  "price-per-month": "per user/month",
+  "price-per-month-billed-annually": "per user/month billed annually",
+  "pricing": "Pricing",
+  "pricing-description": "Choose the plan that fits your needs. All plans come with a 30-day money-back guarantee.",
+  "pro-plan-cta": "Subscribe now",
+  "pro-plan-description": "For professionals and businesses who want to grow.",
+  "pro-plan-features": [
+    "Unlimited public and private projects",
+    "Priority support",
+    "Remove branding"
+  ],
+  "pro-plan-name": "Pro",
+  "save-annually": "Save 20% on the annual plan.",
+  "starter-plan-cta": "Get started",
+  "starter-plan-description": "For hobbyists and beginners who want to learn.",
+  "starter-plan-features": [
+    "Unlimited public projects",
+    "Community support"
+  ],
+  "starter-plan-name": "Starter"
+}

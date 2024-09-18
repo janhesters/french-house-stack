@@ -222,6 +222,12 @@ test.describe('organizations settings team members page', () => {
       'href',
       `/organizations/${organization.slug}/settings/team-members`,
     );
+    await expect(
+      navBar.getByRole('link', { name: /billing/i }),
+    ).toHaveAttribute(
+      'href',
+      `/organizations/${organization.slug}/settings/billing`,
+    );
 
     await teardown(data);
   });

@@ -23,9 +23,15 @@ model UserProfile {
   acceptedTermsAndConditions Boolean                  @default(false)
   memberships                Membership[]
   authSession                UserAuthSession[]
-  notes                      Note[]
   createdInviteLinks         OrganizationInviteLink[]
   inviteLinkUse              InviteLinkUse[]
+  // The Stripe subscriptions that the user has created. A user can have
+  // multiple subscriptions: both for each organization they are paying for, and
+  // multiple subscriptions for the same organization if that organization uses
+  // multiple products.
+  stripeSubscriptions        StripeSubscription[]
+  // The Stripe customer ID of the user in the Stripe dashboard.
+  stripeCustomerId           String                   @default("")
 }
 
 model UserAuthSession {
@@ -46,8 +52,8 @@ model Organization {
   /// `database.server.ts`.
   slug                    String                   @unique
   memberships             Membership[]
-  Note                    Note[]
   organizationInviteLinks OrganizationInviteLink[]
+  stripeSubscriptions     StripeSubscription[]
 }
 
 model Membership {
@@ -58,22 +64,11 @@ model Membership {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   organizationId String
   deactivatedAt  DateTime?
+  // The role of the member in the organization. Possible values are "member",
+  // "admin", and "owner".
   role           String       @default("member")
 
   @@id([memberId, organizationId])
-}
-
-model Note {
-  id        String   @id @unique @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  title          String
-  content        String
-  creator        UserProfile  @relation(fields: [creatorId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  creatorId      String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  organizationId String
 }
 
 model OrganizationInviteLink {
@@ -107,4 +102,43 @@ model InviteLinkUse {
   userId       String?
 
   @@unique([inviteLinkId, userId])
+}
+
+model StripeSubscription {
+  /// Unique identifier for the object.
+  id                 String       @id
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId     String
+  buyer              UserProfile  @relation(fields: [buyerId], references: [id])
+  buyerId            String
+  /// Time at which the object was created. Stripe measures it in in seconds
+  /// since the Unix epoch, but we convert it to a Date.
+  created            DateTime
+  /// If the subscription has been canceled with the at_period_end flag set to
+  /// true, cancel_at_period_end on the subscription will be true. You can use
+  /// this attribute to determine whether a subscription that has a status of
+  /// active is scheduled to be canceled at the end of the current period.
+  cancelAtPeriodEnd  Boolean
+  /// End of the current period that the subscription has been invoiced for. At
+  /// the end of this period, a new invoice will be created.
+  currentPeriodEnd   DateTime
+  /// Start of the current period that the subscription has been invoiced for.
+  currentPeriodStart DateTime
+  /// Stringified list of subscription items, each with an attached price.
+  items              String
+  /// Possible values are incomplete, incomplete_expired, trialing, active,
+  /// past_due, canceled, or unpaid.
+  status             String
+}
+
+model ContactSalesFormSubmission {
+  id          String   @id @default(cuid())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  companyName String
+  firstName   String
+  lastName    String
+  message     String   @default("")
+  phoneNumber String   @default("")
+  workEmail   String
 }

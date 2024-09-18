@@ -18,6 +18,8 @@ import { withSentry } from '@sentry/remix';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { HoneypotProvider } from 'remix-utils/honeypot/react';
+import type { HoneypotInputProps } from 'remix-utils/honeypot/server';
 import invariant from 'tiny-invariant';
 
 import darkStyles from '~/styles/dark.css?url';
@@ -30,6 +32,7 @@ import { i18next } from './features/localization/i18next.server';
 import { NotFoundComponent } from './features/not-found/not-found-component';
 import { useToast } from './hooks/use-toast';
 import { combineHeaders } from './utils/combine-headers.server';
+import { honeypot } from './utils/honeypot.server';
 import type { Toast } from './utils/toast.server';
 import { getToast } from './utils/toast.server';
 
@@ -59,6 +62,7 @@ export const links: LinksFunction = () => [
 
 type LoaderData = {
   ENV: EnvironmentVariables;
+  honeypotInputProps: HoneypotInputProps;
   locale: string;
   title: string;
   toast: Toast | null;
@@ -77,6 +81,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   return json<LoaderData>(
     {
       ENV: { MAGIC_PUBLISHABLE_KEY, ENVIRONMENT: NODE_ENV, SENTRY_DSN },
+      honeypotInputProps: honeypot.getInputProps(),
       locale,
       title,
       toast,
@@ -87,7 +92,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 export const meta: MetaFunction<typeof loader> = ({
   data = { title: 'French House Stack' },
-}) => [{ title: data.title }];
+}) => [{ title: data?.title || 'French House Stack' }];
 
 function useChangeLanguage(locale: string) {
   const { i18n } = useTranslation();
@@ -125,7 +130,9 @@ export function Layout({ children }: { children: ReactNode }) {
       </head>
 
       <body className="h-full overscroll-none">
-        {children}
+        <HoneypotProvider {...data?.honeypotInputProps}>
+          {children}
+        </HoneypotProvider>
         <Toaster position="bottom-right" />
         <Scripts />
         <ScrollRestoration />
