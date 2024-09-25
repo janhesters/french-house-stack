@@ -21,7 +21,7 @@ import {
 } from '~/features/user-authentication/user-authentication-session.server';
 import { createPopulatedUserProfile } from '~/features/user-profile/user-profile-factories.server';
 import { saveUserProfileToDatabase } from '~/features/user-profile/user-profile-model.server';
-import { generateRandomDid } from '~/test/generate-random-did.server';
+import { generateRandomClerkId } from '~/test/generate-random-did.server';
 
 installGlobals();
 
@@ -79,16 +79,16 @@ export const ONE_YEAR_IN_MILLISECONDS = 1000 * 60 * 60 * 24 * 365;
  */
 export async function loginAndSaveUserProfileToDatabase({
   acceptedTermsAndConditions = true,
-  did = generateRandomDid(),
   email = createPopulatedUserProfile().email,
+  clerkId = generateRandomClerkId(),
   id = createId(),
   name = createPopulatedUserProfile().name,
   page,
 }: Partial<Parameters<typeof saveUserProfileToDatabase>[0]> & { page: Page }) {
   const user = await saveUserProfileToDatabase({
     acceptedTermsAndConditions,
-    did,
     email,
+    clerkId,
     id,
     name,
   });

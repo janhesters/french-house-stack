@@ -8,7 +8,7 @@ import {
   getUserIsOnboarded,
   type OnboardingUser,
 } from '../onboarding/onboarding-helpers.server';
-import { magicAdmin } from './magic-admin.server';
+import { revokeClerkSessionFromRequest } from './clerk-sdk.server';
 import {
   deleteUserAuthSessionsFromDatabaseByUserId,
   retrieveUserAuthSessionFromDatabaseById,
@@ -113,7 +113,7 @@ export async function logout(request: Request, redirectTo: string = '/') {
 
   if (userAuthSession) {
     await Promise.allSettled([
-      magicAdmin.users.logoutByIssuer(userAuthSession.user.did),
+      revokeClerkSessionFromRequest(request),
       deleteUserAuthSessionsFromDatabaseByUserId(userAuthSession.user.id),
     ]);
   }

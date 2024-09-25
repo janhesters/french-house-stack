@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { createId } from '@paralleldrive/cuid2';
 import type { UserAuthSession } from '@prisma/client';
 
-import { generateRandomDid } from '~/test/generate-random-did.server';
+import { generateRandomClerkId } from '~/test/generate-random-did.server';
 import type { Factory } from '~/utils/types';
 
 /**
@@ -30,6 +30,6 @@ export const createPopulatedUserAuthSession: Factory<UserAuthSession> = ({
   id = createId(),
   updatedAt = faker.date.recent({ days: 10 }),
   createdAt = faker.date.past({ years: 3, refDate: updatedAt }),
-  userId = generateRandomDid(),
+  userId = generateRandomClerkId(),
   expirationDate = faker.date.future({ years: 1, refDate: updatedAt }),
 } = {}) => ({ id, userId, createdAt, updatedAt, expirationDate });

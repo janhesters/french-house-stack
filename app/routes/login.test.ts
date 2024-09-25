@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker';
+import { createId } from '@paralleldrive/cuid2';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { retrieveinviteLinkUseFromDatabaseByUserIdAndLinkId } from '~/features/organizations/invite-link-uses-model.server';
@@ -6,7 +7,7 @@ import { ORGANIZATION_MEMBERSHIP_ROLES } from '~/features/organizations/organiza
 import { createPopulatedOrganizationInviteLink } from '~/features/organizations/organizations-factories.server';
 import { saveOrganizationInviteLinkToDatabase } from '~/features/organizations/organizations-invite-link-model.server';
 import { retrieveOrganizationMembershipFromDatabaseByUserIdAndOrganizationId } from '~/features/organizations/organizations-model.server';
-import { magicAdmin } from '~/features/user-authentication/magic-admin.server';
+import { clerkSdkServer } from '~/features/user-authentication/clerk-sdk.server';
 import { retrieveActiveUserAuthSessionFromDatabaseByUserProfileId } from '~/features/user-authentication/user-auth-session-model.server';
 import { createPopulatedUserProfile } from '~/features/user-profile/user-profile-factories.server';
 import {
@@ -80,7 +81,7 @@ describe('/login route action', () => {
           errors: {
             intent: {
               message:
-                "Invalid discriminator value. Expected 'emailLogin' | 'magicEmailLogin'",
+                "Invalid discriminator value. Expected 'emailLogin' | 'clerkEmailLogin'",
               type: 'manual',
             },
           },
@@ -104,7 +105,7 @@ describe('/login route action', () => {
           errors: {
             intent: {
               message:
-                "Invalid discriminator value. Expected 'emailLogin' | 'magicEmailLogin'",
+                "Invalid discriminator value. Expected 'emailLogin' | 'clerkEmailLogin'",
               type: 'manual',
             },
           },
@@ -168,26 +169,37 @@ describe('/login route action', () => {
     });
   });
 
-  describe('magic email login intent', () => {
+  describe('clerk email login intent', () => {
     afterEach(() => {
       vi.restoreAllMocks();
     });
 
-    const intent = 'magicEmailLogin';
+    const intent = 'clerkEmailLogin';
 
-    test("given a valid DID token and the user is a member of an organization: redirects to the user's first organization's page and logs the user in by creating a session and attaching an authentication cookie to the request", async () => {
+    test("given a valid  session Id and the user is a member of an organization: redirects to the user's first organization's page and logs the user in by creating a session and attaching an authentication cookie to the request", async () => {
       const { organization, user } = await setupUserWithOrgAndAddAsMember();
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: user.email,
-        issuer: user.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      const sessionId = `sess_${createId()}`;
+
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: user.email,
+        id: user.clerkId,
       });
 
-      const formData = toFormData({ didToken: user.did, intent });
+      vi.spyOn(clerkSdkServer.sessions, 'getSession').mockResolvedValue({
+        id: sessionId,
+        clientId: `client_${faker.number.int()}`,
+        userId: `user_${faker.number.int()}`,
+        status: 'active',
+        lastActiveAt: Date.now(),
+        expireAt: Date.now(),
+        abandonAt: Date.now(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      const formData = toFormData({ sessionId, intent });
 
       const response = await sendRequest({ formData });
 
@@ -206,20 +218,30 @@ describe('/login route action', () => {
       await teardownOrganizationAndMember({ organization, user });
     });
 
-    test('given a valid DID token and the user is NOT a member of any organization: redirects to the onboarding page and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
+    test('given a valid sessionId and the user is NOT a member of any organization: redirects to the onboarding page and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
       const user = createPopulatedUserProfile();
       await saveUserProfileToDatabase(user);
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: user.email,
-        issuer: user.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      const sessionId = `sess_${createId()}`;
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: user.email,
+        id: user.clerkId,
       });
 
-      const formData = toFormData({ didToken: user.did, intent });
+      vi.spyOn(clerkSdkServer.sessions, 'getSession').mockResolvedValue({
+        id: sessionId,
+        clientId: `client_${faker.number.int()}`,
+        userId: `user_${faker.number.int()}`,
+        status: 'active',
+        lastActiveAt: Date.now(),
+        expireAt: Date.now(),
+        abandonAt: Date.now(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      const formData = toFormData({ sessionId, intent });
 
       const response = await sendRequest({ formData });
 
@@ -236,7 +258,7 @@ describe('/login route action', () => {
       await deleteUserProfileFromDatabaseById(user.id);
     });
 
-    test('given no DID token: returns a response with a 400 status code and an error message about the missing DID token', async () => {
+    test('given no session Id: returns a response with a 400 status code and an error message about the missing DID token', async () => {
       expect.assertions(2);
 
       const formData = toFormData({ intent });
@@ -248,8 +270,8 @@ describe('/login route action', () => {
           expect(error.status).toEqual(400);
           expect(await error.json()).toEqual({
             errors: {
-              didToken: {
-                message: 'login:did-token-missing',
+              sessionId: {
+                message: 'login:session-id-missing',
                 type: 'manual',
               },
             },
@@ -259,20 +281,29 @@ describe('/login route action', () => {
       }
     });
 
-    test("given a valid DID token, but the user profile doesn't exist (= i.e. the user has been deleted in a race condition): returns a response with a 400 status code and an error message about the missing user profile", async () => {
+    test("given a valid session id, but the user profile doesn't exist (= i.e. the user has been deleted in a race condition): returns a response with a 400 status code and an error message about the missing user profile", async () => {
       const userProfile = createPopulatedUserProfile();
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: userProfile.email,
-        issuer: userProfile.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      const sessionId = `sess_${createId()}`;
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: userProfile.email,
+        id: userProfile.clerkId,
       });
 
-      const formData = toFormData({ didToken: userProfile.did, intent });
+      vi.spyOn(clerkSdkServer.sessions, 'getSession').mockResolvedValue({
+        id: sessionId,
+        clientId: `client_${faker.number.int()}`,
+        userId: `user_${faker.number.int()}`,
+        status: 'active',
+        lastActiveAt: Date.now(),
+        expireAt: Date.now(),
+        abandonAt: Date.now(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
 
+      const formData = toFormData({ sessionId, intent });
       const response = await sendRequest({ formData });
 
       expect(response.status).toEqual(400);
@@ -284,17 +315,27 @@ describe('/login route action', () => {
       });
     });
 
-    test("given a valid DID token, and a valid invite token in the query string for an organization that the user is NOT yet a member of: redirects to the organizations page, displays a toast that the user successfully joined the organization, adds the user to the invite link's organization and logs the user in by creating a session and attaching an authentication cookie to the request", async () => {
+    test("given a valid session id, and a valid invite token in the query string for an organization that the user is NOT yet a member of: redirects to the organizations page, displays a toast that the user successfully joined the organization, adds the user to the invite link's organization and logs the user in by creating a session and attaching an authentication cookie to the request", async () => {
       const userProfile = createPopulatedUserProfile();
       await saveUserProfileToDatabase(userProfile);
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: userProfile.email,
-        issuer: userProfile.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      const sessionId = `sess_${createId()}`;
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: userProfile.email,
+        id: userProfile.clerkId,
+      });
+
+      vi.spyOn(clerkSdkServer.sessions, 'getSession').mockResolvedValue({
+        id: sessionId,
+        clientId: `client_${faker.number.int()}`,
+        userId: `user_${faker.number.int()}`,
+        status: 'active',
+        lastActiveAt: Date.now(),
+        expireAt: Date.now(),
+        abandonAt: Date.now(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
 
       const { organization, user } = await setupUserWithOrgAndAddAsMember();
@@ -303,7 +344,8 @@ describe('/login route action', () => {
         organizationId: organization.id,
       });
       await saveOrganizationInviteLinkToDatabase(inviteLink);
-      const formData = toFormData({ didToken: userProfile.did, intent });
+
+      const formData = toFormData({ sessionId, intent });
 
       const response = await sendRequest({ formData, token: inviteLink.token });
 
@@ -361,16 +403,26 @@ describe('/login route action', () => {
       await teardownOrganizationAndMember({ organization, user });
     });
 
-    test('given a valid did token and a valid invite token in the query string for an organization that the user is already a member of: redirects to the organizations page, displays a toast that the user is already a member of the organization and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
+    test('given a valid session id and a valid invite token in the query string for an organization that the user is already a member of: redirects to the organizations page, displays a toast that the user is already a member of the organization and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
       const { organization, user } = await setupUserWithOrgAndAddAsMember();
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: user.email,
-        issuer: user.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      const sessionId = `sess_${createId()}`;
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: user.email,
+        id: user.clerkId,
+      });
+
+      vi.spyOn(clerkSdkServer.sessions, 'getSession').mockResolvedValue({
+        id: sessionId,
+        clientId: `client_${faker.number.int()}`,
+        userId: `user_${faker.number.int()}`,
+        status: 'active',
+        lastActiveAt: Date.now(),
+        expireAt: Date.now(),
+        abandonAt: Date.now(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
       });
 
       const inviteLink = createPopulatedOrganizationInviteLink({
@@ -378,8 +430,7 @@ describe('/login route action', () => {
         organizationId: organization.id,
       });
       await saveOrganizationInviteLinkToDatabase(inviteLink);
-      const formData = toFormData({ didToken: user.did, intent });
-
+      const formData = toFormData({ sessionId, intent });
       const response = await sendRequest({ formData, token: inviteLink.token });
 
       expect(response.status).toEqual(302);
@@ -412,19 +463,29 @@ describe('/login route action', () => {
       await teardownOrganizationAndMember({ organization, user });
     });
 
-    test("given a valid did token and an invalid invite token: redirects to the user's first organization's page, shows a toast message about the invalid token and logs the user in by creating a session and attaching an authentication cookie to the request", async () => {
+    test("given a valid session id and an invalid invite token: redirects to the user's first organization's page, shows a toast message about the invalid token and logs the user in by creating a session and attaching an authentication cookie to the request", async () => {
       const { organization, user } = await setupUserWithOrgAndAddAsMember();
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: user.email,
-        issuer: user.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      const sessionId = `sess_${createId()}`;
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: user.email,
+        id: user.clerkId,
       });
 
-      const formData = toFormData({ didToken: user.did, intent });
+      vi.spyOn(clerkSdkServer.sessions, 'getSession').mockResolvedValue({
+        id: sessionId,
+        clientId: `client_${faker.number.int()}`,
+        userId: `user_${faker.number.int()}`,
+        status: 'active',
+        lastActiveAt: Date.now(),
+        expireAt: Date.now(),
+        abandonAt: Date.now(),
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      const formData = toFormData({ sessionId, intent });
 
       const response = await sendRequest({
         formData,

@@ -1,13 +1,13 @@
 import { randomBytes } from 'node:crypto';
 
 /**
- * Generates a random decentralized identity token (DID). This function is to
- * _**generate fake test data only**_. We use DIDs for user ids.
+ * Generates a random Clerk id. This function is to
+ * _**generate fake test data only**_. We use clerk ids for user ids.
  *
- * @see https://magic.link/docs/introduction/decentralized-id
+ * @see https://clerk.com/docs/references/javascript/user/user
  *
- * @returns did - Decentralized identity token.
+ * @returns clerkId
  */
-export function generateRandomDid() {
-  return 'did:ethr:0x' + randomBytes(32).toString('hex').slice(0, 40);
+export function generateRandomClerkId() {
+  return 'user_' + randomBytes(32).toString('hex').slice(0, 40);
 }

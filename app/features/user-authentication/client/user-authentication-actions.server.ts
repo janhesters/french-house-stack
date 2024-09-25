@@ -5,13 +5,20 @@ import type { FieldErrors } from 'react-hook-form';
 import { promiseHash } from 'remix-utils/promise';
 import { z } from 'zod';
 
-import { magicAdmin } from '~/features/user-authentication/magic-admin.server';
+import { i18next } from '~/features/localization/i18next.server';
+import { saveInviteLinkUseToDatabase } from '~/features/organizations/invite-link-uses-model.server';
+import { ORGANIZATION_MEMBERSHIP_ROLES } from '~/features/organizations/organizations-constants';
+import { getInviteLinkToken } from '~/features/organizations/organizations-helpers.server';
+import {
+  addMembersToOrganizationInDatabaseById,
+  retrieveActiveInviteLinkFromDatabaseByToken,
+} from '~/features/organizations/organizations-model.server';
 import {
   getDoesUserProfileExistByEmail,
   getIsEmailAvailableForRegistration,
 } from '~/features/user-profile/user-profile-helpers.server';
 import {
-  retrieveUserProfileWithMembershipsFromDatabaseByDid,
+  retrieveUserProfileWithMembershipsFromDatabaseByClerkId,
   saveUserProfileToDatabase,
 } from '~/features/user-profile/user-profile-model.server';
 import { getErrorMessage } from '~/utils/get-error-message';
@@ -19,31 +26,27 @@ import { badRequest, conflict } from '~/utils/http-responses.server';
 import { parseFormData } from '~/utils/parse-form-data.server';
 import { createToastHeaders } from '~/utils/toast.server';
 
-import { i18next } from '../localization/i18next.server';
-import { saveInviteLinkUseToDatabase } from '../organizations/invite-link-uses-model.server';
-import { ORGANIZATION_MEMBERSHIP_ROLES } from '../organizations/organizations-constants';
-import { getInviteLinkToken } from '../organizations/organizations-helpers.server';
 import {
-  addMembersToOrganizationInDatabaseById,
-  retrieveActiveInviteLinkFromDatabaseByToken,
-} from '../organizations/organizations-model.server';
+  getUserFromClerkById,
+  getUserFromClerkBySessionId,
+} from '../clerk-sdk.server';
 import {
   loginFormSchema,
   registrationFormSchema,
-} from './user-authentication-client-schemas';
+} from '../user-authentication-client-schemas';
 import {
   getLoginRedirectUrl,
   login,
   requireAnonymous,
-} from './user-authentication-helpers.server';
+} from '../user-authentication-helpers.server';
 
 const loginSchema = z.discriminatedUnion('intent', [
   loginFormSchema,
   z.object({
-    intent: z.literal('magicEmailLogin'),
-    didToken: z.string({
-      invalid_type_error: 'login:did-token-malformed-error',
-      required_error: 'login:did-token-missing',
+    intent: z.literal('clerkEmailLogin'),
+    sessionId: z.string({
+      invalid_type_error: 'login:session-id-malformed-error',
+      required_error: 'login:session-id-missing',
     }),
   }),
 ]);
@@ -79,13 +82,18 @@ export const loginAction = async ({
 
       return json({ email });
     }
-    case 'magicEmailLogin': {
-      const { didToken } = data;
+    case 'clerkEmailLogin': {
+      const { sessionId } = data;
 
-      const { issuer: did } =
-        await magicAdmin.users.getMetadataByToken(didToken);
+      const { id: clerkUserId } = await getUserFromClerkBySessionId(sessionId);
 
-      if (typeof did !== 'string') {
+      if (typeof clerkUserId !== 'string') {
+        console.error(
+          new Error(
+            `unable to fetch clerkUserId for client login. sessionId: ${sessionId}. recieved ${clerkUserId}`,
+          ),
+        );
+
         return badRequest<LoginActionData>({
           errors: {
             email: {
@@ -97,7 +105,9 @@ export const loginAction = async ({
       }
 
       const userProfile =
-        await retrieveUserProfileWithMembershipsFromDatabaseByDid(did);
+        await retrieveUserProfileWithMembershipsFromDatabaseByClerkId(
+          clerkUserId,
+        );
 
       if (!userProfile) {
         return badRequest<LoginActionData>({
@@ -193,10 +203,10 @@ export const loginAction = async ({
 const registerSchema = z.discriminatedUnion('intent', [
   registrationFormSchema,
   z.object({
-    intent: z.literal('magicEmailRegistration'),
-    didToken: z.string({
-      invalid_type_error: 'register:did-token-malformed-error',
-      required_error: 'register:did-token-missing',
+    intent: z.literal('clerkEmailRegistration'),
+    createdUserId: z.string({
+      invalid_type_error: 'register:clerk-id-malformed-error',
+      required_error: 'register:clerk-id-missing',
     }),
   }),
 ]);
@@ -232,13 +242,20 @@ export const registerAction = async ({
 
       return json({ email: data.email });
     }
-    case 'magicEmailRegistration': {
-      const { didToken } = data;
+    case 'clerkEmailRegistration': {
+      const { createdUserId } = data;
 
-      const { email, issuer: did } =
-        await magicAdmin.users.getMetadataByToken(didToken);
+      const { primaryEmailAddress, id: clerkUserId } =
+        await getUserFromClerkById(createdUserId);
 
-      if (typeof did !== 'string') {
+      const email = primaryEmailAddress?.emailAddress;
+
+      if (typeof clerkUserId !== 'string') {
+        console.log(
+          new Error(
+            `unable to fetch clerkUserId for client registration. createdUserId: ${createdUserId}. recieved ${clerkUserId}`,
+          ),
+        );
         return badRequest<RegisterActionData>({
           errors: {
             email: {
@@ -263,7 +280,7 @@ export const registerAction = async ({
       try {
         const userProfile = await saveUserProfileToDatabase({
           id: createId(),
-          did,
+          clerkId: clerkUserId,
           email,
           acceptedTermsAndConditions: true,
         });

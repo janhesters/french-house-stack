@@ -20,7 +20,6 @@ import {
 } from '~/features/user-profile/user-profile-model.server';
 import type { Factory } from '~/utils/types';
 
-export { generateRandomDid } from './generate-random-did.server';
 export { toFormData } from '~/utils/to-form-data';
 
 /**

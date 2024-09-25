@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { createId } from '@paralleldrive/cuid2';
 import type { UserProfile } from '@prisma/client';
 
-import { generateRandomDid } from '~/test/generate-random-did.server';
+import { generateRandomClerkId } from '~/test/generate-random-did.server';
 import type { Factory } from '~/utils/types';
 
 /**
@@ -16,13 +16,13 @@ export const createUserProfile: Factory<UserProfile> = ({
   id = '',
   createdAt = new Date(),
   updatedAt = new Date(),
-  did = '',
+  clerkId = '',
   email = '',
   name = '',
   acceptedTermsAndConditions = false,
 } = {}) => ({
   id,
-  did,
+  clerkId,
   email,
   name,
   createdAt,
@@ -38,7 +38,7 @@ export const createUserProfile: Factory<UserProfile> = ({
  */
 export const createPopulatedUserProfile: Factory<UserProfile> = ({
   id = createId(),
-  did = generateRandomDid(),
+  clerkId = generateRandomClerkId(),
   email = faker.internet.email(),
   name = faker.person.fullName(),
   updatedAt = faker.date.recent({ days: 10 }),
@@ -46,7 +46,7 @@ export const createPopulatedUserProfile: Factory<UserProfile> = ({
   acceptedTermsAndConditions = true,
 } = {}) => ({
   id,
-  did,
+  clerkId,
   email,
   name,
   createdAt,

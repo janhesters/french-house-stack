@@ -39,7 +39,7 @@ export async function retrieveUserAuthSessionFromDatabaseById(
     where: { id },
     select: {
       id: true,
-      user: { select: { id: true, did: true } },
+      user: { select: { id: true, clerkId: true } },
       expirationDate: true,
     },
   });
@@ -62,7 +62,7 @@ export async function retrieveActiveUserAuthSessionFromDatabaseByUserProfileId(
     where: { userId: userId, expirationDate: { gt: currentDate } },
     select: {
       id: true,
-      user: { select: { id: true, did: true } },
+      user: { select: { id: true, clerkId: true } },
       expirationDate: true,
     },
   });

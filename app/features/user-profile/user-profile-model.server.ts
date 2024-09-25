@@ -4,7 +4,7 @@ import { prisma } from '~/database.server';
 
 export type PartialUserProfileParameters = Pick<
   Parameters<typeof prisma.userProfile.create>[0]['data'],
-  'acceptedTermsAndConditions' | 'did' | 'email' | 'id' | 'name'
+  'acceptedTermsAndConditions' | 'clerkId' | 'email' | 'id' | 'name'
 >;
 
 // CREATE
@@ -83,15 +83,15 @@ export async function retrieveUserProfileWithMembershipsFromDatabaseById(
  * includes the active memberships for the organizations the user is a member
  * of.
  *
- * @param did - The did of the user profile to get.
+ * @param clerkId - The clerkId of the user profile to get.
  * @returns The user profile with their active memberships for the organizations
  * of which they are a member of for the given id or null if it wasn't found.
  */
-export async function retrieveUserProfileWithMembershipsFromDatabaseByDid(
-  did: UserProfile['did'],
+export async function retrieveUserProfileWithMembershipsFromDatabaseByClerkId(
+  clerkId: UserProfile['clerkId'],
 ) {
   return prisma.userProfile.findUnique({
-    where: { did },
+    where: { clerkId },
     include: {
       memberships: {
         where: {
@@ -144,4 +144,20 @@ export async function updateUserProfileInDatabaseById({
  */
 export async function deleteUserProfileFromDatabaseById(id: UserProfile['id']) {
   return prisma.userProfile.delete({ where: { id } });
+}
+
+/**
+ * Removes a user profile by clerkId from the database.
+ *
+ * @param clerkId - The clerkId of the user profile you want to delete.
+ * @returns The user profile that was deleted.
+ */
+export async function deleteUserProfileFromDatabaseByClerkUserId(
+  clerkId: UserProfile['clerkId'],
+) {
+  return prisma.userProfile.delete({
+    where: {
+      clerkId,
+    },
+  });
 }

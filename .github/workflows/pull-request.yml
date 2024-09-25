@@ -82,6 +82,8 @@ jobs:
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
   playwright-firefox:
     name: 🎭 Playwright Firefox
@@ -113,6 +115,8 @@ jobs:
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: 📸 Playwright Screenshots
         uses: actions/upload-artifact@v4
@@ -152,6 +156,8 @@ jobs:
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: 📸 Playwright Screenshots
         uses: actions/upload-artifact@v3
@@ -191,6 +197,8 @@ jobs:
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: 📸 Playwright Screenshots
         uses: actions/upload-artifact@v3
@@ -230,6 +238,10 @@ jobs:
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+
+
 
       - name: 📸 Playwright Screenshots
         uses: actions/upload-artifact@v3
@@ -269,6 +281,8 @@ jobs:
           MAGIC_SECRET_KEY: ${{ secrets.MAGIC_SECRET_KEY }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLERK_PUBLISHABLE_KEY: ${{ secrets.CLERK_PUBLISHABLE_KEY }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
 
       - name: 📸 Playwright Screenshots
         uses: actions/upload-artifact@v3
