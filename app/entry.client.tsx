@@ -11,7 +11,6 @@ import { i18n } from './features/localization/i18n';
 import { onUnhandledRequest } from './test/mocks/msw-utils';
 
 export type EnvironmentVariables = {
-  MAGIC_PUBLISHABLE_KEY: string;
   CLIENT_MOCKS?: string;
   SENTRY_DSN?: string;
   ENVIRONMENT?: string;

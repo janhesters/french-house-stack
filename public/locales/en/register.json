@@ -1,8 +1,8 @@
 {
   "already-a-member": "Already a member?",
   "create-your-account": "Create your account",
-  "did-token-malformed-error": "A DID token must be string.",
-  "did-token-missing": "Registration failed. No DID token.",
+  "clerk-id-malformed-error": "A DID token must be string.",
+  "clerk-id-missing": "Registration failed. No DID token.",
   "email-address": "Email address",
   "email-description": "Your account's email address.",
   "email-invalid": "A valid email consists of characters, '@' and '.'.",
@@ -19,5 +19,10 @@
   "terms-description": "By signing up, you are creating an account and you agree to our <1>Terms of Use</1> and <2>Privacy Policy</2>.",
   "terms-label": "I accept the terms and conditions.",
   "terms-must-be-accepted": "You must accept the terms and conditions.",
-  "user-already-exists": "User with given email already exists. Did you mean to log in instead?"
+  "user-already-exists": "User with given email already exists. Did you mean to log in instead?",
+  "verify-email": "Verify email",
+  "verify-email-description": "A verification email has been sent to <1>{{email}}</1>. Please click the link in the email to verify your account to complete the registration.",
+  "back-to-register": "Go back to create account",
+  "email-verified-description": "Email verification successful. Close this tab and return to the sign up page to continue.",
+  "email-verification-failed-description": "Email verification failed. Token is invalid or expired. Please try again."
 }

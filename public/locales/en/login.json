@@ -1,8 +1,8 @@
 {
   "authenticating": "Authenticating ...",
   "create-your-account": "Create your account.",
-  "did-token-malformed-error": "A DID token must be string.",
-  "did-token-missing": "Login failed. No DID token.",
+  "session-id-malformed-error": "A Session Id must be string.",
+  "session-id-missing": "Login failed. No session id",
   "email-address": "Email address",
   "email-description": "Your account's email address.",
   "email-invalid": "A valid email consists of characters, '@' and '.'.",
@@ -16,5 +16,10 @@
   "missing-email-metadata": "Missing email from Magic metadata.",
   "missing-issuer-metadata": "Missing issuer from Magic metadata.",
   "not-a-member": "Not a member?",
-  "user-doesnt-exist": "User with given email doesn't exist. Did you mean to create a new account instead?"
+  "user-doesnt-exist": "User with given email doesn't exist. Did you mean to create a new account instead?",
+  "verify-email": "Verify email",
+  "verify-email-description": "A login link has been sent to <1>{{email}}</1>. Please click the link in the email to login your account.",
+  "back-to-login": "Go back to login",
+  "email-verified-description": "Email verification successful. Close this tab and return to the login page to continue.",
+  "email-verification-failed-description": "Email verification failed. Token is invalid or expired. Please try again."
 }

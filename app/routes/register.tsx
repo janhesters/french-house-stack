@@ -1,3 +1,4 @@
+import { useSignUp } from '@clerk/remix';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type {
   ActionFunctionArgs,
@@ -12,8 +13,7 @@ import {
   useSubmit,
 } from '@remix-run/react';
 import { Loader2Icon } from 'lucide-react';
-import { Magic } from 'magic-sdk';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Trans } from 'react-i18next';
 import type { z } from 'zod';
@@ -33,12 +33,11 @@ import {
 import { Input } from '~/components/ui/input';
 import { TypographyH1 } from '~/components/ui/typography';
 import { useTranslation } from '~/features/localization/use-translation';
-import type { RegisterActionData } from '~/features/user-authentication/user-authentication-actions.server';
-import { registerAction } from '~/features/user-authentication/user-authentication-actions.server';
+import { RegisterAwaitingEmailVerification } from '~/features/user-authentication/awaiting-email-confirmation';
+import type { RegisterActionData } from '~/features/user-authentication/client/user-authentication-actions.server';
+import { registerAction } from '~/features/user-authentication/client/user-authentication-actions.server';
 import { registrationFormSchema } from '~/features/user-authentication/user-authentication-client-schemas';
 import { registerLoader } from '~/features/user-authentication/user-authentication-loaders.server';
-import { useEffectOnce } from '~/hooks/use-effect-once';
-import { usePromise } from '~/hooks/use-promise';
 
 export const handle = { i18n: 'register' };
 
@@ -65,65 +64,60 @@ export default function Register() {
     errors: actionData?.errors,
   });
 
+  const { signUp } = useSignUp();
   const submit = useSubmit();
   const onSubmit = form.handleSubmit(async data => {
     submit(data, { method: 'post', replace: true });
   });
+  const [isRegisteringWithClerk, setIsRegisteringWithClerk] = useState(false);
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+  const cancelEmailVerificationRef = useRef<undefined | (() => void)>();
 
-  const [isRegisteringWithMagic, setIsRegisteringWithMagic] = useState(false);
-  const [magicReady, setMagicReady] = usePromise<{ magic: Magic }>();
-
-  async function downloadMagicStaticAssets() {
-    const magic = new Magic(window.ENV.MAGIC_PUBLISHABLE_KEY, {
-      /**
-       * @see https://magic.link/docs/introduction/test-mode
-       */
-      testMode: window.runMagicInTestMode,
-    });
-    await magic.preload();
-    setMagicReady({ magic });
-  }
-
-  useEffectOnce(() => {
-    downloadMagicStaticAssets().catch(() => {
-      form.setError('email', { message: 'register:failed-to-load-magic' });
-    });
-  });
+  const navigation = useNavigation();
 
   useEffect(() => {
-    if (typeof actionData?.email === 'string' && actionData?.email.length > 0) {
-      async function registerWithMagic() {
+    async function registerWithClerk() {
+      if (actionData && actionData.email && signUp) {
         try {
-          setIsRegisteringWithMagic(true);
-          const { magic } = await magicReady;
-          const didToken = await magic.auth.loginWithMagicLink({
-            email: actionData!.email!,
+          setIsRegisteringWithClerk(true);
+          const register = await signUp.create({
+            emailAddress: actionData.email,
           });
-          if (didToken) {
-            submit(
-              { didToken, intent: 'magicEmailRegistration' },
-              { method: 'post', replace: true },
-            );
-          } else {
-            form.setError('email', { message: 'register:did-token-missing' });
-          }
+
+          const emailLinkFlow = register.createEmailLinkFlow();
+          cancelEmailVerificationRef.current =
+            emailLinkFlow.cancelEmailLinkFlow;
+          // send link and poll for verification
+          setIsVerifyingEmail(true);
+          const postVerification = await emailLinkFlow.startEmailLinkFlow({
+            redirectUrl: `${window.location.origin}/verify-complete`,
+          });
+
+          submit(
+            {
+              createdUserId: postVerification.createdUserId,
+              intent: 'clerkEmailRegistration',
+            },
+            { method: 'post', replace: true },
+          );
         } catch {
-          form.setError('email', { message: 'register:registration-failed' });
+          form.setError('email', {
+            message: t('register:registration-failed'),
+          });
         } finally {
-          setIsRegisteringWithMagic(false);
+          setIsRegisteringWithClerk(false);
+          setIsVerifyingEmail(false);
         }
       }
-
-      registerWithMagic();
     }
+    registerWithClerk();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionData?.email]);
 
-  const navigation = useNavigation();
   const isRegisteringViaEmail =
     navigation.formData?.get('intent') === 'emailRegistration' ||
-    navigation.formData?.get('intent') === 'magicEmailRegistration' ||
-    isRegisteringWithMagic;
+    navigation.formData?.get('intent') === 'clerkEmailRegistration' ||
+    isRegisteringWithClerk;
 
   return (
     <main className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -135,100 +129,115 @@ export default function Register() {
         {t('create-your-account')}
       </TypographyH1>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <FormProvider {...form}>
-          <Form method="POST" onSubmit={onSubmit}>
-            <fieldset className="space-y-6" disabled={isRegisteringViaEmail}>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('email-address')}</FormLabel>
+      {isVerifyingEmail ? (
+        <RegisterAwaitingEmailVerification
+          onCancel={() => {
+            cancelEmailVerificationRef.current?.();
+            setIsVerifyingEmail(false);
+            setIsRegisteringWithClerk(false);
+          }}
+          email={actionData?.email || 'tobiz2002@gmail.com'}
+          token={loaderData.token}
+        />
+      ) : (
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <FormProvider {...form}>
+            <Form method="POST" onSubmit={onSubmit}>
+              <fieldset className="space-y-6" disabled={isRegisteringViaEmail}>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('email-address')}</FormLabel>
 
-                    <FormControl>
-                      <Input placeholder={t('email-placeholder')} {...field} />
-                    </FormControl>
-
-                    <FormDescription className="sr-only">
-                      {t('email-description')}
-                    </FormDescription>
-
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="acceptedTerms"
-                render={({ field }) => (
-                  <FormItem className="items-top flex space-x-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-
-                    <div className="grid gap-1 leading-none">
-                      <FormLabel>{t('terms-label')}</FormLabel>
-
-                      <FormDescription>
-                        <Trans
-                          components={{
-                            1: (
-                              <TextLink
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                to="/terms"
-                              />
-                            ),
-                            2: (
-                              <TextLink
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                to="/privacy-policy"
-                              />
-                            ),
-                          }}
-                          i18nKey="register:terms-description"
+                      <FormControl>
+                        <Input
+                          placeholder={t('email-placeholder')}
+                          {...field}
                         />
+                      </FormControl>
+
+                      <FormDescription className="sr-only">
+                        {t('email-description')}
                       </FormDescription>
 
                       <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
+                    </FormItem>
+                  )}
+                />
 
-              <Button
-                {...form.register('intent', { value: 'emailRegistration' })}
-                className="w-full"
-                type="submit"
-              >
-                {isRegisteringViaEmail ? (
-                  <>
-                    <Loader2Icon className="mr-2 size-4 animate-spin" />
-                    {t('registering')}
-                  </>
-                ) : (
-                  t('register')
-                )}
-              </Button>
-            </fieldset>
-          </Form>
-        </FormProvider>
+                <FormField
+                  control={form.control}
+                  name="acceptedTerms"
+                  render={({ field }) => (
+                    <FormItem className="items-top flex space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
 
-        <Text>
-          {t('already-a-member')}{' '}
-          <TextLink
-            to={`/login${loaderData.token ? `?token=${loaderData.token}` : ''}`}
-          >
-            {t('log-in-to-your-account')}
-          </TextLink>
-        </Text>
-      </div>
+                      <div className="grid gap-1 leading-none">
+                        <FormLabel>{t('terms-label')}</FormLabel>
+
+                        <FormDescription>
+                          <Trans
+                            components={{
+                              1: (
+                                <TextLink
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  to="/terms"
+                                />
+                              ),
+                              2: (
+                                <TextLink
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  to="/privacy-policy"
+                                />
+                              ),
+                            }}
+                            i18nKey="register:terms-description"
+                          />
+                        </FormDescription>
+
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  {...form.register('intent', { value: 'emailRegistration' })}
+                  className="w-full"
+                  type="submit"
+                >
+                  {isRegisteringViaEmail ? (
+                    <>
+                      <Loader2Icon className="mr-2 size-4 animate-spin" />
+                      {t('registering')}
+                    </>
+                  ) : (
+                    t('register')
+                  )}
+                </Button>
+              </fieldset>
+            </Form>
+          </FormProvider>
+
+          <Text>
+            {t('already-a-member')}{' '}
+            <TextLink
+              to={`/login${loaderData.token ? `?token=${loaderData.token}` : ''}`}
+            >
+              {t('log-in-to-your-account')}
+            </TextLink>
+          </Text>
+        </div>
+      )}
     </main>
   );
 }

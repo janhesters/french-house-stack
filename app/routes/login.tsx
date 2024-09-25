@@ -1,3 +1,4 @@
+import { useSignIn } from '@clerk/remix';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type {
   ActionFunctionArgs,
@@ -12,7 +13,6 @@ import {
   useSubmit,
 } from '@remix-run/react';
 import { Loader2Icon } from 'lucide-react';
-import { Magic } from 'magic-sdk';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
@@ -31,12 +31,11 @@ import {
 import { Input } from '~/components/ui/input';
 import { TypographyH1 } from '~/components/ui/typography';
 import { useTranslation } from '~/features/localization/use-translation';
-import type { LoginActionData } from '~/features/user-authentication/user-authentication-actions.server';
-import { loginAction } from '~/features/user-authentication/user-authentication-actions.server';
+import { AwaitingLoginEmailVerification } from '~/features/user-authentication/awaiting-email-confirmation';
+import type { LoginActionData } from '~/features/user-authentication/client/user-authentication-actions.server';
+import { loginAction } from '~/features/user-authentication/client/user-authentication-actions.server';
 import { loginFormSchema } from '~/features/user-authentication/user-authentication-client-schemas';
 import { loginLoader } from '~/features/user-authentication/user-authentication-loaders.server';
-import { useEffectOnce } from '~/hooks/use-effect-once';
-import { usePromise } from '~/hooks/use-promise';
 
 export const handle = { i18n: 'login' };
 
@@ -63,57 +62,57 @@ export default function Login() {
     errors: actionData?.errors,
   });
 
+  const { signIn } = useSignIn();
   const submit = useSubmit();
+  const [isLoggingInWithClerk, setIsLoggingInWithClerk] = useState(false);
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+
   const onSubmit = form.handleSubmit(data => {
     submit(data, { method: 'post', replace: true });
   });
 
-  const [isLoggingInWithMagic, setIsLoggingInWithMagic] = useState(false);
-  const [magicReady, setMagicReady] = usePromise<{ magic: Magic }>();
-
-  async function downloadMagicStaticAssets() {
-    const magic = new Magic(window.ENV.MAGIC_PUBLISHABLE_KEY, {
-      /**
-       * @see https://magic.link/docs/introduction/test-mode
-       */
-      testMode: window.runMagicInTestMode,
-    });
-    await magic.preload();
-    setMagicReady({ magic });
-  }
-
-  useEffectOnce(() => {
-    downloadMagicStaticAssets().catch(() => {
-      form.setError('email', { message: t('failed-to-load-magic') });
-    });
-  });
-
   useEffect(() => {
-    if (typeof actionData?.email === 'string' && actionData?.email.length > 0) {
-      async function loginWithMagic() {
-        try {
-          setIsLoggingInWithMagic(true);
-          const { magic } = await magicReady;
-          const didToken = await magic.auth.loginWithMagicLink({
-            email: actionData!.email!,
-          });
+    async function loginWithClerk(email: string) {
+      if (!signIn) return;
+      const redirectUrl = `${window.location.origin}/verify-complete?action=login`;
+      try {
+        setIsLoggingInWithClerk(true);
 
-          if (didToken) {
-            submit(
-              { didToken, intent: 'magicEmailLogin' },
-              { method: 'post', replace: true },
-            );
-          } else {
-            form.setError('email', { message: t('did-token-missing') });
-          }
-        } catch {
-          form.setError('email', { message: t('login-failed') });
-        } finally {
-          setIsLoggingInWithMagic(false);
-        }
+        const login = await signIn.create({
+          identifier: email,
+          redirectUrl,
+        });
+
+        const emailLink = signIn.createEmailLinkFlow();
+        setIsVerifyingEmail(true);
+        const emailVerified = await emailLink.startEmailLinkFlow({
+          // @ts-expect-error 'login.supportedFirstFactors' is possibly 'null'
+          emailAddressId: (login.supportedFirstFactors[0] as any)
+            .emailAddressId,
+          redirectUrl,
+        });
+
+        submit(
+          {
+            sessionId: emailVerified.createdSessionId,
+            intent: 'clerkEmailLogin',
+          },
+          { method: 'POST', replace: true },
+        );
+      } catch {
+        form.setError('email', { message: t('login-failed') });
+      } finally {
+        setIsLoggingInWithClerk(false);
+        setIsVerifyingEmail(false);
       }
+    }
 
-      loginWithMagic();
+    if (
+      typeof actionData?.email === 'string' &&
+      actionData?.email.length > 0 &&
+      !isLoggingInWithClerk
+    ) {
+      loginWithClerk(actionData.email);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionData?.email]);
@@ -121,8 +120,8 @@ export default function Login() {
   const navigation = useNavigation();
   const isLoggingInViaEmail =
     navigation.formData?.get('intent') === 'emailLogin' ||
-    navigation.formData?.get('intent') === 'magicEmailLogin' ||
-    isLoggingInWithMagic;
+    navigation.formData?.get('intent') === 'clerkEmailLogin' ||
+    isLoggingInWithClerk;
 
   return (
     <main className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
@@ -134,57 +133,64 @@ export default function Login() {
         {t('log-in-to-your-account')}
       </TypographyH1>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <FormProvider {...form}>
-          <Form method="POST" onSubmit={onSubmit}>
-            <fieldset className="space-y-6" disabled={isLoggingInViaEmail}>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('email-address')}</FormLabel>
+      {signIn && isVerifyingEmail ? (
+        <AwaitingLoginEmailVerification email={signIn.identifier as string} />
+      ) : (
+        <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+          <FormProvider {...form}>
+            <Form method="POST" onSubmit={onSubmit}>
+              <fieldset className="space-y-6" disabled={isLoggingInViaEmail}>
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>{t('email-address')}</FormLabel>
 
-                    <FormControl>
-                      <Input placeholder={t('email-placeholder')} {...field} />
-                    </FormControl>
+                      <FormControl>
+                        <Input
+                          placeholder={t('email-placeholder')}
+                          {...field}
+                        />
+                      </FormControl>
 
-                    <FormDescription className="sr-only">
-                      {t('email-description')}
-                    </FormDescription>
+                      <FormDescription className="sr-only">
+                        {t('email-description')}
+                      </FormDescription>
 
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <Button
-                {...form.register('intent', { value: 'emailLogin' })}
-                className="w-full"
-                type="submit"
-              >
-                {isLoggingInViaEmail ? (
-                  <>
-                    <Loader2Icon className="mr-2 size-4 animate-spin" />
-                    {t('authenticating')}
-                  </>
-                ) : (
-                  t('login')
-                )}
-              </Button>
-            </fieldset>
-          </Form>
-        </FormProvider>
+                <Button
+                  {...form.register('intent', { value: 'emailLogin' })}
+                  className="w-full"
+                  type="submit"
+                >
+                  {isLoggingInViaEmail ? (
+                    <>
+                      <Loader2Icon className="mr-2 size-4 animate-spin" />
+                      {t('authenticating')}
+                    </>
+                  ) : (
+                    t('login')
+                  )}
+                </Button>
+              </fieldset>
+            </Form>
+          </FormProvider>
 
-        <Text>
-          {t('not-a-member')}{' '}
-          <TextLink
-            to={`/register${loaderData.token ? `?token=${loaderData.token}` : ''}`}
-          >
-            {t('create-your-account')}
-          </TextLink>
-        </Text>
-      </div>
+          <Text>
+            {t('not-a-member')}{' '}
+            <TextLink
+              to={`/register${loaderData.token ? `?token=${loaderData.token}` : ''}`}
+            >
+              {t('create-your-account')}
+            </TextLink>
+          </Text>
+        </div>
+      )}
     </main>
   );
 }

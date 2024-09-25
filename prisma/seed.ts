@@ -11,12 +11,12 @@ const prettyPrint = (object: any) =>
 
 const prisma = new PrismaClient();
 
-const userDid = process.env.SEED_USER_DID;
+const userClerkId = process.env.SEED_USER_CLERK_ID;
 const userEmail = process.env.SEED_USER_EMAIL;
 
 async function seed() {
-  if (!userDid) {
-    throw new Error('Please provide a userDid to seed.ts');
+  if (!userClerkId) {
+    throw new Error('Please provide a userClerkId to seed.ts');
   }
 
   if (!userEmail) {
@@ -26,7 +26,7 @@ async function seed() {
   console.log('👤 Creating user profiles ...');
   const user = await prisma.userProfile.create({
     data: {
-      did: userDid,
+      clerkId: userClerkId,
       email: userEmail,
       id: createId(),
       name: faker.person.fullName(),
@@ -35,7 +35,7 @@ async function seed() {
   });
   const memberUser = await prisma.userProfile.create({
     data: {
-      did: createId(),
+      clerkId: createId(),
       email: faker.internet.email(),
       id: createId(),
       name: faker.person.fullName(),
@@ -44,7 +44,7 @@ async function seed() {
   });
   const adminUser = await prisma.userProfile.create({
     data: {
-      did: createId(),
+      clerkId: createId(),
       email: faker.internet.email(),
       id: createId(),
       name: faker.person.fullName(),

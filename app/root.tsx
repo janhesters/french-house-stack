@@ -1,3 +1,5 @@
+import { ClerkApp } from '@clerk/remix';
+import { rootAuthLoader } from '@clerk/remix/ssr.server';
 import type {
   LinksFunction,
   LoaderFunctionArgs,
@@ -18,7 +20,6 @@ import { withSentry } from '@sentry/remix';
 import type { ReactNode } from 'react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import invariant from 'tiny-invariant';
 
 import darkStyles from '~/styles/dark.css?url';
 import styles from '~/styles/tailwind.css?url';
@@ -29,6 +30,7 @@ import type { EnvironmentVariables } from './entry.client';
 import { i18next } from './features/localization/i18next.server';
 import { NotFoundComponent } from './features/not-found/not-found-component';
 import { useToast } from './hooks/use-toast';
+import { enforceHttps } from './https';
 import { combineHeaders } from './utils/combine-headers.server';
 import type { Toast } from './utils/toast.server';
 import { getToast } from './utils/toast.server';
@@ -64,25 +66,31 @@ type LoaderData = {
   toast: Toast | null;
 };
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { MAGIC_PUBLISHABLE_KEY, NODE_ENV, SENTRY_DSN } = process.env;
-  invariant(MAGIC_PUBLISHABLE_KEY, 'MAGIC_PUBLISHABLE_KEY must be set');
+const rootLoader = async ({ request }: LoaderFunctionArgs) => {
+  const { NODE_ENV, SENTRY_DSN } = process.env;
+
+  if ((NODE_ENV || 'production') === 'production') {
+    enforceHttps(request);
+  }
 
   const locale = await i18next.getLocale(request);
-
   const t = await i18next.getFixedT(request);
   const title = t('app-name');
   const { toast, headers: toastHeaders } = await getToast(request);
 
   return json<LoaderData>(
     {
-      ENV: { MAGIC_PUBLISHABLE_KEY, ENVIRONMENT: NODE_ENV, SENTRY_DSN },
+      ENV: { ENVIRONMENT: NODE_ENV, SENTRY_DSN },
       locale,
       title,
       toast,
     },
     { headers: combineHeaders(toastHeaders) },
   );
+};
+
+export const loader = (arguments_: LoaderFunctionArgs) => {
+  return rootAuthLoader(arguments_, rootLoader);
 };
 
 export const meta: MetaFunction<typeof loader> = ({
@@ -141,7 +149,7 @@ export function Layout({ children }: { children: ReactNode }) {
   );
 }
 
-export default withSentry(App);
+export default withSentry(ClerkApp(App));
 
 export function ErrorBoundary() {
   const error = useRouteError();

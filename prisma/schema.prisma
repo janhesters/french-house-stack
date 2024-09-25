@@ -13,9 +13,6 @@ datasource db {
 
 model UserProfile {
   id                         String                   @id @default(cuid())
-  /// The Magic issuer of the user who created the account. Its a decentralized
-  /// identifier (DID) that uniquely identifies the user.
-  did                        String                   @unique
   createdAt                  DateTime                 @default(now())
   updatedAt                  DateTime                 @updatedAt
   email                      String                   @unique
@@ -26,6 +23,7 @@ model UserProfile {
   notes                      Note[]
   createdInviteLinks         OrganizationInviteLink[]
   inviteLinkUse              InviteLinkUse[]
+  clerkId                    String                          @unique
 }
 
 model UserAuthSession {

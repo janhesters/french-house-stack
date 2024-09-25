@@ -1,4 +1,3 @@
-import { faker } from '@faker-js/faker';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { retrieveinviteLinkUseFromDatabaseByUserIdAndLinkId } from '~/features/organizations/invite-link-uses-model.server';
@@ -6,7 +5,7 @@ import { ORGANIZATION_MEMBERSHIP_ROLES } from '~/features/organizations/organiza
 import { createPopulatedOrganizationInviteLink } from '~/features/organizations/organizations-factories.server';
 import { saveOrganizationInviteLinkToDatabase } from '~/features/organizations/organizations-invite-link-model.server';
 import { retrieveOrganizationMembershipFromDatabaseByUserIdAndOrganizationId } from '~/features/organizations/organizations-model.server';
-import { magicAdmin } from '~/features/user-authentication/magic-admin.server';
+import { clerkSdkServer } from '~/features/user-authentication/clerk-sdk.server';
 import { retrieveActiveUserAuthSessionFromDatabaseByUserProfileId } from '~/features/user-authentication/user-auth-session-model.server';
 import { createPopulatedUserProfile } from '~/features/user-profile/user-profile-factories.server';
 import {
@@ -81,7 +80,7 @@ describe('/register route action', () => {
           errors: {
             intent: {
               message:
-                "Invalid discriminator value. Expected 'emailRegistration' | 'magicEmailRegistration'",
+                "Invalid discriminator value. Expected 'emailRegistration' | 'clerkEmailRegistration'",
               type: 'manual',
             },
           },
@@ -105,7 +104,7 @@ describe('/register route action', () => {
           errors: {
             intent: {
               message:
-                "Invalid discriminator value. Expected 'emailRegistration' | 'magicEmailRegistration'",
+                "Invalid discriminator value. Expected 'emailRegistration' | 'clerkEmailRegistration'",
               type: 'manual',
             },
           },
@@ -202,26 +201,28 @@ describe('/register route action', () => {
     });
   });
 
-  describe('magic email registration intent', () => {
+  describe('clerk email registration intent', () => {
     afterEach(() => {
       vi.restoreAllMocks();
     });
 
-    const intent = 'magicEmailRegistration';
+    const intent = 'clerkEmailRegistration';
 
-    test('given a valid DID token: creates a user profile, redirects to the onboarding page and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
+    test('given a valid session id: creates a user profile, redirects to the onboarding page and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
       const userProfile = createPopulatedUserProfile();
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: userProfile.email,
-        issuer: userProfile.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: {
+          emailAddress: userProfile.email,
+        },
+        id: userProfile.clerkId,
       });
 
-      const formData = toFormData({ didToken: userProfile.did, intent });
+      const formData = toFormData({
+        createdUserId: userProfile.clerkId,
+        intent,
+      });
 
       const response = await sendRequest({ formData });
 
@@ -233,7 +234,7 @@ describe('/register route action', () => {
 
       const createdUserProfile =
         await retrieveFirstUserProfileFromDatabaseByEmail(userProfile.email);
-      expect(createdUserProfile?.did).toEqual(userProfile.did);
+      expect(createdUserProfile?.clerkId).toEqual(userProfile.clerkId);
       expect(createdUserProfile?.acceptedTermsAndConditions).toEqual(true);
 
       const userAuthenticationSession =
@@ -245,7 +246,7 @@ describe('/register route action', () => {
       await deleteUserProfileFromDatabaseById(createdUserProfile!.id);
     });
 
-    test('given no DID token: returns a response with a 400 status code and an error message about the missing DID token', async () => {
+    test('given no clerk id: returns a response with a 400 status code and an error message about the missing DID token', async () => {
       expect.assertions(2);
 
       const formData = toFormData({ intent });
@@ -257,8 +258,8 @@ describe('/register route action', () => {
           expect(error.status).toEqual(400);
           expect(await error.json()).toEqual({
             errors: {
-              didToken: {
-                message: 'register:did-token-missing',
+              createdUserId: {
+                message: 'register:clerk-id-missing',
                 type: 'manual',
               },
             },
@@ -268,20 +269,22 @@ describe('/register route action', () => {
       }
     });
 
-    test('given a valid DID token, but the user already exists (e.g. due to a race condition): returns a response with a 409 status code and an error message that the registration failed', async () => {
+    test('given a valid clerk id, but the user already exists (e.g. due to a race condition): returns a response with a 409 status code and an error message that the registration failed', async () => {
       const userProfile = createPopulatedUserProfile();
       await saveUserProfileToDatabase(userProfile);
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: userProfile.email,
-        issuer: userProfile.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: {
+          emailAddress: userProfile.email,
+        },
+        id: userProfile.clerkId,
       });
 
-      const formData = toFormData({ didToken: userProfile.did, intent });
+      const formData = toFormData({
+        createdUserId: userProfile.clerkId,
+        intent,
+      });
 
       const response = await sendRequest({ formData });
 
@@ -296,16 +299,15 @@ describe('/register route action', () => {
       await deleteUserProfileFromDatabaseById(userProfile.id);
     });
 
-    test('given a valid DID and a valid invite link token in the query string: creates a user profile, adds the user as a member to the organization for the invite link, redirects to the user-profile onboarding page, shows a toast that the user successfully joined the organization and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
+    test('given a valid clerk Id and a valid invite link token in the query string: creates a user profile, adds the user as a member to the organization for the invite link, redirects to the user-profile onboarding page, shows a toast that the user successfully joined the organization and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
       const userProfile = createPopulatedUserProfile();
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: userProfile.email,
-        issuer: userProfile.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: {
+          emailAddress: userProfile.email,
+        },
+        id: userProfile.clerkId,
       });
 
       const { organization, user } = await setupUserWithOrgAndAddAsMember();
@@ -314,7 +316,10 @@ describe('/register route action', () => {
         organizationId: organization.id,
       });
       await saveOrganizationInviteLinkToDatabase(inviteLink);
-      const formData = toFormData({ didToken: userProfile.did, intent });
+      const formData = toFormData({
+        createdUserId: userProfile.clerkId,
+        intent,
+      });
 
       const response = await sendRequest({ formData, token: inviteLink.token });
 
@@ -330,7 +335,7 @@ describe('/register route action', () => {
       // It creates a user profile.
       const createdUserProfile =
         await retrieveFirstUserProfileFromDatabaseByEmail(userProfile.email);
-      expect(createdUserProfile?.did).toEqual(userProfile.did);
+      expect(createdUserProfile?.clerkId).toEqual(userProfile.clerkId);
       expect(createdUserProfile?.acceptedTermsAndConditions).toEqual(true);
 
       // It shows a toast.
@@ -379,20 +384,22 @@ describe('/register route action', () => {
       await teardownOrganizationAndMember({ organization, user });
     });
 
-    test('given a valid DID, but an invalid invite link token in the query string: creates a user profile, redirects to the onboarding page with a toast message about the invalid token, and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
+    test('given a valid clerk id, but an invalid invite link token in the query string: creates a user profile, redirects to the onboarding page with a toast message about the invalid token, and logs the user in by creating a session and attaching an authentication cookie to the request', async () => {
       const userProfile = createPopulatedUserProfile();
 
-      vi.spyOn(magicAdmin.users, 'getMetadataByToken').mockResolvedValue({
-        email: userProfile.email,
-        issuer: userProfile.did,
-        phoneNumber: faker.phone.number(),
-        publicAddress: faker.finance.ethereumAddress(),
-        oauthProvider: faker.internet.domainName(),
-        wallets: [],
+      vi.spyOn(clerkSdkServer.users, 'getUser').mockResolvedValue({
+        // @ts-ignore
+        primaryEmailAddress: {
+          emailAddress: userProfile.email,
+        },
+        id: userProfile.clerkId,
       });
 
       const { token } = createPopulatedOrganizationInviteLink();
-      const formData = toFormData({ didToken: userProfile.did, intent });
+      const formData = toFormData({
+        createdUserId: userProfile.clerkId,
+        intent,
+      });
 
       const response = await sendRequest({ formData, token });
 
@@ -404,7 +411,7 @@ describe('/register route action', () => {
 
       const createdUserProfile =
         await retrieveFirstUserProfileFromDatabaseByEmail(userProfile.email);
-      expect(createdUserProfile?.did).toEqual(userProfile.did);
+      expect(createdUserProfile?.clerkId).toEqual(userProfile.clerkId);
       expect(createdUserProfile?.acceptedTermsAndConditions).toEqual(true);
 
       // It shows a toast.
