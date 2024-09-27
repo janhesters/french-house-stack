@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
-import { json } from '@remix-run/node';
+import { json, redirect } from '@remix-run/node';
 import { promiseHash } from 'remix-utils/promise';
 
 import type { HeaderUserProfileDropDownProps } from '~/components/header';
@@ -49,6 +49,13 @@ export const organizationSlugLoader = async ({
   request,
   params,
 }: Pick<LoaderFunctionArgs, 'request' | 'params'>) => {
+  if (
+    params.organizationSlug &&
+    request.url.endsWith(`/organizations/${params.organizationSlug}`)
+  ) {
+    return redirect(`/organizations/${params.organizationSlug}/home`);
+  }
+
   const { user, organizationSlug, ...rest } =
     await retrieveOrganizationMembership({ request, params });
 
@@ -91,19 +98,27 @@ export const organizationSettingsLoader = async ({
   request,
   params,
 }: Pick<LoaderFunctionArgs, 'request' | 'params'>) => {
-  const { t, organizationMembership } = await promiseHash({
+  //if this is the layout route, redirect to the profile page
+  if (
+    request.url.endsWith(`/organizations/${params.organizationSlug}/settings`)
+  ) {
+    return redirect(
+      `/organizations/${params.organizationSlug}/settings/profile`,
+    );
+  }
+
+  const { t } = await promiseHash({
     t: i18next.getFixedT(request),
-    organizationMembership: retrieveOrganizationMembership({ request, params }),
   });
 
   return json({
-    ...organizationMembership,
     t,
     pageTitle: getPageTitle(
       t,
       'organization-settings:organization-settings',
       '',
     ),
+    organizationSlug: getOrganizationSlug(params),
     headerTitle: t('organization-settings:organization-settings'),
     renderBackButton: false,
   });

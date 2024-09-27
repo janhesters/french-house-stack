@@ -20,7 +20,7 @@ import {
   setupOrganizationAndLoginAsMember,
 } from '../../utils';
 
-const loginLoaderRoute = '/login?_data=routes%2Flogin';
+const loginLoaderRoute = '/login.data';
 const invalidMagicEmail = 'test+fail@magic.link';
 const validMagicEmail = 'test+success@magic.link';
 
