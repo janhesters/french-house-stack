@@ -1,17 +1,24 @@
 import { vitePlugin as remix } from '@remix-run/dev';
-import { installGlobals } from '@remix-run/node';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
-
-installGlobals();
 
 export default defineConfig(({ isSsrBuild }) => ({
   build: isSsrBuild ? { target: 'ES2022' } : {},
   plugins: [
     process.env.VITEST
       ? react()
-      : remix({ ignoredRouteFiles: ['**/.*', '*/*.test.ts', '*/*.test.tsx'] }),
+      : remix({
+          ignoredRouteFiles: ['**/.*', '*/*.test.ts', '*/*.test.tsx'],
+          future: {
+            v3_fetcherPersist: true,
+            v3_relativeSplatPath: true,
+            v3_throwAbortReason: true,
+            unstable_singleFetch: true,
+            unstable_optimizeDeps: true,
+            unstable_lazyRouteDiscovery: true,
+          },
+        }),
     tsconfigPaths(),
   ],
   server: {

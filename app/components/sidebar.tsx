@@ -165,6 +165,7 @@ function SidebarContent({
                           )
                         }
                         onClick={closeSidebar}
+                        prefetch="intent"
                         to={item.href}
                       >
                         <>

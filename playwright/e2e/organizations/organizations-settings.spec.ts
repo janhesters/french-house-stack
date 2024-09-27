@@ -18,10 +18,7 @@ test.describe('organizations settings root page', () => {
     const { slug } = createPopulatedOrganization();
     await page.goto(`/organizations/${slug}/settings`);
     const searchParams = new URLSearchParams();
-    searchParams.append(
-      'redirectTo',
-      `/organizations/${slug}/settings/profile`,
-    );
+    searchParams.append('redirectTo', `/organizations/${slug}/settings`);
     expect(getPath(page)).toEqual(`/login?${searchParams.toString()}`);
   });
 
