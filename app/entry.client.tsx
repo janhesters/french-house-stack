@@ -15,6 +15,7 @@ export type EnvironmentVariables = {
   CLIENT_MOCKS?: string;
   SENTRY_DSN?: string;
   ENVIRONMENT?: string;
+  LOCALE?: string;
 };
 
 declare global {
@@ -51,6 +52,7 @@ async function hydrate() {
     .use(Backend)
     .init({
       ...i18n,
+      lng: ENV.LOCALE,
       ns: getInitialNamespaces(),
       backend: {
         loadPath: '/locales/{{lng}}/{{ns}}.json',

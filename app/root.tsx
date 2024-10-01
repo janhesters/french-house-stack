@@ -16,7 +16,6 @@ import {
 } from '@remix-run/react';
 import { withSentry } from '@sentry/remix';
 import type { ReactNode } from 'react';
-import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import invariant from 'tiny-invariant';
 
@@ -76,7 +75,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
   return json<LoaderData>(
     {
-      ENV: { MAGIC_PUBLISHABLE_KEY, ENVIRONMENT: NODE_ENV, SENTRY_DSN },
+      ENV: { MAGIC_PUBLISHABLE_KEY, ENVIRONMENT: NODE_ENV, SENTRY_DSN, LOCALE: locale },
       locale,
       title,
       toast,
@@ -89,14 +88,6 @@ export const meta: MetaFunction<typeof loader> = ({
   data = { title: 'French House Stack' },
 }) => [{ title: data.title }];
 
-function useChangeLanguage(locale: string) {
-  const { i18n } = useTranslation();
-
-  useEffect(() => {
-    i18n.changeLanguage(locale);
-  }, [locale, i18n]);
-}
-
 function App() {
   return <Outlet />;
 }
@@ -105,7 +96,6 @@ export function Layout({ children }: { children: ReactNode }) {
   const data = useRouteLoaderData<typeof loader>('root');
   const { i18n } = useTranslation();
   const locale = data?.locale || 'en';
-  useChangeLanguage(locale);
   useToast(data?.toast);
 
   const error = useRouteError();
