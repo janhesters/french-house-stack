@@ -181,5 +181,4 @@ export default function Landing() {
       </ul>
     </main>
   );
-  // throw new Error('Revise test');
 }
