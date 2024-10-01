@@ -81,10 +81,24 @@ test.describe('login page', () => {
 
         if (postData && postData.includes('didToken')) {
           return route.fulfill({
+            body: JSON.stringify([
+              { _1: 2, _3: 4, _5: 6, _7: 8, _9: 8 },
+              'redirect',
+              '/onboarding',
+              'status',
+              302,
+              'revalidate',
+              true,
+              'reload',
+              false,
+              'replace',
+            ]),
             headers: {
               'Set-Cookie': `${USER_AUTHENTICATION_SESSION_NAME}=${cookieToken}; Max-Age=31536000; Path=/; HttpOnly; SameSite=Lax`,
-              'X-Remix-Redirect': '/onboarding',
-              'X-Remix-Revalidate': 'yes',
+              'Transfer-Encoding': 'chunked',
+              'x-remix-response': 'yes',
+              'content-type': 'text/x-script',
+              Location: '/onboarding',
             },
             status: 204,
           });
