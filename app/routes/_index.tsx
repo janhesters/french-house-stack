@@ -1,6 +1,5 @@
 import type { LoaderFunctionArgs } from '@remix-run/node';
 import { json } from '@remix-run/node';
-import { Link } from '@remix-run/react';
 import { GithubIcon } from 'lucide-react';
 import { Trans } from 'react-i18next';
 
@@ -135,9 +134,12 @@ export default function Landing() {
           </Text>
 
           <div className="flex items-center gap-x-4">
-            <Link className={buttonVariants()} to="/register">
+            <button
+              className={buttonVariants()}
+              onClick={() => console.log('Registration clicked')}
+            >
               {t('register')}
-            </Link>
+            </button>
 
             <a
               className={buttonVariants({ variant: 'outline' })}
