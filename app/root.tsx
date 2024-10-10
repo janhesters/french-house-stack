@@ -1,3 +1,5 @@
+import './styles/sonner.css';
+
 import { ClerkApp } from '@clerk/remix';
 import { rootAuthLoader } from '@clerk/remix/ssr.server';
 import type {
@@ -13,6 +15,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  ShouldRevalidateFunctionArgs,
   useRouteError,
   useRouteLoaderData,
 } from '@remix-run/react';
@@ -64,6 +67,22 @@ type LoaderData = {
   locale: string;
   title: string;
   toast: Toast | null;
+};
+
+/**
+ * By enabling single fetch, the loaders will no longer revalidate the data when the action status is in the 4xx range.
+ * This behavior will prevent toasts from being displayed for failed actions.
+ * so, we opt in to revalidate the root loader data when the action status is in the 4xx range.
+ */
+export const shouldRevalidate = ({
+  defaultShouldRevalidate,
+  actionStatus,
+}: ShouldRevalidateFunctionArgs) => {
+  if (actionStatus && actionStatus > 399 && actionStatus < 500) {
+    return true;
+  }
+
+  return defaultShouldRevalidate;
 };
 
 const rootLoader = async ({ request }: LoaderFunctionArgs) => {
