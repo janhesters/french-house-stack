@@ -1,5 +1,13 @@
 # Remix French House Stack 🪩
 
+> **⚠️ Archived Notice**
+>
+> This stack is archived and no longer actively maintained.  
+> For new projects, please use the **React Router SaaS Template** instead:  
+> https://github.com/janhesters/react-router-saas-template
+
+---
+
 ![The Remix French House Stack](./public/french-house-stack.png)
 
 The Remix Stack for Web2, Web3 and
