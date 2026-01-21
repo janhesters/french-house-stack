@@ -43,7 +43,7 @@
     "react-hook-form": "7.53.0",
     "react-i18next": "15.0.2",
     "remix-i18next": "6.1.1",
-    "remix-utils": "7.6.0",
+    "remix-utils": "7.7.0",
     "sonner": "1.5.0",
     "tailwind-merge": "2.5.2",
     "tailwindcss-animate": "1.0.7",
